@@ -1,0 +1,261 @@
+objs <- ls(pos = ".GlobalEnv")
+rm(list = objs, pos = ".GlobalEnv")
+
+
+source("scripts/app4_ui.R",local=TRUE)
+source("scripts/app4_runUd.R",local=TRUE)
+source("../globalScripts/globalUiFunctions.R",local=TRUE)
+source("../globalScripts/sqlLiteQueries.R",local=TRUE)
+
+
+source("wmiScripts\\CalcPopGrid.R")
+source("wmiScripts\\CalcSeqDistances.R")
+source("wmiScripts\\CalcBBMM.R")
+source("wmiScripts\\CalcDBBMM.R")
+source("wmiScripts\\CalcKernel.R")
+source("wmiScripts\\CalcLineBuff.R")
+source("wmiScripts\\CalcCTMM.R")
+
+dependencies<-c("shiny","shinyjs","parallel","RSQLite","adehabitatHR", "R.utils","BBMM","R.utils","dplyr", "ctmm", "move","sf","raster","sp","fields",'shinyBS')
+loadDependencies(dependencies)
+
+ui <- fluidPage(
+  tags$head(tags$style("body{ overflow-x:hidden}")),
+  HTML("<div id='loadingScreen' style='width:100%; display:none; height:200%; background-color:rgba(0, 0, 0,0.5); color:white; position:absolute; top:0px; left:0px; z-index:500;'>
+  <div id='loadingMessage' style='position:absolute; top:10%; text-align:center; font-size:15px; color:white; width:100%;'></div>
+  <img src='spinner.gif' style='position:absolute; top:25%; left:45%;'>
+  </div>"),
+  useShinyjs(),
+  column(12,
+  HTML("<div style='width:110% !important; margin-left:-3rem !important; height:10rem !important; padding:4rem !important; background-color:black; color:white; text-align:center !important;'>
+    <span style='text-align: center !important; font-size:3rem; width:100% !important; position:absolute !important; top:0px !important; left:0px !important; color:white;>Migration Mapper - Module 4</span>'>
+    Migration Mapper 3.0 - App 4
+    </div>"),
+  actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
+  actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP")
+  ),
+  # HTML("<div style='width:100%; height:3rem; padding:4rem; font-size:3rem; margin-bottom:2rem; padding-bottom:6rem; background-color:black; color:white; text-align:center !important;'>Migration Mapper 3.0</div>"),
+  # actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:25px !important;", "Reload Existing Project Folder"),
+  # actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:25px !important;", "X - CLOSE MAPP"),
+  fluidRow(
+  column(4,
+    column(12,
+    p('For each sequence you exported in App3, you can use a movement model to calculate an occurrence distribution (or utilization distribution) and footprint. The many options to customize your movement models are below. By default Migration Mapper uses a regular Brownian Bridge Movement Model to calculate your occurrence distribution. However you can choose from the following methods below:'),
+    p('BBMM - Brownian Bridge Movement Model (from BBMM package) or a variant where you can fix the motion variance for BBMM.'),
+    p('DBBMM - Dynamic Brownian Bridge Movement Model (from Move package)'),
+    p('Kernel UD - Bivariate normal kernel Utilization Distribution (from adehabitatHR package), including an option to subsample data beforehand.'),
+    p('CTMM - Continuous Time Movement Model (from package ctmm) and calculate the occurrence distribution.'),
+    p('Line Buffer - Connect points with strait lines and then buffer lines based on user specified value. Note - this method does not provide an occurrence distribution, only a footprint.'),
+    br(),
+    column(12,
+      h3('Configuration Parameters'),
+      actionButton("resetConfigOptionsButton", "Reset all parameters to default")
+    ),
+    column(12,
+      br(),
+    )
+    ),
+    column(6,
+      h4('UD Method'),
+      p('What method would you like to use to calculate UDs?'),
+      selectInput('udMethodInput', label=NULL,c('BBMM','dBBMM','kernel','CTMM','Line Buffer')),
+      # ------------------------
+      h4('Number of Cores For Processing - applies to all methods'),
+      p(paste0("How many cores would you like to use for processing? R has detected that your machine has a total of ",detectCores()," cores. Default selection is total available-1. Using all available cores on your machine is not recomended")),
+      numericInput('numberOfCoresInput',
+      # 'mult4buff - Proportion of current extent or bbox to add for building the grid. Typically 0.2 or 0.3. Applies to population grid, BBMM, DBBMM, Kernel, CTMM',
+      label=NULL,
+      value=detectCores() - 1,min = 1, max = detectCores(), step = 1,),
+      # ------------------------
+      h4('mult4buff - applies to population grid, BBMM, DBBMM, Kernel, CTMM'),
+      p('mult4buff - Proportion of current extent or bbox to add for building the grid. Typically 0.2 or 0.3.'),
+      numericInput('mult4buffInput',
+      # 'mult4buff - Proportion of current extent or bbox to add for building the grid. Typically 0.2 or 0.3. Applies to population grid, BBMM, DBBMM, Kernel, CTMM',
+      label=NULL,
+      value=NULL,min = 0, max = 0.99, step = 0.01,),
+
+      h4('Cell Size - applies to all methods'),
+      p('Cell Size - Numeric providing the cell or grid size (in meters) for output.'),
+      numericInput('cellSizeInput',
+      # 'Cell Size - Numeric providing the cell or grid size (in meters) for output.',
+      label=NULL,
+      value=NULL,min = 1, max = 10000, step = 1,),
+      # -------------------------------
+      h4('Line Buffer Radii - applies to line buffer'),
+      p('Numeric value indicating the distance (in meters) to buffer lines (acts as radii).'),
+      numericInput('buffInput',
+      # 'Numeric value indicating the distance (in meters) to buffer lines (acts as radii).',
+      label=NULL,
+      value=NULL,min = 1, max = 10000, step = 1,),
+      # -------------------------------
+      # h4('BBMM - Brownian Bridge and Fixed Motion Variance'),
+
+      h4('BMVar - applies to BBMM'),
+      p('If left blank, will run regular BB and calculate motion variance. If a number is specified, it will invoke the Forced motion variance method (values are typically between 1000 and 3000).'),
+      numericInput('BMVarInput',
+      # 'If Null, will run regular BB and calculate motion variance. If a number is specified, it will invoke the Forced motion variance method',
+      label=NULL,
+      value=NULL,min = 1, max = 10000, step = 1,),
+
+      h4('Location Error - applies to BBMM, DBBMM'),
+      p('Location error of your GPS data (in meters).'),
+      numericInput('locationErrorInput',
+      # 'location.error Location error of your GPS data (in meters).',
+      label=NULL,
+      value=NULL,min = 0, max = 10000, step = 1,),
+
+      h4('max.lag - applies to BBMM, DBBMM'),
+      p('Maximum amount of time (in hours) to allow any two sequential points to be connected when fitting BBMMs and DBBMMs. This is important parameter if you do not have fine scale movement data! Default is 8 hours.'),
+      numericInput('maxLagInput',
+      # 'Maximum amount of time (in hours) to allow any two sequential points to be connected when fitting BBs. Default is 8 hours.',
+      label=NULL,
+      value=NULL,min = 0, max = 10000, step = 1,)
+    ),
+    column(6,
+      h4('Contour Level - applies to BBMM, DBBMM, Kernel UD, CTMM'),
+      p('Contour level used to create the footprint from the UD or occurrence distribution (numeric between 1 and 99.999). Typically 95, 99, or 99.9.'),
+      numericInput('contourInput',
+      # 'Contour level used to create the footprint from the UD or occurrence distribution (numeric between 1 and 99.999). Typically 95, 99, or 99.9.',
+      label=NULL,
+      value=NULL,min = 0, max = 99.9, step = 0.1,),
+
+      h4('Time Step - applies to BBMM'),
+      p('Time Step - How often (in minutes) that the BB integrates between sequential points.'),
+      numericInput('timeStepInput',
+      # 'Time Step - How often (in minutes) that the BB integrates between sequential points.',
+      label=NULL,
+      value=NULL,min = 0, max = 100, step = 1,),
+
+      # h5('mult4buff - applies to BBMM, DBBMM, Kernel UD, CTMM'),
+      # numericInput('udMult4buffInput',
+      # 'Proportion of space around the extent of seq.sf (i.e., a buffer) that is used to subsample the population grid for analysis. Typically 0.2 or 0.3.',
+      # value=0.3,min = 0.01, max = 1, step = 0.01,),
+
+      h4('max.timeout - applies to BBMM, DBBMM, Kernel UD, CTMM'),
+      p('# Max amount of time (in minutes) it should run before timing out. Default is 720 minutes (12 hours)'),
+      numericInput('maxTimeoutInput',
+      # '# Max amount of time (in seconds) it should run before timing out. Default is 3600*12 (12 hours)',
+      label=NULL,
+      value=NULL,min = 1, max = 10000, step = 1,),
+
+      h4('dbbmm margin - applies to DBBMM'),
+      p('The margin used for the behavioral change point analysis. This number has to be odd. See ??brownian.bridge.dyn for details.'),
+      numericInput('dbbmmMarginInput',
+      # 'The margin used for the behavioral change point analysis. This number has to be odd. See ??brownian.bridge.dyn for details.',
+      label=NULL,
+      value=NULL,min = 1, max = 99, step = 2,),
+
+      h4('dbbmm window - applies to DBBMM'),
+      p('The size of the moving window along the track. See ??brownian.bridge.dyn for details.'),
+      numericInput('dbbmmWindowInput',
+      # 'The size of the moving window along the track. See ??brownian.bridge.dyn for details.',
+      label=NULL,
+      value=NULL,min = 1, max = 99, step = 1,),
+
+      h4('Smooth Param - applies to Kernel UD'),
+      # ------------ range of values????????????
+      # ------------ range of values????????????
+      # ------------ range of values????????????
+      p('If left blank (the default), will evoke the "href" method. If numeric, will force the given smoothing parameter.'),
+      numericInput('smoothParamInput',
+      # 'If NULL (the default), will evoke the "href" method. If numeric, will force the given smoothing parameter.',
+      label=NULL,
+      value=NULL,min = 1, max = 99, step = 1,),
+
+      h4('subsample - applies to Kernel UD'),
+      # ------------ range of values????????????
+      # ------------ range of values????????????
+      # ------------ range of values????????????
+      p('If left blank (the default), no subsampling will take place. If numeric, will be used as the number of random locations to sample per julian day in seq.sf.'),
+      numericInput('subsampleInput',
+      # 'If NULL (the default), no subsampling will take place. If numeric, will be used as the number of random locations to sample per julian day in seq.sf.',
+      label=NULL,
+      value=NULL,min = 1, max = 99, step = 1,),
+
+      h4('Information Criteria - applies to CTMM'),
+      # ------------ range of values????????????
+      # ------------ range of values????????????
+      # ------------ range of values????????????
+      p('Information criteria used for model selection. Can be "AICc", "AIC", "BIC", "LOOCV" or none (NA). Use LOOCV for 12 hour data. Use something else for more frequent fixes. AIC is default.'),
+      selectInput('informationCriteriaInput',
+      # 'Information criteria used for model selection. Can be "AICc", "AIC", "BIC", "LOOCV" or none (NA). Use LOOCV for 12 hour data. Use something else for more frequent fixes. AIC is default.',
+        label=NULL,
+        c('AICc','AIC','BIC','LOOCV','NA')
+      )
+    )
+  ),
+  column(8,
+    p("Process all sequences by pressing the button below"),
+    actionButton("processAllButton", "Process All Sequences"),
+    p(''),
+    p('You can also process just one of the sequences at a time by clicking the appropriate button below'),
+    uiOutput("sequenceButtonHolder1"),
+    uiOutput("sequenceButtonHolder2"),
+    uiOutput("sequenceButtonHolder3"),
+    uiOutput("sequenceButtonHolder4"),
+    uiOutput("sequenceButtonHolder5"),
+    uiOutput("sequenceButtonHolder6"),
+    uiOutput("sequenceButtonHolder7"),
+    uiOutput("sequenceButtonHolder8"),
+    p("after processing completes, results and metadata will appear in the table below"),
+    tableOutput("resultsTable")
+  ),
+  )
+)
+
+appFourReload <- function(filePath){
+  loadingScreenToggle('show','loading existing project')
+  removeModal()
+  rdsLocation<-paste0(filePath,'//workingFile.rds')
+  if(file.exists(rdsLocation)){
+    workingFile<<-readRDS(rdsLocation)
+    importedDatasetMaster<<-workingFile$importedDatasetMaster
+    # masterWorkingDirectory<<-workingFile$masterWorkingDirectory
+    workingFile$masterWorkingDirectory<<-filePath
+    masterWorkingDirectory<<-filePath
+    dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
+    updateMasterTableFromDatabase()
+
+    # -----------------------------
+    # -----------------------------
+    # DROPPING PROBLEMS AND MORTALITIES BY DEFAULT
+    # -----------------------------
+    # -----------------------------
+    importedDatasetMasterAsSf<<-st_as_sf(importedDatasetMaster[which(importedDatasetMaster@data$problem != 1 & importedDatasetMaster@data$mortality != 1),])
+
+    sessionInfo<-list()
+    sessionInfo$masterWorkingDirectory<-masterWorkingDirectory
+    sessionInfo$time<-Sys.time()
+    saveTo<-paste0(dirname(getwd()),'//session.rds')
+    saveRDS(sessionInfo,saveTo)
+    getSequences()
+  }else{
+    modalMessager('Error',paste0('Data file from this session does not exist at ',filePath,'. Please try loading the data file manually using the "Reload Existing Project Folder" button.'))
+    sessionCheckLocation<-paste0(dirname(getwd()),'//session.rds')
+    file.remove(sessionCheckLocation)
+  }
+  loadingScreenToggle('hide','')
+  loadConfig()
+}
+
+loadConfig<-function(){
+  configOptions<<-readRDS(paste0(masterWorkingDirectory,'//configOptions.rds'))
+  configOptions$masterWorkingDirectory<<-masterWorkingDirectory
+  if('udConfigOptions'%in%names(configOptions)){
+    reloadUdConfigOptions()
+  }else{
+    udConfigOptionsInit()
+  }
+}
+
+
+
+server <- function(input, output, session) {
+  checkForSession('app4')
+
+  app4_init(input, output, session)
+}
+
+shiny::devmode(TRUE)
+shinyApp(ui, server)
