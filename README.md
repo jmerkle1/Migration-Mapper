@@ -1,6 +1,4 @@
-# Migration-Mapper
-Repository for Migration Mapper
-# MIGRATION MAPPER VERSION 3
+# MIGRATION MAPPER - VERSION 3
 
 ## overview
 Migration Mapper™ is a free application designed for researchers, biologists, and managers, to analyze fine-scale GPS collar data collected from migratory ungulates.
