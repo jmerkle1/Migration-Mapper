@@ -8,9 +8,16 @@ Migration Mapper provides a number of interfaces to help users analyze their dat
 
 ## getting started
 A detailed **user guide** can be found here: https://docs.google.com/document/d/1BV2-VAsxKRMaoTxPrVWC9v2YBhSAMg5WDl7Vok9narM/edit
-A video on **how to install** Migration Mapper can be found here: https://www.youtube.com/watch?v=GIUPm225yKk&list=PLf14a0UX8AU0jktV7GcHf0dV75glC2xeU&index=1&t=18s
+
+A video on **installation** can be found here: https://www.youtube.com/watch?v=GIUPm225yKk&list=PLf14a0UX8AU0jktV7GcHf0dV75glC2xeU&index=1&t=18s
+
 A complete **demo series** of videos can be found here: https://www.youtube.com/playlist?list=PLf14a0UX8AU0jktV7GcHf0dV75glC2xeU
 
+More information can be found at the Wyoming Migration Initiative's Migration Mapper website: https://www.migrationinitiative.org/content/migration-mapper
+
+## citing migration mapper
+Citation coming soon... 
+
 ## project funders
-Support for the development of Migration Mapper™ has come from Western Association of Fish and Wildlife Agencies, The Pew Charitable Trust, and The Knobloch Family Foundation. We especially thank [Josh Gage (with Gage Cartographics LLC)](https://www.gagecarto.com) and Jerod Merkle for writing the majority of code and leading the development of Migration Mapper.
+Support for the development of Migration Mapper has come from Western Association of Fish and Wildlife Agencies, The Pew Charitable Trust, The Wyoming Migration Initiative, and The Knobloch Family Foundation. We especially thank [Josh Gage (with Gage Cartographics LLC)](https://www.gagecarto.com) and Jerod Merkle for writing the majority of code and leading the development of Migration Mapper.
 
