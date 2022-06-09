@@ -1,15 +1,15 @@
 # MIGRATION MAPPER - VERSION 3
 
 ## overview
-Migration Mapper is a free application designed for researchers, biologists, and managers, to analyze fine-scale GPS collar data collected from terrestrial ungulates.
+Migration Mapper is a free application designed for researchers, biologists, and managers, to analyze fine-scale GPS collar data collected from terrestrial ungulates. 
 
 ## downloading Migration Mapper
 You can download directly from GitHub (above); however, we prefer if you download from the Wyoming Migration Initiative's website (https://migrationinitiative.org/content/migration-mapper-download) - so we can keep in communication with you when Migration Mapper is updated. 
 
 ## getting started
-A detailed **user guide** can be found here: https://docs.google.com/document/d/1BV2-VAsxKRMaoTxPrVWC9v2YBhSAMg5WDl7Vok9narM/edit
+Migration Mapper is a shiny app; thus, after you download and unzip the app, open the MAPP.R file in RStudio and click 'run app'! A detailed video on **installation** can be found here: https://www.youtube.com/watch?v=GIUPm225yKk&list=PLf14a0UX8AU0jktV7GcHf0dV75glC2xeU&index=1&t=18s
 
-A video on **installation** can be found here: https://www.youtube.com/watch?v=GIUPm225yKk&list=PLf14a0UX8AU0jktV7GcHf0dV75glC2xeU&index=1&t=18s
+A detailed **user guide** can be found here: https://docs.google.com/document/d/1BV2-VAsxKRMaoTxPrVWC9v2YBhSAMg5WDl7Vok9narM/edit
 
 A complete **demo series** of videos can be found here: https://www.youtube.com/playlist?list=PLf14a0UX8AU0jktV7GcHf0dV75glC2xeU
 
