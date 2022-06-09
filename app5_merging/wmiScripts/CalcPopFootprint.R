@@ -37,7 +37,7 @@ CalcPopFootprint <- function(
   require(raster)
   require(stringr)
   require(smoothr)
-  require(rgeos)  
+  require(rgeos)
 
   # some checks
   if(length(dir(out.fldr))> 0)
@@ -193,7 +193,7 @@ CalcPopFootprint <- function(
   codes <- sort(unique(classifiedPoly$contour))
   classifiedPoly <- do.call(rbind, lapply(codes, function(i){
 
-    tmp <- st_union(classifiedPoly[classifiedPoly$contour <= i,])
+    tmp <- st_union(classifiedPoly[classifiedPoly$contour >= i,])
 
     # this removes polygon segments smaller than a specific threshold
     tmp <- drop_crumbs(tmp, threshold = min_area_drop)
