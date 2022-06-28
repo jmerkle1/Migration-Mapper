@@ -21,8 +21,8 @@
 #' @export
 
 CalcPopUse <- function(
-  UD.fldr = "C:/Users/jmerkle_local/Desktop/Corridor_test/UDs_Test",
-  out.fldr = "C:/Users/jmerkle_local/Desktop/Corridor_test/UD_out",
+  UD.fldr = "",
+  out.fldr = "",
   udFootprintsToDrop = NULL,
   seas2merge = c("spring", "fall"),
   merge.order = c("year", "id"),
@@ -324,7 +324,7 @@ CalcPopUse <- function(
 
     return(st_as_sf(data.frame(contour = i),
                     geometry=tmp))
-  }))  
+  }))
 
   # reorder for plotting
   classifiedPoly <- classifiedPoly[order(classifiedPoly$contour, decreasing=TRUE),]

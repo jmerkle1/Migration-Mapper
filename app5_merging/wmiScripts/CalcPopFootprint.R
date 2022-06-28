@@ -18,8 +18,8 @@
 #' @export
 
 CalcPopFootprint <- function(
-  Foot.fldr = "C:/Users/jmerkle_local/Desktop/Corridor_test/Footprints_Test",
-  out.fldr = "C:/Users/jmerkle_local/Desktop/Corridor_test/Footprints_out",
+  Foot.fldr = "",
+  out.fldr = "",
   udFootprintsToDrop = NULL,
   seas2merge = c("spring", "fall"),
   contour.levels = c(5,10,15,20,30),

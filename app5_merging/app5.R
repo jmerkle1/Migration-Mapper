@@ -83,7 +83,7 @@ ui <- fluidPage(
       actionButton("processContoursPopUseButton", "Update Contour Values"),
 
       h4('Contour Type'),
-      p("How should the contours be calculated? Applies only to population use contours. Contours with Area represent the % of the total area used. Contours with volume represent the % of time spent in areas."),
+      p("How should the contours be calculated? Applies only to population use contours. Contours with Area represent the % of individuals. Contours with volume represent the % of time spent in areas."),
       selectInput('contourTypeInput', label=NULL, c('Area','Volume'),selected='Area'),
 
       h4('Contour Levels - Population Footprints'),
