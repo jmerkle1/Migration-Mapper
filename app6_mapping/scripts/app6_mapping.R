@@ -3,7 +3,8 @@ whichBaseMap<<-'default'
 mapColors<-c('#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928','#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928','#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99','#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a','#ffff99','#b15928')
 colorLookup<<-list()
 
-footPrintsColor<-'#e9e9e9'
+# footPrintsColor<-'#e9e9e9'
+footPrintsColor<-'rgba(255, 255, 255, 0.46)'
 
 popUseColor<-'#eb8f22'
 
@@ -98,12 +99,19 @@ addPolygonsToMap<-function(thisFileType,thisFileName){
   thisSourceName<-paste0(thisFileName,'Source')
   thisLayerName<-paste0(thisFileName,'Layer')
 
+  # mapboxer._widget.map.map.getStyle().layers
+  # mapboxer._widget.map.map.setPaintProperty('fall_spring_SSSPPPAAANNN_Footprint_contoursLayer','fill-outline-color','rgb(0, 0, 0)')
+  # mapboxer._widget.map.map.setPaintProperty('fall_spring_SSSPPPAAANNN_Footprint_contoursLayer','fill-color','rgba(255, 255, 255,0.25)')
+
+
+
   mapboxer_proxy("map") %>%
     add_source(as_mapbox_source(thisFile),thisSourceName)%>%
     add_fill_layer(
       source = thisSourceName,
       visibility = FALSE,
       fill_color=thisColor,
+      fill_outline_color='rgb(0, 0, 0)',
       fill_opacity=1,
       popup=thisLayerName,
       id=thisLayerName
