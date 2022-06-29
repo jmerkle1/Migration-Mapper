@@ -107,7 +107,7 @@ projectShapefilesHandler<-function(){
     }
   )
 }else{
-  importedDatasetMaster <<- tryCatch({      
+  importedDatasetMaster <<- tryCatch({
       importedDatasetMaster<<-spTransform(importedDatasetMaster,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
     },
     error = function(cond) {
@@ -138,6 +138,15 @@ projectShapefilesHandler<-function(){
     }
   )
 }
+
+  #if there's a z dimension in the coords, drop it
+  if(ncol(importedDatasetMaster@coords)==3){
+    print('---------------------------------------')
+    print('-------- DROPPING Z DIM ---------------')
+    print('---------------------------------------')
+    importedDatasetMaster@coords <<- importedDatasetMaster@coords[, 1:2]
+  }
+
 
   # add lat/lon for leaflet maps
   importedDatasetMaster@data[["lon"]]<<-importedDatasetMaster$coords.x1
