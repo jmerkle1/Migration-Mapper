@@ -117,6 +117,9 @@ app4_init<-function(input, output, session){
         dawg<<-ex
       })
   },ignoreInit=TRUE)
+
+
+  showHideMenus()
 }
 
 getSequences<-function(){
@@ -164,6 +167,7 @@ reloadUdConfigOptions<-function(){
     thisInputName<-paste0(thisOptionName,'Input')
     if(thisOptionName=='udMethod'){
       updateSelectInput(session, thisInputName, selected=thisValue)
+      showHideMenus(configOptions$udConfigOptions$udMethod)
     }else if(thisOptionName=='informationCriteria'){
       updateSelectInput(session, thisInputName, selected=thisValue)
     }else{
@@ -179,6 +183,7 @@ udConfigOptionsInit<-function(){
     }
 
     configOptions$udConfigOptions$udMethod<<-'BBMM'
+    showHideMenus(configOptions$udConfigOptions$udMethod)
 
     configOptions$udConfigOptions$mult4buff<<-0.3
 
