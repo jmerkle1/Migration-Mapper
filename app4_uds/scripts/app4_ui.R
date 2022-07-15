@@ -31,6 +31,7 @@ app4_init<-function(input, output, session){
 
   observeEvent(input$udMethodInput,{
       configOptions$udConfigOptions$udMethod<<-input$udMethodInput
+      showHideMenus(input$udMethodInput)
       saveConfig()
   },ignoreInit=TRUE)
 
@@ -211,4 +212,27 @@ udConfigOptionsInit<-function(){
 
     saveConfig()
     reloadUdConfigOptions()
+}
+
+showHideMenus<-function(selectedUd){
+  app4ShowHide<<-list()
+  app4ShowHide$all<<-c('numberOfCoresRow','cellSizeRow','buffRow','mult4buffRow','BMVarRow','locationErrorRow','maxLagRow','contourRow','timeStepRow','maxTimeoutRow','locationErrorRow','maxLagRow','contourRow','maxTimeoutRow','dbmmRow','dbmmWindowRow','contourRow','maxTimeoutRow','smoothParamRow','subsampleRow','maxTimeoutRow','informationCriteriaRow')
+  app4ShowHide$BBMM<<-c('numberOfCoresRow','mult4buffRow','cellSizeRow','BMVarRow','locationErrorRow','maxLagRow','contourRow','timeStepRow','maxTimeoutRow')
+  app4ShowHide$dBBMM<<-c('numberOfCoresRow','mult4buffRow','cellSizeRow','locationErrorRow','maxLagRow','contourRow','maxTimeoutRow','dbmmRow','dbmmWindowRow')
+  app4ShowHide$kernel<<-c('numberOfCoresRow','mult4buffRow','cellSizeRow','contourRow','maxTimeoutRow','smoothParamRow','subsampleRow')
+  app4ShowHide$CTMM<<-c('numberOfCoresRow','mult4buffRow','cellSizeRow','contourRow','maxTimeoutRow','informationCriteriaRow')
+  app4ShowHide$'Line Buffer'<<-c('numberOfCoresRow','cellSizeRow','buffRow')
+
+  rowsToShow<-app4ShowHide[[selectedUd]]
+  rowsToHide<-app4ShowHide$all
+  for(i in 1:length(rowsToHide)){
+    thisRow<-rowsToHide[i]
+    hideElement(thisRow)
+  }
+  for(i in 1:length(rowsToShow)){
+    thisRow<-rowsToShow[i]
+    print('showing')
+    print(thisRow)
+    showElement(thisRow)
+  }
 }
