@@ -84,8 +84,7 @@ checkUdFolder<-function(seqName){
 
     showModal(modalDialog(
              title="Files Already Exist",
-             paste0("It looks like footprints were previously calculated for ",seqName,'. Would you like to delete these files and reprocess?' ),
-             # paste0("There are already files in your ",seqName,' folder. Would you like to delete these and reprocess?' ),
+             paste0("It looks like footprints and UDs were previously calculated for ",seqName,'. Would you like to delete these files and reprocess?' ),
              footer = tagList(actionButton("confirmRerun", "Yes delete and reprocess"),
                               actionButton("dontRerun", "No, don't delete")
              )
