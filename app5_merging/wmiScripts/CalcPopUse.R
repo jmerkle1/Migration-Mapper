@@ -130,7 +130,7 @@ CalcPopUse <- function(
     }
     if(merge.order[i] == "seas"){
       opts.order[[i]] <- seas.unique
-      names(opts.order)[i] <- "seeasons"
+      names(opts.order)[i] <- "seasons"
     }
     if(merge.order[i] == "year"){
       opts.order[[i]] <- yrs.unique
