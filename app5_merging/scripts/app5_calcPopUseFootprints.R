@@ -101,6 +101,9 @@ calculatePopUse<-function(){
     stop()
   })
 
+  popUseParams<-data.frame(configOptions$popConfigOption)
+  write.csv(popUseParams, file=paste0(popUseFolder,"/",mergeName,"_popUseParams.csv"), row.names = FALSE)
+
 
 
   calculatePopFootprint()
@@ -132,6 +135,9 @@ calculatePopFootprint<-function(){
     loadingScreenToggle('hide',paste0('calculating population footprints for seasons ',paste(seasonsToMerge)))
     stop()
   })
+
+  popFootprintParams<-data.frame(configOptions$popConfigOption)
+  write.csv(popFootprintParams, file=paste0(footprintsMergedFolder,"/",mergeName,"_popFootprintParams.csv"), row.names = FALSE)
 
 
 

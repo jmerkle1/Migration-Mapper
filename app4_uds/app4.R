@@ -81,9 +81,6 @@ ui <- fluidPage(
     ),
 
     column(6,
-
-
-
       # ------------------------
       hidden(
         fluidRow( id="numberOfCoresRow",

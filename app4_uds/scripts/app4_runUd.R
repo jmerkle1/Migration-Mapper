@@ -255,7 +255,10 @@ runUdProcessing<-function(seqName){
    resultsTable$Start.Date<-as.character(resultsTable$Start.Date)
    resultsTable$End.Date<-as.character(resultsTable$End.Date)
    output$resultsTable <- renderTable(resultsTable)
-   # write out result.tbl
+   # write out result.tbl   
    write.csv(result.tbl, file=paste0(metadataFolder,"/",seqName,"_metadata.csv"), row.names = FALSE)
+   udParams<-data.frame(configOptions$udConfigOptions)
+   write.csv(udParams, file=paste0(metadataFolder,"/",seqName,"_udParams.csv"), row.names = FALSE)
+   # capture.output(summary(configOptions), file = paste0(metadataFolder,"/",seqName,"_configOptions.txt"))
    loadingScreenToggle('hide',paste0('starting UD calcuations using method ',configOptions$udConfigOptions$udMethod," for sequence ",seqName))
 }
