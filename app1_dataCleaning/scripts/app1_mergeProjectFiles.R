@@ -68,10 +68,10 @@ mergeShapfilesHandler<-function(){
       }
     )
 
-  progressIndicator('Processing.... Please wait...','stop')
-
   projectShapefilesHandler()
+  progressIndicator('Processing.... Please wait...','stop')
 }
+
 
 projectShapefilesHandler<-function(){
 

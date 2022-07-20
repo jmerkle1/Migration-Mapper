@@ -1,4 +1,4 @@
-prepareFileImport<<-function(){  
+prepareFileImport<<-function(){
   filesToImport<<-input$fileUploadSelector
   fileImportTracker<<-list()
   importedShapefilesHolder<<-list()
@@ -82,10 +82,13 @@ importShapefile<-function(fileToImport,lastOne,i){
     importIterator<-i
     progressIndicator(paste(fileToImport,' Imported successfully!',sep=""),'stop')
     loadingScreenToggle('hide','')
-    # # make note that this file has been imported successfully
-    # fileImportTracker[[fileToImport]]<<-TRUE
+
     # add this shapefile to list holder of imported shapefiles
     importedShapefilesHolder[[fileToImport]]<<-assign(fileToImport,importedDataset)
+
+    # change columns names to lowercase!!
+    names(importedShapefilesHolder[[fileToImport]]@data)<<-tolower(names(importedShapefilesHolder[[fileToImport]]@data))
+
     # temp ui element for reference
     tempUiElement<-paste("uploadedShapefile",importIterator,sep="")
 
