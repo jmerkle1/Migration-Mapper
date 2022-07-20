@@ -21,6 +21,9 @@ Migration Mapper provides a number of applications to help users clean and analy
 ## Citing migration mapper
 Citation coming soon... 
 
+## Durable DOI for Migration Mapper
+https://doi.org/10.5281/zenodo.6868175
+
 ## Reporting bugs or issues
 Please submit issues, bugs, or comments through GitHub or by filling out this form: https://forms.gle/hS5DgSLZd19uJLTg7
 
