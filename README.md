@@ -19,7 +19,7 @@ A complete **demo series** of videos can be found here: https://www.youtube.com/
 Migration Mapper provides a number of applications to help users clean and analyze their GPS data with the ultimate goal of producing spatial outputs that identify movement corridors and areas of important use (e.g., stopovers or seasonal ranges). The user starts with a cleaned GPS collar dataset in ESRI Shapefile format. MAPP is modular and consists of six standalone applications representing distinct steps of the workflow. Each of the applications are accessed through the main MAPP homepage. Modularity clarifies the step-by step process and allows users to easily navigate between steps, fix errors or make changes in a previous step, or even skip certain steps in the workflow. The modules include: 1) data cleaning and review, 2-3) seasonal movement delineation, 4) movement model application, 5) calculating population-level outputs, and 6) visualizing the outputs.
 
 ## Citing migration mapper
-Citation coming soon... 
+Merkle, J.A., Gage, J., Sawyer, H., Lowrey, B., and Kauffman, M.J. 2022. Migration Mapper: Identifying movement corridors and seasonal ranges for large mammal conservation. Methods in Ecology and Evolution 10.1111/2041-210X.13976. Link to paper: https://besjournals.onlinelibrary.wiley.com/doi/10.1111/2041-210X.13976
 
 ## Durable DOI for Migration Mapper
 https://doi.org/10.5281/zenodo.6868175
