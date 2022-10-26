@@ -3,7 +3,7 @@
 #' @param Foot.fldr This is the location of the folder where the season folders are located for footprints.
 #' @param out.fldr Folder to store outputs.
 #' @param seas2merge Character vector of the seasons to merge together. These values must match folder names in Foot.fldr. If vector of length 1, no seasons will be merged.
-#' @param contour.levels Percents (ranging from 1 to 90, in whole numbers) of contours. Do not include a 0. Max value is 90. Must be ascending. Represents % of animals using an area.
+#' @param contour.levels Percents (ranging from 1 to 99, in whole numbers) of contours. Do not include a 0. Max value is 99. Must be ascending. Represents % of animals using an area.
 #' @param min_area_drop Do you want to remove some small polygons from the output? Numeric value in square meters.
 #' @param min_area_fill Do you want to fill in holes with areas smaller than this value? Numeric value in square meters.
 #' @param simplify Do you want to smooth the contours so they aren't gridlooking? TRUE or FALSE
@@ -46,8 +46,8 @@ CalcPopFootprint <- function(
     stop("There are no Footprints in your Foot.fldr!")
   if(any(!seas2merge %in% dir(Foot.fldr)))
     stop("One or more of your seas2merge values do not represent season folders inside your Foot.fldr!")
-  if(any(!contour.levels %in% 1:90))
-    stop("contour.levels must be integers between 1 and 100!!")
+  if(any(!contour.levels %in% 1:99))
+    stop("contour.levels must be integers between 1 and 99!!")
   if(any(!contour.levels == sort(contour.levels)))
     stop("contour.levels must be written in ascending order!")
 

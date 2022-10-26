@@ -76,7 +76,7 @@ ui <- fluidPage(
     column(6,
 
       h4('Contour Levels - Population Use'),
-      p('Used for population use merging. Percents (ranging from 1 to 90, in whole numbers) of contours. Do not include a 0. Max value is 90. Must be ascending. Must be seperated with commas. Represents contours of volume or area of use.'),
+      p('Used for population use merging. Percents (ranging from 1 to 99, in whole numbers) of contours. Do not include a 0. Max value is 99. Must be ascending. Must be seperated with commas. Represents contours of volume or area of use.'),
       textInput('contourLevelsPopUseInput',
         label=NULL,
         value='5,10,15,20,30'),
@@ -87,7 +87,7 @@ ui <- fluidPage(
       selectInput('contourTypeInput', label=NULL, c('Area','Volume'),selected='Area'),
 
       h4('Contour Levels - Population Footprints'),
-      p('Used for population footprints merging. Percents (ranging from 1 to 90, in whole numbers) of contours. Do not include a 0. Max value is 90. Must be ascending. Must be seperated with commas. Represents contours of volume or area of use.'),
+      p('Used for population footprints merging. Percents (ranging from 1 to 99, in whole numbers) of contours. Do not include a 0. Max value is 99. Must be ascending. Must be seperated with commas. Represents contours of volume or area of use.'),
       textInput('contourLevelsPopFootprintsInput',
         label=NULL,
         value='5,10,15,20,30'),

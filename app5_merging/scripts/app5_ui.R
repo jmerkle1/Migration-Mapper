@@ -38,8 +38,8 @@ app5_init<-function(input, output, session){
       updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
       return()
     }
-    if(any(theseContours>90)){
-      modalMessager('error processing contours','you have values greater than 90')
+    if(any(theseContours>99)){
+      modalMessager('error processing contours','you have values greater than 99')
       updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
       return()
     }
@@ -75,8 +75,8 @@ app5_init<-function(input, output, session){
       updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
       return()
     }
-    if(any(theseContours>90)){
-      modalMessager('error processing contours','you have values greater than 90')
+    if(any(theseContours>99)){
+      modalMessager('error processing contours','you have values greater than 99')
       updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
       return()
     }
