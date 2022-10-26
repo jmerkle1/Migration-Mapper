@@ -87,7 +87,10 @@ importShapefile<-function(fileToImport,lastOne,i){
     importedShapefilesHolder[[fileToImport]]<<-assign(fileToImport,importedDataset)
 
     # change columns names to lowercase!!
-    names(importedShapefilesHolder[[fileToImport]]@data)<<-tolower(names(importedShapefilesHolder[[fileToImport]]@data))
+    # names(importedShapefilesHolder[[fileToImport]]@data)<<-tolower(names(importedShapefilesHolder[[fileToImport]]@data))
+    # change columns names to UPPERCASE!!
+    names(importedShapefilesHolder[[fileToImport]]@data)<<-toupper(names(importedShapefilesHolder[[fileToImport]]@data))
+
 
     # temp ui element for reference
     tempUiElement<-paste("uploadedShapefile",importIterator,sep="")
