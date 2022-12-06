@@ -90,6 +90,19 @@ importShapefile<-function(fileToImport,lastOne,i){
     # names(importedShapefilesHolder[[fileToImport]]@data)<<-tolower(names(importedShapefilesHolder[[fileToImport]]@data))
     # change columns names to UPPERCASE!!
     names(importedShapefilesHolder[[fileToImport]]@data)<<-toupper(names(importedShapefilesHolder[[fileToImport]]@data))
+    colsToCheck<-c("LAT","LON","newUid","elev","comments","rowIds","newMasterDate","burst","month","day","year","jul","id_yr","x","y","nsdYear","displacementYear","nsdOverall","displacementOverall","dist","dt","speed","abs.angle","rel.angle","fixRateHours","problem","mortality")
+    colsToCheck<-toupper(colsToCheck)
+
+    for(i in 1:length(colsToCheck)){
+      thisCol<-colsToCheck[i]
+      if(thisCol %in% names(importedShapefilesHolder[[fileToImport]]@data)){
+        whichCol<-which(names(importedShapefilesHolder[[fileToImport]]@data) == thisCol)
+        names(importedShapefilesHolder[[fileToImport]]@data)[whichCol]<<-paste0(thisCol,'_')
+      }
+    }
+
+
+
 
 
     # temp ui element for reference

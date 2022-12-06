@@ -5,7 +5,11 @@ dependenciesAll<-c("shiny", "sf","circular","shinyjs","shinyBS","sp","ggplot2","
   "lubridate","stringr","parallel","R.utils","dplyr","ctmm","fields","smoothr","rgeos","suncalc","terra")
 for(i in 1:length(dependenciesAll)){
   if(dependenciesAll[i] %in% installed.packages()==FALSE){
-    install.packages(dependenciesAll[i])
+    if(dependenciesAll[i]=='BBMM'){
+        install.packages("https://cran.r-project.org/src/contrib/Archive/BBMM/BBMM_3.0.tar.gz", repos=NULL)
+      }else{
+        install.packages(dependenciesAll[i])
+      }
   }
 }
 dependencies<-c("shiny","shinyjs")

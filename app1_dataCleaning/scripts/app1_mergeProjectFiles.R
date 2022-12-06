@@ -75,69 +75,75 @@ mergeShapfilesHandler<-function(){
 
 projectShapefilesHandler<-function(){
 
-  if(packageVersion("rgdal")>'1.5.7'){
-  importedDatasetMaster <<- tryCatch({
-      spTransform(importedDatasetMaster,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0', SRS_string='EPSG:4326'))
-    },
-    error = function(cond) {
-    modalMessager(
-      "PROJECTION ERROR",
-      paste(
-        "There was a fatal error projecting
-        your datasets. Please check the data and try again. Detailed error from
-        R is : ",
-        cond,
-        sep = ""
-      )
-    )
-    return()
-    },
-    warning = function(cond) {
-    modalMessager(
-      "PROJECTION WARNING",
-      paste(
-        "There was a fatal error projecting
-        your datasets. Please check the data and try again. Detailed error from
-        R is : ",
-        cond,
-        sep = ""
-      )
-    )
-    return()
-    }
-  )
-}else{
-  importedDatasetMaster <<- tryCatch({
-      importedDatasetMaster<<-spTransform(importedDatasetMaster,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
-    },
-    error = function(cond) {
-    modalMessager(
-      "PROJECTION ERROR",
-      paste(
-        "There was a fatal error projecting
-        your datasets. Please check the data and try again. Detailed error from
-        R is : ",
-        cond,
-        sep = ""
-      )
-    )
-    return()
-    },
-    warning = function(cond) {
-    modalMessager(
-      "PROJECTION WARNING",
-      paste(
-        "There was a fatal error projecting
-        your datasets. Please check the data and try again. Detailed error from
-        R is : ",
-        cond,
-        sep = ""
-      )
-    )
-    return()
-    }
-  )
-}
+  
+     importedDatasetMaster<<-spTransform(importedDatasetMaster,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
+
+#   if(packageVersion("rgdal")>'1.5.7'){
+#   importedDatasetMaster <<- tryCatch({
+#       spTransform(importedDatasetMaster,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0', SRS_string='EPSG:4326'))
+#     },
+#     error = function(cond) {
+#     modalMessager(
+#       "PROJECTION ERROR",
+#       paste(
+#         "There was a fatal error projecting
+#         your datasets. Please check the data and try again. Detailed error from
+#         R is : ",
+#         cond,
+#         sep = ""
+#       )
+#     )
+#     return()
+#     },
+#     warning = function(cond) {
+#     # modalMessager(
+#     #   "PROJECTION WARNING",
+#     #   paste(
+#     #     "There was a fatal error projecting
+#     #     your datasets. Please check the data and try again. Detailed error from
+#     #     R is : ",
+#     #     cond,
+#     #     sep = ""
+#     #   )
+#     # )
+#     # return()
+#     }
+#   )
+# }else{  
+#   print(')))))))))))))))))))))))))))))))))))))))))))))')
+#   importedDatasetMaster <<- tryCatch({
+#       importedDatasetMaster<<-spTransform(importedDatasetMaster,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'))
+#     },
+#     error = function(cond) {
+#     modalMessager(
+#       "PROJECTION ERROR",
+#       paste(
+#         "There was a fatal error projecting
+#         your datasets. Please check the data and try again. Detailed error from
+#         R is : ",
+#         cond,
+#         sep = ""
+#       )
+#     )
+#     return()
+#     },
+#     warning = function(cond) {
+#     modalMessager(
+#       "PROJECTION WARNING",
+#       paste(
+#         "There was a fatal error projecting
+#         your datasets. Please check the data and try again. Detailed error from
+#         R is : ",
+#         cond,
+#         sep = ""
+#       )
+#     )
+#     return()
+#     }
+#   )
+# }
+
+
 
   #if there's a z dimension in the coords, drop it
   if(ncol(importedDatasetMaster@coords)==3){

@@ -23,7 +23,7 @@ source("scripts/mov.param.R",local=TRUE)
 source("scripts/mort.check.R",local=TRUE)
 
 
-dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","sp","ggplot2","mapboxer","rgdal","adehabitatHR",'RSQLite','move','shinycssloaders','raster')
+dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","sp","ggplot2","mapboxer","rgdal","adehabitatHR",'RSQLite','move','shinycssloaders','raster','terra')
 loadDependencies(dependencies)
 
 # lubridate can cause issues when loaded in app2 if the R session is not terminated before reloading app1
