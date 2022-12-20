@@ -761,23 +761,28 @@ plotData=function(){
 
 
   plotClickObserver$destroy()
+  plotHoverObserver$destroy()
+
+
+  if(!is.na(pointsForMap$speed)){
   plotClickObserver<<-observeEvent(input$plot_click, {
     clickedPlotPoint<<-nearPoints(pointsForMap, input$plot_click, threshold = 10, maxpoints = 1, addDist = TRUE)
     if(nrow(clickedPlotPoint)>0){
       plotClickEvent(clickedPlotPoint)
     }
   },ignoreInit=TRUE)
-  #
-  #
-  plotHoverObserver$destroy()
   plotHoverObserver<<-observeEvent(input$plot_hover, {
     hoveredPoint<<-nearPoints(pointsForMap, input$plot_hover, threshold = 5, maxpoints = 1, addDist = TRUE)
     if(nrow(hoveredPoint)>0){
       showHoverPoint(hoveredPoint)
-    }else{
-      clearHoverPoint()
-    }
+    } else{
+       clearHoverPoint()
+     }
   },ignoreInit=TRUE)
+  
+  }
+  
+  
 }
 
 plotClickEvent=function(clickedPlotPoint){
