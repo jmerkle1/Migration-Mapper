@@ -80,6 +80,27 @@ findProblemPoints<-function(){
   importedDatasetMaster[which(importedDatasetMaster@data$speed>maxSpeedMPerSec),'problem']<<-1
   progressIndicator('finding problem points','stop')
 
+  
+  checkForAllNaSpeedsEtc()
+}
+
+checkForAllNaSpeedsEtc<-function(){
+  idYrs<-unique(importedDatasetMaster$id_yr)
+  for(i in 1:length(idYrs)){
+      temp<- importedDatasetMaster@data[importedDatasetMaster@data$id_yr==idYrs[i],]      
+      nonNaSpeeds<-length(which(!is.na(temp$speed)))      
+      if(nonNaSpeeds<3){        
+        importedDatasetMaster@data[importedDatasetMaster@data$id_yr==idYrs[i],"problem"]<<-1
+      }
+      nonNaBurst<-length(which(!is.na(temp$burst)))
+      if(nonNaBurst<3){
+        importedDatasetMaster@data[importedDatasetMaster@data$id_yr==idYrs[i],"problem"]<<-1
+      }
+      nonNaNsd<-length(which(!is.na(temp$nsdYear)))
+      if(nonNaNsd<3){
+        importedDatasetMaster@data[importedDatasetMaster@data$id_yr==idYrs[i],"problem"]<<-1
+      }
+  }
   checkMortalities()
 }
 
