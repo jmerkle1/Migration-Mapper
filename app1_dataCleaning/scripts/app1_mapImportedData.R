@@ -661,10 +661,10 @@ addPointsToMap<-function(){
     }
 
 
-    modalMessager(
-      "No points",
-      "no points for this selection"
-    )
+    # modalMessager(
+    #   "No points",
+    #   "no points for this selection"
+    # )
 
     updateSummaryStats()
 
@@ -763,8 +763,12 @@ plotData=function(){
   plotClickObserver$destroy()
   plotHoverObserver$destroy()
 
+  # print('-------daw')
+  # jj<<-pointsForMap
+  # print(!is.na(pointsForMap$speed))
 
-  if(!is.na(pointsForMap$speed)){
+  # if(!is.na(pointsForMap$speed)){
+  if(any(!is.na(pointsForMap$speed))){
   plotClickObserver<<-observeEvent(input$plot_click, {
     clickedPlotPoint<<-nearPoints(pointsForMap, input$plot_click, threshold = 10, maxpoints = 1, addDist = TRUE)
     if(nrow(clickedPlotPoint)>0){

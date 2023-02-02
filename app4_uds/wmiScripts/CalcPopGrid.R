@@ -29,15 +29,15 @@ CalcPopGrid <- function(datasf=d,
   if(grepl("units=m", st_crs(datasf)$proj4string)==FALSE)
     stop("Your datasf is not in a projection with units=m!")
 
-  ext <- raster::extent(datasf)
-  multiplyers <- c((ext[2]-ext[1])*mult4buff, (ext[4]-ext[3])*mult4buff)   # add about 20% around the edges of your extent (you can adjust this if necessary)
-  ext <<- raster::extend(ext, multiplyers)
-  grd <- raster(ext)
+  ext2 <- raster::extent(datasf)
+  multiplyers <- c((ext2[2]-ext2[1])*mult4buff, (ext2[4]-ext2[3])*mult4buff)   # add about 20% around the edges of your extent (you can adjust this if necessary)
+  ext2 <<- raster::extend(ext2, multiplyers)
+  grd <- raster(ext2)
   res(grd) <- cell.size
   projection(grd) <- st_crs(datasf)$proj4string
   grd[] <- 0  # put some 0s in there so it isn't empty
 
-  rm(ext, multiplyers, datasf) #remove objects
+  rm(ext2, multiplyers, datasf) #remove objects
   gc()
 
   #write out grid
