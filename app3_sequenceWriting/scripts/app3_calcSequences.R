@@ -354,7 +354,9 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         if(thisSequenceAverageStartDate==999){
           stop()
         }
-        thisMigStart<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)
+        # thisMigStart<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)
+        # this should fix issue with overspanning data when averaging across bio years etc
+        thisMigStart<-paste0(as.numeric(thisFullYear)+1,'-',thisSequenceAverageStartDate)
       }
 
       # -------------------------------------
