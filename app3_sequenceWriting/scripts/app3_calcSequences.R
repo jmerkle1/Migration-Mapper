@@ -332,6 +332,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       # if we're still here, then the enddate is in the next row of the migtime table
       thisMigEnd<-migtime[j+1,endSeason]
 
+
+
       # -------------------------------------
       # -------------------------------------
       # ---------- first deal with migstart...
@@ -354,9 +356,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         if(thisSequenceAverageStartDate==999){
           stop()
         }
-        # thisMigStart<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)
-        # this should fix issue with overspanning data when averaging across bio years etc
-        thisMigStart<-paste0(as.numeric(thisFullYear)+1,'-',thisSequenceAverageStartDate)
+        thisMigStart<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)       
       }
 
       # -------------------------------------
@@ -370,7 +370,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         if(shouldAverage==FALSE){
           next
         }
-        thisSequenceAverageEndDate<-seasonDetails[[thisFullYear]][[endSeason]][[averagingMethodTwo]]
+
+        thisSequenceAverageEndDate<-seasonDetails[[toString(as.numeric(thisFullYear)+1)]][[endSeason]][[averagingMethodOne]]    
         # if there were no start dates for this year, we'll use the average start for all years
         if(thisSequenceAverageEndDate==999){
           thisSequenceAverageEndDate<-seasonDetails[[endSeason]][[averagingMethodTwo]]
@@ -381,8 +382,13 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         if(thisSequenceAverageEndDate==999){
           stop()
         }
+
+        # this should fix issue with overspanning data when averaging across bio years etc
         thisMigEnd<-paste0(as.numeric(thisFullYear)+1,'-',thisSequenceAverageEndDate)
+
       }
+
+    
 
       theseRows<-which(
         importedDatasetMaster@data$newUid==thisAid &
@@ -392,6 +398,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
       if(length(theseRows)>0){
         tempDToAdd<-importedDatasetMaster[theseRows,]
+
+    
 
         # when spanning two years.. I used to use a combined bioyear_bioyear+1
         # tempDToAdd@data$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
@@ -404,6 +412,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
       thisSequencesRows<-c(thisSequencesRows,theseRows)
     }
+
+    
 
 
   if(length(thisSequencesRows)>1){
@@ -630,7 +640,7 @@ exportShapeFiles<-function(theseSequencePoints,thisSequenceName){
 
 
 
-  st_write(theseSequencePoints, sequenceShapesDirectory, paste0(thisSequenceName,'_points'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)
+  st_write(theseSequencePoints, sequenceShapesDirectory, paste0(thisSequenceName,'_points'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)  
 
     u <- unique(theseSequencePoints$id_yrbio_season)  # d is sf df, and id_yrbio_season is a column representing some season or id
 
