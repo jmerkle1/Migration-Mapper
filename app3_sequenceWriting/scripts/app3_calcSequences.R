@@ -163,9 +163,26 @@ calculateInBetweenSequences<-function(){
     thisMigStart<-migtime[j,startSeason]
     thisMigEnd<-migtime[j,endSeason]
 
+    if( grepl( 'start', startSeason, fixed = TRUE) ){
+        startSeasonMatch<-gsub("start", "end", startSeason)
+    }else{
+        startSeasonMatch<-gsub("end", "start", startSeason)
+    }
+
+    if( grepl( 'start', endSeason, fixed = TRUE) ){
+        endSeasonMatch<-gsub("start", "end", endSeason)
+    }else{
+        endSeasonMatch<-gsub("end", "start", endSeason)
+    }
+
+    thisMigStartPartner<-migtime[j,startSeasonMatch]
+    thisMigEndPartner<-migtime[j,endSeasonMatch]
+
+
+
 
     # if there is an actual sequence defined in the migtime table and we're not crossing over bio year
-    if(thisMigStart!=thisMigEnd){
+    if(thisMigStart!=thisMigStartPartner && thisMigEnd!=thisMigEndPartner){
       theseRows<-which(
         importedDatasetMaster@data$id_bioYear==thisIdYr &
         importedDatasetMaster@data$newMasterDate >= thisMigStart &
@@ -382,10 +399,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         if(thisSequenceAverageEndDate==999){
           stop()
         }
-
         # this should fix issue with overspanning data when averaging across bio years etc
         thisMigEnd<-paste0(as.numeric(thisFullYear)+1,'-',thisSequenceAverageEndDate)
-
       }
 
     
