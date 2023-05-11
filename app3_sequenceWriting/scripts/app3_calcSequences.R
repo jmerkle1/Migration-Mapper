@@ -63,6 +63,7 @@ calculateDefinedSequences<-function(){
         theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
         theseSequencePointsForExport$season<-thisSequenceName
         if(exportShapes!='No, do not export shapefiles'){
+          theseSequencePointsForExport$method<-'sliderSelected'
           exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
         }
         theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig')]
@@ -156,6 +157,7 @@ calculateInBetweenSequences<-function(){
 
   # these are the rows that will be added to this sequence
   thisSequencesRows<-c()
+  methodsHolder<-c()
   for(j in 1:nrow(migtime)){
     thisFullYear<-migtime[j,'bioYearFull']
     thisIdYr<-migtime[j,'id_bioYear']
@@ -189,10 +191,14 @@ calculateInBetweenSequences<-function(){
         importedDatasetMaster@data$newMasterDate < thisMigEnd
       )
       thisSequencesRows<-c(thisSequencesRows,theseRows)
+      thisDateSelectionType='sliderSelected'      
+      theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
+      methodsHolder<-c(methodsHolder,theseSelectionMethods)
     }else{
       if(shouldAverage==FALSE){
         next
       }
+      thisDateSelectionType='averaged'      
       # if there are no dates selected in the migtime table then we'll use averages for this year start end
       thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
       # if there were no end dates for this year, we'll use the average end for all years
@@ -224,6 +230,8 @@ calculateInBetweenSequences<-function(){
         importedDatasetMaster@data$newMasterDate <= thisSequenceAverageEndDate
       )
 
+      theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
+      methodsHolder<-c(methodsHolder,theseSelectionMethods)
       thisSequencesRows<-c(thisSequencesRows,theseRows)
     }
   }
@@ -232,6 +240,8 @@ calculateInBetweenSequences<-function(){
     # remove anything non alphanumeric from the sequence name so the folders and files don't get weird
     thisSequenceName<-str_replace_all(thisSequenceName, "[^[:alnum:]]", "")
     theseSequencePoints<-importedDatasetMaster[thisSequencesRows,]
+
+    theseSequencePoints$method<-methodsHolder
 
     # -----------------------------
     # -----------------------------
@@ -250,8 +260,8 @@ calculateInBetweenSequences<-function(){
       theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
     }
     theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
-    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig')]
-    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','geometry')
+    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','method')]
+    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','method','geometry')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
     if(exportShapes!='No, do not export shapefiles'){
@@ -324,6 +334,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
   # these are the rows that will be added to this sequence
   thisSequencesRows<-c()
+  methodsHolder<-c()
   for(j in 1:nrow(migtime)){
       thisFullYear<-migtime[j,'bioYearFull']
       thisBioYear<-migtime[j,'bioYear']
@@ -401,6 +412,9 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         }
         # this should fix issue with overspanning data when averaging across bio years etc
         thisMigEnd<-paste0(as.numeric(thisFullYear)+1,'-',thisSequenceAverageEndDate)
+        thisDateSelectionType='averaged'      
+      }else{
+        thisDateSelectionType='sliderSelected'
       }
 
     
@@ -417,14 +431,21 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
     
 
         # when spanning two years.. I used to use a combined bioyear_bioyear+1
-        # tempDToAdd@data$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
+        tempDToAdd@data$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
         # changing back to just the first bioyear
-        tempDToAdd@data$bioYear<-thisBioYear
+        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # tempDToAdd@data$bioYear<-thisBioYear
+        tempDToAdd@data$method<-thisDateSelectionType
+
 
         tempDForSpan<-rbind(tempDForSpan,tempDToAdd)
 
+        # theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))      
+        # methodsHolder<-c(methodsHolder,theseSelectionMethods)
+
       }
 
+      
       thisSequencesRows<-c(thisSequencesRows,theseRows)
     }
 
@@ -434,6 +455,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
   if(length(thisSequencesRows)>1){
     theseSequencePoints<-tempDForSpan
     theseSequencePoints@data$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+    
     sequencesSummary(theseSequencePoints)
 
     thisSequenceName<-thisSequenceName
@@ -452,9 +474,10 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
     if('originalProjection' %in% names(configOptions)){
       theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
     }
+    dawg<<-theseSequencePointsForExport
     theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
-    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig')]
-    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','geometry')
+    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','method')]
+    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','method','geometry')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
     if(exportShapes!='No, do not export shapefiles'){
@@ -601,6 +624,7 @@ calculateCustomSequences<-function(){
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
     if(exportShapes!='No, do not export shapefiles'){
+      theseSequencePointsForExport$method<-'custom'
       exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
     }
 
@@ -666,9 +690,12 @@ exportShapeFiles<-function(theseSequencePoints,thisSequenceName){
     lns <- data.frame(id_yrbio_season=u,
                       firstdate=do.call(c, lapply(u, function(e){min(theseSequencePoints$date[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
                       lastdate=do.call(c, lapply(u, function(e){max(theseSequencePoints$date[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
+                      method=do.call(c, lapply(u, function(e){max(theseSequencePoints$method[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
                       geometry=lns)
 
   lns <- st_as_sf(lns, sf_column_name = "geometry")
+
+  lns
 
   st_write(lns, sequenceShapesDirectory, paste0(thisSequenceName,'_lines'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)
 
