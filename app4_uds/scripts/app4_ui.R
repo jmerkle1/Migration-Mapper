@@ -119,7 +119,7 @@ app4_init<-function(input, output, session){
   },ignoreInit=TRUE)
 
 
-  showHideMenus()
+  # showHideMenus()
 }
 
 getSequences<-function(){
@@ -220,6 +220,10 @@ udConfigOptionsInit<-function(){
 }
 
 showHideMenus<-function(selectedUd){
+
+    print('&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+    print(selectedUd)
+
   app4ShowHide<<-list()
   app4ShowHide$all<<-c('numberOfCoresRow','cellSizeRow','buffRow','mult4buffRow','BMVarRow','locationErrorRow','maxLagRow','contourRow','timeStepRow','maxTimeoutRow','locationErrorRow','maxLagRow','contourRow','maxTimeoutRow','dbmmRow','dbmmWindowRow','contourRow','maxTimeoutRow','smoothParamRow','subsampleRow','maxTimeoutRow','informationCriteriaRow')
   app4ShowHide$BBMM<<-c('numberOfCoresRow','mult4buffRow','cellSizeRow','BMVarRow','locationErrorRow','maxLagRow','contourRow','timeStepRow','maxTimeoutRow')
