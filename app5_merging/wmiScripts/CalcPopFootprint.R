@@ -46,8 +46,8 @@ CalcPopFootprint <- function(
     stop("There are no Footprints in your Foot.fldr!")
   if(any(!seas2merge %in% dir(Foot.fldr)))
     stop("One or more of your seas2merge values do not represent season folders inside your Foot.fldr!")
-  if(any(!contour.levels %in% 1:99))
-    stop("contour.levels must be integers between 1 and 99!!")
+  # if(any(!contour.levels %in% 1:99))
+  #   stop("contour.levels must be integers between 1 and 99!!")
   if(any(!contour.levels == sort(contour.levels)))
     stop("contour.levels must be written in ascending order!")
 

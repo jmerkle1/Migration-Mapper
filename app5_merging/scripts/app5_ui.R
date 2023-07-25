@@ -38,8 +38,8 @@ app5_init<-function(input, output, session){
       updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
       return()
     }
-    if(any(theseContours>99)){
-      modalMessager('error processing contours','you have values greater than 99')
+    if(any(theseContours>100)){
+      modalMessager('error processing contours','you have values greater than 100')
       updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
       return()
     }
@@ -48,11 +48,16 @@ app5_init<-function(input, output, session){
       updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
       return()
     }
-    if(!testInteger(theseContours)){
-      modalMessager('error processing contours','you have non integers')
+    if(any(theseContours<0)){
+      modalMessager('error processing contours','you have values < 0')
       updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
       return()
     }
+    # if(!testInteger(theseContours)){
+    #   modalMessager('error processing contours','you have non integers')
+    #   updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
+    #   return()
+    # }
     if(any(!theseContours == sort(theseContours))){
       modalMessager('error processing contours','contours should be in ascending order')
       updateTextInput(session, 'contourLevelsPopFootprintsInput', value = configOptions$popConfigOption$contourLevelsPopFootprints)
