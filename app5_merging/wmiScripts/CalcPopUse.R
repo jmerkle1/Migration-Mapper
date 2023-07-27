@@ -59,8 +59,8 @@ CalcPopUse <- function(
     stop("One or more of your seas2merge values do not represent season folders inside your UD.fldr!")
   if(any(!contour.type %in% c("Area","Volume")))
     stop("contour.type must be either Area or Volume!!")
-  if(any(!contour.levels %in% 1:100))
-    stop("contour.levels must be integers between 1 and 100!!")
+  # if(any(!contour.levels %in% 1:100))
+  #   stop("contour.levels must be integers between 1 and 100!!")
   if(any(!contour.levels == sort(contour.levels)))
     stop("contour.levels must be written in ascending order!")
 

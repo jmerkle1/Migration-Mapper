@@ -80,8 +80,13 @@ app5_init<-function(input, output, session){
       updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
       return()
     }
-    if(any(theseContours>99)){
-      modalMessager('error processing contours','you have values greater than 99')
+    if(any(theseContours>100)){
+      modalMessager('error processing contours','you have values greater than 100')
+      updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
+      return()
+    }
+    if(any(theseContours<0)){
+      modalMessager('error processing contours','you have values less than 0')
       updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
       return()
     }
@@ -90,11 +95,11 @@ app5_init<-function(input, output, session){
       updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
       return()
     }
-    if(!testInteger(theseContours)){
-      modalMessager('error processing contours','you have non integers')
-      updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
-      return()
-    }
+    # if(!testInteger(theseContours)){
+    #   modalMessager('error processing contours','you have non integers')
+    #   updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
+    #   return()
+    # }
     if(any(!theseContours == sort(theseContours))){
       modalMessager('error processing contours','contours should be in ascending order')
       updateTextInput(session, 'contourLevelsPopUseInput', value = configOptions$popConfigOption$contourLevelsPopUse)
