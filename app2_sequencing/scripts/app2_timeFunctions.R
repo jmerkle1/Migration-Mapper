@@ -122,29 +122,73 @@ buildMigtime<-function(){
   migtime$mig7end <<- as.Date(tempEndDate)
   migtime$mig8start <<- as.Date(tempStartDate)
   migtime$mig8end <<- as.Date(tempEndDate)
-  migtime$notes <<- ''  
+  migtime$notes <<- '' 
+
+  importedDatasetMaster@data$nsdBio<<-0
+  importedDatasetMaster@data$displacementBio<<-0
 
   for(i in 1:nrow(migtime)){
-    temp<- importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==migtime$id_bioYear[i],]
+    thisIdYr<-migtime$id_bioYear[i]
+    print(i)
+    print(thisIdYr)
+    
+    temp<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==thisIdYr,]
     temp<-temp[which(temp$problem != 1),]
     temp<-temp[which(temp$mortality != 1),]
     # if there are no rows for this individual/id, then it should not have a row in migtime table
     if(nrow(temp)==0){
+      print('no nsd!!!')
       # print('----------- dropping migtime row -----------------')
-      migtime<<-migtime[-i,]
+      # print('dropping')
+      # migtime<<-migtime[-i,]
     }else{
-      temp<- importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==migtime$id_bioYear[i],]
-      temp$nsdBio <- sqrt((mean(temp$x[1:20])-temp$x)^2 + (mean(temp$y[1:20])-temp$y)^2)^2
-      temp$nsdBio <- temp$nsdBio/1000000
-      importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==migtime$id_bioYear[i],"nsdBio"]<<-temp$nsdBio
-      temp$displacementBio <- sqrt((mean(temp$x[1:20])-temp$x)^2 + (mean(temp$y[1:20])-temp$y)^2)
-      temp$displacementBio <- temp$displacementBio/1000
-      importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==migtime$id_bioYear[i],"displacementBio"]<<-temp$displacementBio
+      
+      # temp<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==thisIdYr,]
+      # # temp<-temp[which(temp$problem != 1),]
+      # # temp<-temp[which(temp$mortality != 1),]
+      
+      # temp$nsdBio <- sqrt((mean(temp$x[1:20])-temp$x)^2 + (mean(temp$y[1:20])-temp$y)^2)^2
+      # temp$nsdBio <- temp$nsdBio/1000000      
+      
+      # temp$displacementBio <- sqrt((mean(temp$x[1:20])-temp$x)^2 + (mean(temp$y[1:20])-temp$y)^2)
+      # temp$displacementBio <- temp$displacementBio/1000
+
+      # importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==thisIdYr,"nsdBio"]<<-temp$nsdBio
+      # importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==thisIdYr,"displacementBio"]<<-temp$displacementBio
+
+
+      whichPoints<-which(importedDatasetMaster@data$id_bioYear==thisIdYr &
+        importedDatasetMaster@data$problem != 1 &
+        importedDatasetMaster@data$mortality != 1)
+      
+      thesePoints<-importedDatasetMaster@data[whichPoints,c('x','y')]
+      
+      importedDatasetMaster@data[whichPoints,"nsdBio"]<<-
+        (sqrt((mean(thesePoints$x[1:20])-thesePoints$x)^2 + (mean(thesePoints$y[1:20])-thesePoints$y)^2)^2)/1000000
+
+      importedDatasetMaster@data[whichPoints,"displacementBio"]<<-
+        (sqrt((mean(thesePoints$x[1:20])-thesePoints$x)^2 + (mean(thesePoints$y[1:20])-thesePoints$y)^2))/1000
+
+      
+      # print(temp$nsdBio)
+      print('yes nsd')
+    }    
+  }
+
+
+  for(i in 1:nrow(migtime)){
+    thisIdYr<-migtime$id_bioYear[i]
+    temp<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==thisIdYr,]
+    temp<-temp[which(temp$problem != 1),]
+    temp<-temp[which(temp$mortality != 1),]
+    # if there are no rows for this individual/id, then it should not have a row in migtime table
+    if(nrow(temp)==0){
+      migtime<<-migtime[-i,]
     }
   }
+
   progressIndicator('Building Migtime Table and calculating NSD','stop')
   saveWorkingFile()
-
   saveMigtime()
   if(!hasMapRendered){
     mapInit()

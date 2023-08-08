@@ -36,6 +36,13 @@ plotInit<-function(){
       c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
     ]
 
+    # plotData<-plotData[which(plotData$problem != 1),]
+    # plotData<-plotData[which(plotData$mortality != 1),]
+
+    # plotDataSixMonth<-plotDataSixMonth[which(plotDataSixMonth$problem != 1),]
+    # plotDataSixMonth<-plotDataSixMonth[which(plotDataSixMonth$mortality != 1),]
+
+
     tempList<<-list()
     tempList$plotData<<-plotData
     tempList$plotDataSixMonth<<-plotDataSixMonth
