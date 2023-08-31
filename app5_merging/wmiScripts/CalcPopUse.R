@@ -26,7 +26,7 @@ CalcPopUse <- function(
   udFootprintsToDrop = NULL,
   seas2merge = c("spring", "fall"),
   merge.order = c("year", "id"),
-  contour = 90,
+  contour = 99.99,
   contour.type = "Area",
   contour.levels = c(5,10,15,20,30,40,50,60,70,80,90),
   min_area_drop = 20000,
