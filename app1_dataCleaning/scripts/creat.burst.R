@@ -13,16 +13,19 @@ creat.burst <- function(data = data, id = TRUE, Tmax = 500000){
   key2 <- key[order(data$newUid, data$newMasterDate)]
   if(all(key==key2)==FALSE) stop(print("Your data are not ordered correctly"))
   rm(key, key2)
-  if(any(duplicated(data[c("newUid", "newMasterDate")])) == TRUE) stop("You have duplicates in your database")
+  if(any(duplicated(data[,c("newUid", "newMasterDate")])) == TRUE) stop("You have duplicates in your database")
   if(any(is.na(data$newMasterDate) == TRUE)) stop ("You have NAs in your date column")
   if(any(is.na(data$newUid) == TRUE)) stop ("You have NAs in your id column")
   d <- c(1, as.numeric(difftime(data$newMasterDate[2:nrow(data)], data$newMasterDate[1:nrow(data)-1], units = "secs")))
   ids <- c(0, diff(as.numeric(as.factor(data$newUid))))
-  if(id == TRUE){
-    burst <- cumsum(ifelse(ids != 0, 1,
+
+  burst <- cumsum(ifelse(ids != 0, 1,
                            ifelse(d > Tmax, 1, 0))) + 1
-  } else {
-    burst <- cumsum(ifelse(d > Tmax, 1, 0)) + 1
-  }
+  # if(id == TRUE){
+  #   burst <- cumsum(ifelse(ids != 0, 1,
+  #                          ifelse(d > Tmax, 1, 0))) + 1
+  # } else {
+  #   burst <- cumsum(ifelse(d > Tmax, 1, 0)) + 1
+  # }
   return(burst)
 }

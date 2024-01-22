@@ -54,9 +54,10 @@ updateSummaryStats<-function(){
       HTML('<span>No MCP info! Too few points for this individual</span>')
     })    
     }else{
-      mcp100<-mcp(pointsForMap,percent=100,unout='km2')$area
-      mcp99<-mcp(pointsForMap,percent=99,unout='km2')$area
-      mcp95<-mcp(pointsForMap,percent=95,unout='km2')$area
+      thesePointsForMcp<-as_Spatial(st_as_sf(pointsForMap,coords = c("x", "y"), crs = configOptions$masterCrs))
+      mcp100<-mcp(thesePointsForMcp,percent=100,unout='km2')$area
+      mcp99<-mcp(thesePointsForMcp,percent=99,unout='km2')$area
+      mcp95<-mcp(thesePointsForMcp,percent=95,unout='km2')$area
       output$mcpInfo <- renderUI({
         HTML('<span>MCP 100% - Area: ',round(mcp100,digits=1),' km2</span><br><span>MCP 99% - Area: ',round(mcp99,digits=1),' km2</span><br><span>MCP 95% - Area: ',round(mcp95,digits=1),' km2</span>')
       })

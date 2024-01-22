@@ -19,13 +19,15 @@ showDateTimeSelectionPanel<-function(){
       })
 
   ##------------------ show the first 20 rows of data
-  rowsToShow<-importedDatasetMaster@data[1:20,]
+  # rowsToShow<-importedDatasetMaster@data[1:20,]
+  rowsToShow<-st_drop_geometry(importedDatasetMaster[1:20,])
   if('timestamp'%in%names(rowsToShow)){
     rowsToShow$timestamp<-as.character(rowsToShow$timestamp)
-  }
+  }  
   output$dateConfigTable1 <- renderTable(rowsToShow)
 
-  uniqueColumns<-names(importedDatasetMaster@data)
+  # uniqueColumns<-names(importedDatasetMaster@data)
+  uniqueColumns<-names(importedDatasetMaster)
   selectedDateColumns<-NULL
 
   updateCheckboxGroupInput(session,
@@ -67,7 +69,9 @@ processDates<-function(){
 
 
   ##------------------ show the first 20 rows of data
-  rowsToShow<-importedDatasetMaster@data[1:20,]
+  # rowsToShow<-importedDatasetMaster@data[1:20,]
+  # rowsToShow<-importedDatasetMaster[1:20,]
+  rowsToShow<-st_drop_geometry(importedDatasetMaster[1:20,])
   if('timestamp'%in%names(rowsToShow)){
     rowsToShow$timestamp<-as.character(rowsToShow$timestamp)
   }
@@ -213,7 +217,8 @@ processDates<-function(){
     startTime<<-Sys.time()
     progressIndicator('Processing Dates.. Please wait','start')
     loadingScreenToggle('show','processing dates')
-    importedDatasetMaster@data$newMasterDate<<--999
+    # importedDatasetMaster@data$newMasterDate<<--999
+    importedDatasetMaster$newMasterDate<<--999
 
     # if there happens to be am/pm time.. lets quickly create a vector to hold these
     # we'll paste it back to the time later
@@ -221,7 +226,8 @@ processDates<-function(){
       # this is the column where ampm lives
       tempDtCol<-validatorObjectAmPm[[1]][4]
       # temp vector of this column
-      ampm<<-importedDatasetMaster@data[,tempDtCol]
+      # ampm<<-importedDatasetMaster@data[,tempDtCol]
+      ampm<<-importedDatasetMaster[,tempDtCol]
       # remove everything in this column thats not a,m,p,A,M,P
       ampm<<-gsub("[^amp|AMP]","",ampm)
     }
@@ -251,14 +257,18 @@ processDates<-function(){
       # -------------
       if(tempDtType=='year'){
         if(validatorObject$year[3]=='%y'){
-          importedDatasetMaster@data[,tempDtCol]<<-paste0('20',importedDatasetMaster@data[,tempDtCol])
+          # importedDatasetMaster@data[,tempDtCol]<<-paste0('20',importedDatasetMaster@data[,tempDtCol])
+          importedDatasetMaster[,tempDtCol]<<-paste0('20',importedDatasetMaster[,tempDtCol])
         }
       }
       # -------------
       # -------------
 
       # create a temp vector for this DT element named as such
-      assign(selectedDateTimeElements[j],importedDatasetMaster@data[,tempDtCol])
+      # assign(selectedDateTimeElements[j],importedDatasetMaster@data[,tempDtCol])
+      # assign(selectedDateTimeElements[j],importedDatasetMaster[,tempDtCol])
+      assign(selectedDateTimeElements[j],importedDatasetMaster[[tempDtCol]])
+      
       # remove all the non numeric characters and spaces and sub
       # with commas -- the get command grabs the above variabled named as
       # month day year etc etc
@@ -282,7 +292,8 @@ processDates<-function(){
 
       if(any(naList)){
         firstErrorRow<-which(naList)[1]
-        firstErrorRowData<-importedDatasetMaster@data[firstErrorRow,tempDtCol]
+        # firstErrorRowData<-importedDatasetMaster@data[firstErrorRow,tempDtCol]
+        firstErrorRowData<-importedDatasetMaster[firstErrorRow,tempDtCol]
         errorMsg<-paste0('You have date time elements in your data that have a
         different number of elements than you indicated. For example, row
         ',firstErrorRow,' column ',tempDtCol,' = ',firstErrorRowData)
@@ -334,7 +345,7 @@ processDates<-function(){
         }
 
         # need to check for any decimals in the data
-        checkForDec<-function(element,from){
+        checkForDec<-function(element,from){          
           element<-as.numeric(element)
           isDecimal<-testInteger(element)
           if(!isDecimal){
@@ -389,9 +400,16 @@ processDates<-function(){
       stringFormat<-"%Y-%m-%d %I:%M:%S %p"
     }
 
+    ttt<<-importedDatasetMaster
+    sss<<-newDateTime
+    # importedDatasetMaster<-ttt
+    # 
+
+
     importedDatasetMaster$dateTest<<-newDateTime
 
-    importedDatasetMaster@data$newMasterDate<<-tryCatch({
+    # importedDatasetMaster@data$newMasterDate<<-tryCatch({
+    importedDatasetMaster$newMasterDate<<-tryCatch({
       as.POSIXct(strptime(
         newDateTime,
         format = stringFormat),
@@ -407,10 +425,12 @@ processDates<-function(){
       }
     )
 
-    naDatesLength<<-nrow(importedDatasetMaster@data[is.na(as.Date(importedDatasetMaster@data$newMasterDate)),])
+    # naDatesLength<<-nrow(importedDatasetMaster@data[is.na(as.Date(importedDatasetMaster@data$newMasterDate)),])
+    naDatesLength<<-nrow(importedDatasetMaster[is.na(as.Date(importedDatasetMaster$newMasterDate)),])
     configOptions$naDates<<-NULL
     configOptions$naDatesLength<<-naDatesLength
-    if(naDatesLength==nrow(importedDatasetMaster@data)){
+    # if(naDatesLength==nrow(importedDatasetMaster@data)){
+    if(naDatesLength==nrow(importedDatasetMaster)){
       modalMessager('ERROR','Your selection of date elements failed.
       Check your selection of date/time elements and try again')
       dtvRunning<<-FALSE
@@ -420,10 +440,12 @@ processDates<-function(){
     ### if NA dates are produced
     # importedDatasetMaster$naDates<<-0
     if(naDatesLength>0){
-        naDatesObservations<-importedDatasetMaster@data[is.na(as.Date(importedDatasetMaster@data$newMasterDate)),]
+        # naDatesObservations<-importedDatasetMaster@data[is.na(as.Date(importedDatasetMaster@data$newMasterDate)),]
+        naDatesObservations<-importedDatasetMaster[is.na(as.Date(importedDatasetMaster$newMasterDate)),]
         modalMessager('Warning',paste0('You had ',naDatesLength,' NA dates in your dataset. These have been saved to your working directory as naDates.csv if you would like to review them.'))
-        write.csv(naDatesObservations,paste0(masterWorkingDirectory,'\\naDates.csv'))
-        importedDatasetMaster<<-importedDatasetMaster[!is.na(as.Date(importedDatasetMaster@data$newMasterDate)),]
+        # write.csv(naDatesObservations,paste0(masterWorkingDirectory,'\\naDates.csv'))
+        # importedDatasetMaster<<-importedDatasetMaster[!is.na(as.Date(importedDatasetMaster@data$newMasterDate)),]
+        importedDatasetMaster<<-importedDatasetMaster[!is.na(as.Date(importedDatasetMaster$newMasterDate)),]
         progressIndicator('Done importing dates','stop')
         createUniqueIdsHanlder()
       } else{

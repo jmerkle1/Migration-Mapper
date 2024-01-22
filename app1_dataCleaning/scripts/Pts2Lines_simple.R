@@ -4,7 +4,7 @@
 #Created by Ben Robb
 #Purpose:This function takes point data and converts using the Visvalingam algorithm (from rmapshaper) to make
 #clean looking line files. Saved as the unique id plus the proportion of data used int he algorithm
-#Last Update 1/17/2017 by jerod merkle
+#Last Update 01/08/2024 by josh gage
 
 ###########################################################################################################################
 
@@ -39,28 +39,42 @@ pts.to.lines.fx<-function(pts=pts,   # a SpatialPointsDataFrame of the GPS locat
     stop("your id name is not in the columns of pts")
   if(timestamp %in% names(pts) == FALSE)
     stop("your timestamp name is not in the columns of pts")
-  if("POSIXct" %in% class(pts@data[,timestamp]) == FALSE)
+  # if("POSIXct" %in% class(pts@data[,timestamp]) == FALSE)
+  #   stop("Please convert the timestamp column to POSIXct")
+  if("POSIXct" %in% class(pts[,timestamp]) == FALSE)
     stop("Please convert the timestamp column to POSIXct")
   
   #Now convert the id column to a factor if not already converted
-  if(!is.factor(pts@data[,id])){
-    pts$data[,id]<-as.factor(pts@data[,id])
+  # if(!is.factor(pts@data[,id])){
+  #   pts$data[,id]<-as.factor(pts@data[,id])
+  # }
+  if(!is.factor(pts[,id])){
+    pts$data[,id]<-as.factor(pts[,id])
   }
   
   #Now run a lapply for each unique id
-  simp <- lapply(1:length(unique(pts@data[,id])), function(h){
+  # simp <- lapply(1:length(unique(pts@data[,id])), function(h){
+  simp <- lapply(1:length(unique(pts[,id])), function(h){
     
     #Subset the unique id of the loop
-    path <- pts[pts@data[,id] %in% unique(pts@data[,id])[h],]
+    # path <- pts[pts@data[,id] %in% unique(pts@data[,id])[h],]
+    path <- pts[pts[,id] %in% unique(pts[,id])[h],]
 
     #Create a simple dataframe using dplyr to include with the attributes of the line file. Any of these rows can be
     #removed if not wanted/needed
-    df<-data.frame(id=path@data[,id][1])%>%mutate(begin_coord_x=path@coords[1,1])%>%
+    # df<-data.frame(id=path@data[,id][1])%>%mutate(begin_coord_x=path@coords[1,1])%>%
+    #   mutate(begin_coord_y=path@coords[1,2])%>%
+    #   mutate(end_coord_x=path@coords[length(path),1])%>%
+    #   mutate(end_coord_y=path@coords[length(path),2])%>%
+    #   mutate(begin_timestamp=path@data[,timestamp][1])%>%
+    #   mutate(end_timestamp=path@data[,timestamp][length(path)])%>%
+    #   mutate(numb_points=length(path))
+    df<-data.frame(id=path[,id][1])%>%mutate(begin_coord_x=path@coords[1,1])%>%
       mutate(begin_coord_y=path@coords[1,2])%>%
       mutate(end_coord_x=path@coords[length(path),1])%>%
       mutate(end_coord_y=path@coords[length(path),2])%>%
-      mutate(begin_timestamp=path@data[,timestamp][1])%>%
-      mutate(end_timestamp=path@data[,timestamp][length(path)])%>%
+      mutate(begin_timestamp=path[,timestamp][1])%>%
+      mutate(end_timestamp=path[,timestamp][length(path)])%>%
       mutate(numb_points=length(path))
     
     #Convert everything into a spatial line with the attributes selected

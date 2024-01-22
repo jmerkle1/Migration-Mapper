@@ -16,15 +16,21 @@ source("scripts/app1_summarizeAid.R",local=TRUE)
 source("../globalScripts/globalUiFunctions.R",local=TRUE)
 source("../globalScripts/sqlLiteQueries.R",local=TRUE)
 
-source("scripts/dropDuplicates.R",local=TRUE)
-source("scripts/creat.burst.R",local=TRUE)
-source("scripts/find.problem.pts.R",local=TRUE)
-source("scripts/mov.param.R",local=TRUE)
-source("scripts/mort.check.R",local=TRUE)
+# source("scripts/creat.burst.R",local=TRUE)
+# source("scripts/find.problem.pts.R",local=TRUE)
+# source("scripts/mov.param.R",local=TRUE)
+# source("scripts/mort.check.R",local=TRUE)
+source("wmiScripts/CalcBurst.R",local=TRUE)
+source("wmiScripts/FindProblemPts.R",local=TRUE)
+source("wmiScripts/CalcMovParams.R",local=TRUE)
+source("wmiScripts/Check4Morts.R",local=TRUE)
 
 
-dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","sp","ggplot2","mapboxer","rgdal","adehabitatHR",'RSQLite','move','shinycssloaders','raster','terra')
+# dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","sp","ggplot2","mapboxer","rgdal","adehabitatHR",'RSQLite','move','shinycssloaders','raster','terra','tcltk')
+dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk')
 loadDependencies(dependencies)
+# only need rbindlist from data.table.. other functions cause errors with time conversions
+# library(data.table, include.only = c("rbindlist"))
 
 # lubridate can cause issues when loaded in app2 if the R session is not terminated before reloading app1
 if("lubridate" %in% (.packages())){
@@ -366,7 +372,8 @@ hidden(
 
 server <- function(input, output, session) {
   app1_init(input, output, session)
-  elevation<<-raster("globalDem/etopocompressed.tif")
+  # elevation<<-raster("globalDem/etopocompressed.tif")
+  elevation<<-rast("globalDem/etopocompressed.tif")
   checkForSession('app1')
   hide(id='dateTimeRow')
   onStop(function() {
@@ -387,7 +394,8 @@ appOneReload <- function(filePath){
     dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
     updateMasterTableFromDatabase()
     removeModal()
-    print(!'newMasterDate'%in%names(importedDatasetMaster@data))
+    # print(!'newMasterDate'%in%names(importedDatasetMaster@data))
+    print(!'newMasterDate'%in%names(importedDatasetMaster))
     hideElement(id = 'importDataRow', anim = TRUE)
     showElement(id = 'importedDataMapRow', anim = TRUE)
     hide('loadProjectButton')

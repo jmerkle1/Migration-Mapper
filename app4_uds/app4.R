@@ -236,10 +236,11 @@ appFourReload <- function(filePath){
   removeModal()
   rdsLocation<-paste0(filePath,'//workingFile.rds')
   if(file.exists(rdsLocation)){
-    workingFile<<-readRDS(rdsLocation)
+    workingFile<<-readRDS(rdsLocation)    
     importedDatasetMaster<<-workingFile$importedDatasetMaster
     # masterWorkingDirectory<<-workingFile$masterWorkingDirectory
     workingFile$masterWorkingDirectory<<-filePath
+    configOptions<<-readRDS(paste0(filePath,'//configOptions.rds'))
     masterWorkingDirectory<<-filePath
     dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
     updateMasterTableFromDatabase()
@@ -249,7 +250,11 @@ appFourReload <- function(filePath){
     # DROPPING PROBLEMS AND MORTALITIES BY DEFAULT
     # -----------------------------
     # -----------------------------
-    importedDatasetMasterAsSf<<-st_as_sf(importedDatasetMaster[which(importedDatasetMaster@data$problem != 1 & importedDatasetMaster@data$mortality != 1),])
+    # importedDatasetMasterAsSf<<-st_as_sf(importedDatasetMaster[which(importedDatasetMaster@data$problem != 1 & importedDatasetMaster@data$mortality != 1),])
+    importedDatasetMasterAsSf<<-importedDatasetMaster[which(importedDatasetMaster$problem != 1 & importedDatasetMaster$mortality != 1),]
+    importedDatasetMasterAsSf<<-st_as_sf(importedDatasetMasterAsSf,coords = c("x", "y"), crs = configOptions$masterCrs)
+    
+
 
     sessionInfo<-list()
     sessionInfo$masterWorkingDirectory<-masterWorkingDirectory

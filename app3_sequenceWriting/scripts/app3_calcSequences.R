@@ -32,10 +32,15 @@ calculateDefinedSequences<-function(){
       thisMigEnd<-migtime[j,thisMigEnd]
       # if there is an actual sequence defined in the migtime table
       if(thisMigStart!=thisMigEnd){
+        # theseRows<-which(
+        #   importedDatasetMaster@data$id_bioYear==thisIdYr &
+        #   importedDatasetMaster@data$newMasterDate >= thisMigStart &
+        #   importedDatasetMaster@data$newMasterDate <= thisMigEnd
+        # )
         theseRows<-which(
-          importedDatasetMaster@data$id_bioYear==thisIdYr &
-          importedDatasetMaster@data$newMasterDate >= thisMigStart &
-          importedDatasetMaster@data$newMasterDate <= thisMigEnd
+          importedDatasetMaster$id_bioYear==thisIdYr &
+          importedDatasetMaster$newMasterDate >= thisMigStart &
+          importedDatasetMaster$newMasterDate <= thisMigEnd
         )
 
         thisSequencesRows<-c(thisSequencesRows,theseRows)
@@ -47,28 +52,34 @@ calculateDefinedSequences<-function(){
         # DROPPING PROBLEMS AND MORTALITIES BY DEFAULT
         # -----------------------------
         # -----------------------------
-        theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$problem != 1),]
-        theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$mortality != 1),]
-        theseSequencePoints$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+        # theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$problem != 1),]
+        # theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$mortality != 1),]
+        # theseSequencePoints$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+        theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$problem != 1),]
+        theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$mortality != 1),]
+        theseSequencePoints$mig<-paste0(theseSequencePoints$newUid,'_',theseSequencePoints$bioYear,'_',thisSequenceName)
 
 
         sequencesSummary(theseSequencePoints)
+        dawg<<-theseSequencePoints
         theseSequencePointsForExport<-theseSequencePoints
-        if('originalProjection' %in% names(configOptions)){
-          theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
-        }
-        theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
-        theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig')]
-        names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','geometry')
+        # if('originalProjection' %in% names(configOptions)){
+        #   theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
+        # }
+        # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
+        theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','lon','lat')]
+        names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat')
         theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
         theseSequencePointsForExport$season<-thisSequenceName
+        theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
         if(exportShapes!='No, do not export shapefiles'){
           theseSequencePointsForExport$method<-'sliderSelected'
           exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
         }
-        theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig')]
-        names(theseSequencePoints)<-c('id','date','mig')
-        theseSequencePoints<-st_as_sf(theseSequencePoints)
+        theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat')]
+        names(theseSequencePoints)<-c('id','date','mig','lon','lat')
+        # theseSequencePoints<-st_as_sf(theseSequencePoints)
+        theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
         thisFolder<-paste0(sequencesFolder,'\\',thisSequenceName)
         saveRDS(theseSequencePoints,paste0(thisFolder,'\\',thisSequenceName,'.rds'))
 
@@ -185,10 +196,15 @@ calculateInBetweenSequences<-function(){
 
     # if there is an actual sequence defined in the migtime table and we're not crossing over bio year
     if(thisMigStart!=thisMigStartPartner && thisMigEnd!=thisMigEndPartner){
+      # theseRows<-which(
+      #   importedDatasetMaster@data$id_bioYear==thisIdYr &
+      #   importedDatasetMaster@data$newMasterDate >= thisMigStart &
+      #   importedDatasetMaster@data$newMasterDate < thisMigEnd
+      # )
       theseRows<-which(
-        importedDatasetMaster@data$id_bioYear==thisIdYr &
-        importedDatasetMaster@data$newMasterDate >= thisMigStart &
-        importedDatasetMaster@data$newMasterDate < thisMigEnd
+        importedDatasetMaster$id_bioYear==thisIdYr &
+        importedDatasetMaster$newMasterDate >= thisMigStart &
+        importedDatasetMaster$newMasterDate < thisMigEnd
       )
       thisSequencesRows<-c(thisSequencesRows,theseRows)
       thisDateSelectionType='sliderSelected'      
@@ -224,10 +240,15 @@ calculateInBetweenSequences<-function(){
       thisSequenceAverageStartDate<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)
       thisSequenceAverageEndDate<-paste0(thisFullYear,'-',thisSequenceAverageEndDate)
 
+      # theseRows<-which(
+      #   importedDatasetMaster@data$id_bioYear==thisIdYr &
+      #   importedDatasetMaster@data$newMasterDate >= thisSequenceAverageStartDate &
+      #   importedDatasetMaster@data$newMasterDate <= thisSequenceAverageEndDate
+      # )
       theseRows<-which(
-        importedDatasetMaster@data$id_bioYear==thisIdYr &
-        importedDatasetMaster@data$newMasterDate >= thisSequenceAverageStartDate &
-        importedDatasetMaster@data$newMasterDate <= thisSequenceAverageEndDate
+        importedDatasetMaster$id_bioYear==thisIdYr &
+        importedDatasetMaster$newMasterDate >= thisSequenceAverageStartDate &
+        importedDatasetMaster$newMasterDate <= thisSequenceAverageEndDate
       )
 
       theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
@@ -248,29 +269,36 @@ calculateInBetweenSequences<-function(){
     # DROPPING PROBLEMS AND MORTALITIES BY DEFAULT
     # -----------------------------
     # -----------------------------
-    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$problem != 1),]
-    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$mortality != 1),]
+    # theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$problem != 1),]
+    # theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$mortality != 1),]
+    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$problem != 1),]
+    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$mortality != 1),]
 
 
-    theseSequencePoints@data$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+    # theseSequencePoints@data$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+    theseSequencePoints$mig<-paste0(theseSequencePoints$newUid,'_',theseSequencePoints$bioYear,'_',thisSequenceName)
 
     sequencesSummary(theseSequencePoints)
     theseSequencePointsForExport<-theseSequencePoints
-    if('originalProjection' %in% names(configOptions)){
-      theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
-    }
-    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
-    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','method')]
-    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','method','geometry')
+    # if('originalProjection' %in% names(configOptions)){
+    #   theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
+    # }
+    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
+    # theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','method')]
+    # names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','method','geometry')
+    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','lon','lat')]
+    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
+    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
     if(exportShapes!='No, do not export shapefiles'){
       exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
     }
 
-    theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig')]
-    names(theseSequencePoints)<-c('id','date','mig')
-    theseSequencePoints<-st_as_sf(theseSequencePoints)
+    theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat')]
+    names(theseSequencePoints)<-c('id','date','mig','lon','lat')
+    # theseSequencePoints<-st_as_sf(theseSequencePoints)
+    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
     sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
     if(dir.exists(sequencesFolder)==FALSE){
       dir.create(sequencesFolder)
@@ -341,6 +369,11 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       thisIdYr<-migtime[j,'id_bioYear']
       thisAid<-migtime[j,'newUid']
       thisMigStart<-migtime[j,startSeason]
+
+      print(j)
+      print(startSeason)
+      print(thisFullYear)
+      print(endSeason)
 
 
       # if we're already on the last row of migtime.. there is no end date avaialble so stop
@@ -419,10 +452,15 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
     
 
+      # theseRows<-which(
+      #   importedDatasetMaster@data$newUid==thisAid &
+      #   importedDatasetMaster@data$newMasterDate >= thisMigStart &
+      #   importedDatasetMaster@data$newMasterDate < thisMigEnd
+      # )
       theseRows<-which(
-        importedDatasetMaster@data$newUid==thisAid &
-        importedDatasetMaster@data$newMasterDate >= thisMigStart &
-        importedDatasetMaster@data$newMasterDate < thisMigEnd
+        importedDatasetMaster$newUid==thisAid &
+        importedDatasetMaster$newMasterDate >= thisMigStart &
+        importedDatasetMaster$newMasterDate < thisMigEnd
       )
 
       if(length(theseRows)>0){
@@ -431,11 +469,12 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
     
 
         # when spanning two years.. I used to use a combined bioyear_bioyear+1
-        tempDToAdd@data$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
+        # tempDToAdd@data$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
+        tempDToAdd$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
         # changing back to just the first bioyear
         # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # tempDToAdd@data$bioYear<-thisBioYear
-        tempDToAdd@data$method<-thisDateSelectionType
+        tempDToAdd$method<-thisDateSelectionType
 
 
         tempDForSpan<-rbind(tempDForSpan,tempDToAdd)
@@ -449,12 +488,14 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       thisSequencesRows<-c(thisSequencesRows,theseRows)
     }
 
-    
+    print(thisSequencesRows)  
+
 
 
   if(length(thisSequencesRows)>1){
     theseSequencePoints<-tempDForSpan
-    theseSequencePoints@data$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+    # theseSequencePoints@data$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+    theseSequencePoints$mig<-paste0(theseSequencePoints$newUid,'_',theseSequencePoints$bioYear,'_',thisSequenceName)
     
     sequencesSummary(theseSequencePoints)
 
@@ -467,26 +508,33 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
     # -----------------------------
 
 
-    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$problem != 1),]
-    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$mortality != 1),]
+    # theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$problem != 1),]
+    # theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$mortality != 1),]
+    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$problem != 1),]
+    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$mortality != 1),]
 
     theseSequencePointsForExport<-theseSequencePoints
-    if('originalProjection' %in% names(configOptions)){
-      theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
-    }
-    dawg<<-theseSequencePointsForExport
-    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
-    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','method')]
-    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','method','geometry')
+    # if('originalProjection' %in% names(configOptions)){
+    #   theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
+    # }    
+    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
+    # theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','method')]
+    # names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','method','geometry')
+    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','lon','lat')]
+    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
+    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
     if(exportShapes!='No, do not export shapefiles'){
       exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
     }
 
-    theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig')]
-    names(theseSequencePoints)<-c('id','date','mig')
-    theseSequencePoints<-st_as_sf(theseSequencePoints)
+    # theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig')]
+    # names(theseSequencePoints)<-c('id','date','mig')
+    # theseSequencePoints<-st_as_sf(theseSequencePoints)
+    theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat')]
+    names(theseSequencePoints)<-c('id','date','mig','lon','lat')
+    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
     sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
     if(dir.exists(sequencesFolder)==FALSE){
       dir.create(sequencesFolder)
@@ -500,12 +548,17 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       unlink(paste0(thisFolder,'\\*'))
     }
     saveRDS(theseSequencePoints,paste0(thisFolder,'\\',thisSequenceName,'.rds'))
-  }
-  totalSequences<-length(unique(theseSequencePoints$mig))
-  totalUid<-length(unique(theseSequencePoints$id))
-  modalMessager('success', paste0('done calculating sequences for your season(s)! This include ',totalSequences,' sequences from ',totalUid,' individuals. See sequences folder or choose another season to calculate more sequences.'))
-  loadingScreenToggle('hide','calculating sequences')
-
+  }    
+  if(!exists('theseSequencePoints')){
+      modalMessager('error', paste0('Your selection resulted in no outputs.. please check your data and make sure that unique animals have data that spans to the next year'))
+      loadingScreenToggle('hide','calculating sequences')
+    }else{
+      totalSequences<-length(unique(theseSequencePoints$mig))
+      totalUid<-length(unique(theseSequencePoints$id))
+      modalMessager('success', paste0('done calculating sequences for your season(s)! This include ',totalSequences,' sequences from ',totalUid,' individuals. See sequences folder or choose another season to calculate more sequences.'))
+      loadingScreenToggle('hide','calculating sequences')
+    }
+  
 }
 
 
@@ -575,17 +628,27 @@ calculateCustomSequences<-function(){
     thisSequenceStartDate<-paste0(thisFullYear,'-',seasonStartDate)
     if(doesSequenceSpanBioYears){
       thisSequenceEndDate<-paste0(as.numeric(thisFullYear)+1,'-',seasonEndDate)
+      # theseRows<-which(
+      #   importedDatasetMaster@data$newUid==thisAid &
+      #   importedDatasetMaster@data$newMasterDate >= thisSequenceStartDate &
+      #   importedDatasetMaster@data$newMasterDate <= thisSequenceEndDate
+      # )
       theseRows<-which(
-        importedDatasetMaster@data$newUid==thisAid &
-        importedDatasetMaster@data$newMasterDate >= thisSequenceStartDate &
-        importedDatasetMaster@data$newMasterDate <= thisSequenceEndDate
+        importedDatasetMaster$newUid==thisAid &
+        importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
+        importedDatasetMaster$newMasterDate <= thisSequenceEndDate
       )
     }else{
       thisSequenceEndDate<-paste0(thisFullYear,'-',seasonEndDate)
+      # theseRows<-which(
+      #   importedDatasetMaster@data$newUid==thisAid &
+      #   importedDatasetMaster@data$newMasterDate >= thisSequenceStartDate &
+      #   importedDatasetMaster@data$newMasterDate <= thisSequenceEndDate
+      # )
       theseRows<-which(
-        importedDatasetMaster@data$newUid==thisAid &
-        importedDatasetMaster@data$newMasterDate >= thisSequenceStartDate &
-        importedDatasetMaster@data$newMasterDate <= thisSequenceEndDate
+        importedDatasetMaster$newUid==thisAid &
+        importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
+        importedDatasetMaster$newMasterDate <= thisSequenceEndDate
       )
     }
 
@@ -593,7 +656,8 @@ calculateCustomSequences<-function(){
       tempDToAdd<-importedDatasetMaster[theseRows,]
       # this was where there were 2 years for span years
       # tempDToAdd@data$bioYear<-paste0(thisShortYear,'_',as.numeric(thisShortYear)+1)
-      tempDToAdd@data$bioYear<-thisShortYear
+      # tempDToAdd@data$bioYear<-thisShortYear
+      tempDToAdd$bioYear<-thisShortYear
 
       tempDForSpan<-rbind(tempDForSpan,tempDToAdd)
 
@@ -609,28 +673,35 @@ calculateCustomSequences<-function(){
       theseSequencePoints<-importedDatasetMaster[thisSequencesRows,]
     }
 
-    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$problem != 1),]
-    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints@data$mortality != 1),]
-    theseSequencePoints@data$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$problem != 1),]
+    theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$mortality != 1),]
+    # theseSequencePoints@data$mig<-paste0(theseSequencePoints@data$newUid,'_',theseSequencePoints@data$bioYear,'_',thisSequenceName)
+    theseSequencePoints$mig<-paste0(theseSequencePoints$newUid,'_',theseSequencePoints$bioYear,'_',thisSequenceName)
 
     sequencesSummary(theseSequencePoints)
     theseSequencePointsForExport<-theseSequencePoints
-    if('originalProjection' %in% names(configOptions)){
-      theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
-    }
-    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
-    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig')]
-    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','geometry')
+    # if('originalProjection' %in% names(configOptions)){
+    #   theseSequencePointsForExport<-spTransform(theseSequencePointsForExport, CRS(configOptions$originalProjection))
+    # }
+    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport)
+    # theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig')]
+    # names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','geometry')
+    theseSequencePointsForExport<-theseSequencePointsForExport[,c('newUid','bioYearFull','newMasterDate','mig','lon','lat')]
+    names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
+    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
     if(exportShapes!='No, do not export shapefiles'){
       theseSequencePointsForExport$method<-'custom'
       exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
     }
 
-    theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig')]
-    names(theseSequencePoints)<-c('id','date','mig')
-    theseSequencePoints<-st_as_sf(theseSequencePoints)
+    # theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig')]
+    # names(theseSequencePoints)<-c('id','date','mig')
+    # theseSequencePoints<-st_as_sf(theseSequencePoints)
+    theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat')]
+    names(theseSequencePoints)<-c('id','date','mig','lon','lat')
+    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
     sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
     if(dir.exists(sequencesFolder)==FALSE){
       dir.create(sequencesFolder)
@@ -658,13 +729,13 @@ sequencesSummary<-function(thisData){
   print('--total rows in sequence')
   print(dim(thisData))
   print('--total aids in data')
-  print(unique(thisData@data$newUid))
+  print(unique(thisData$newUid))
   print('--min date')
-  print(min(thisData@data$newMasterDate))
+  print(min(thisData$newMasterDate))
   print('--max date')
-  print(max(thisData@data$newMasterDate))
+  print(max(thisData$newMasterDate))
   print('-- total migs')
-  print(unique(thisData@data$mig))
+  print(unique(thisData$mig))
 }
 
 exportShapeFiles<-function(theseSequencePoints,thisSequenceName){
@@ -677,27 +748,25 @@ exportShapeFiles<-function(theseSequencePoints,thisSequenceName){
     dir.create(sequenceShapesDirectory)
   }
 
+    jj<<-theseSequencePoints
 
+    st_write(theseSequencePoints, sequenceShapesDirectory, paste0(thisSequenceName,'_points'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)  
 
-  st_write(theseSequencePoints, sequenceShapesDirectory, paste0(thisSequenceName,'_points'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)  
+    linesData<-Points2Lines(theseSequencePoints,'date','id')
+    st_write(linesData, sequenceShapesDirectory, paste0(thisSequenceName,'_lines'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)
 
-    u <- unique(theseSequencePoints$id_yrbio_season)  # d is sf df, and id_yrbio_season is a column representing some season or id
-
-    lns <- do.call(c, lapply(1:length(u), function(e){
-      return(st_cast(st_combine(theseSequencePoints[theseSequencePoints$id_yrbio_season == u[e],]), "LINESTRING"))
-    }))
-
-    lns <- data.frame(id_yrbio_season=u,
-                      firstdate=do.call(c, lapply(u, function(e){min(theseSequencePoints$date[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
-                      lastdate=do.call(c, lapply(u, function(e){max(theseSequencePoints$date[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
-                      method=do.call(c, lapply(u, function(e){max(theseSequencePoints$method[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
-                      geometry=lns)
-
-  lns <- st_as_sf(lns, sf_column_name = "geometry")
-
-  lns
-
-  st_write(lns, sequenceShapesDirectory, paste0(thisSequenceName,'_lines'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)
+    # u <- unique(theseSequencePoints$id_yrbio_season)  # d is sf df, and id_yrbio_season is a column representing some season or id
+    # lns <- do.call(c, lapply(1:length(u), function(e){
+    #   return(st_cast(st_combine(theseSequencePoints[theseSequencePoints$id_yrbio_season == u[e],]), "LINESTRING"))
+    # }))
+    # lns <- data.frame(id_yrbio_season=u,
+    #                   firstdate=do.call(c, lapply(u, function(e){min(theseSequencePoints$date[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
+    #                   lastdate=do.call(c, lapply(u, function(e){max(theseSequencePoints$date[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
+    #                   method=do.call(c, lapply(u, function(e){max(theseSequencePoints$method[theseSequencePoints$id_yrbio_season==e], na.rm=TRUE)})),
+    #                   geometry=lns)
+    # lns <- st_as_sf(lns, sf_column_name = "geometry")
+    # lns
+    # st_write(lns, sequenceShapesDirectory, paste0(thisSequenceName,'_lines'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)
 
 
 

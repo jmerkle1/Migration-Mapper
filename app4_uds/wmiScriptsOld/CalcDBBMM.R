@@ -38,10 +38,10 @@ CalcDBBMM <- function(
 ){
   
   #manage packages
-  if(all(c("sf","terra","move","R.utils") %in% installed.packages()[,1])==FALSE)
-    stop("You must install the following packages: sf, terra, move, R.utils")
+  if(all(c("sf","raster","move","R.utils") %in% installed.packages()[,1])==FALSE)
+    stop("You must install the following packages: sf, raster, move, R.utils")
   require(sf)
-  require(terra)
+  require(raster)
   require(move)
   require(R.utils)
   
@@ -49,24 +49,24 @@ CalcDBBMM <- function(
     stop("seq.sf must be a sf data frame from package sf!")
   
   # load up the population grid
-  grd <- terra::rast(Pop.grd)
+  grd <- raster(Pop.grd)
   
   # ensure data are in same projection as grid
-  seq.sf <- sf::st_transform(seq.sf, crs=sf::st_crs(grd))
+  seq.sf <- st_transform(seq.sf, crs=projection(grd))
   
   #prepare only the cells to run BB over
-  ext2 <- terra::ext(seq.sf)
+  ext2 <- raster::extent(seq.sf)
   multiplyers <- c((ext2[2]-ext2[1])*mult4buff, (ext2[4]-ext2[3])*mult4buff)   # add about mult4buff around the edges of your extent (you can adjust this if necessary)
-  ext2 <- terra::extend(ext2, multiplyers)
-  cels <- terra::cells(grd, ext2)
-  grd2 <- terra::crop(grd, ext2)
-  if(length(cels)!=terra::ncell(grd2))
+  ext2 <- raster::extend(ext2, multiplyers)
+  cels <- cellsFromExtent(grd, ext2)
+  grd2 <- crop(grd, ext2)
+  if(length(cels)!=ncell(grd2))
     stop("There is a problem with cropping down the population grid!")
   
   # take out of sf
-  seq.sf$x <- sf::st_coordinates(seq.sf)[,1]
-  seq.sf$y <- sf::st_coordinates(seq.sf)[,2]
-  seq.sf <- sf::st_drop_geometry(seq.sf) 
+  seq.sf$x <- st_coordinates(seq.sf)[,1]
+  seq.sf$y <- st_coordinates(seq.sf)[,2]
+  seq.sf <- st_drop_geometry(seq.sf) 
   
   if("POSIXct" %in% class(seq.sf[,date.name]) == FALSE)
     stop("Your date.name column should be POSIXct!")
@@ -116,15 +116,15 @@ CalcDBBMM <- function(
   # this is the function to calculate the dynamic BB
   
   # prep data for the dBB function
-  mov <- move::move(x=seq.sf$x, y=seq.sf$y, time=seq.sf$date1234,
-              animal=seq.name, proj=sp::CRS(sf::st_crs(grd)$proj4string))   #create mov object
-  mov <- move::burst(mov, seq.sf$connect[1:(nrow(seq.sf)-1)])   #this identifies the bad points (ie > than your MaxFixInterval)
+  mov <- move(x=seq.sf$x, y=seq.sf$y, time=seq.sf$date1234,
+              animal=seq.name, proj=CRS(projection(grd)))   #create mov object
+  mov <- burst(mov, seq.sf$connect[1:(nrow(seq.sf)-1)])   #this identifies the bad points (ie > than your MaxFixInterval)
   
   # this is the function to calculate the dynamics BB
   bb <- R.utils::withTimeout({
     try(move::brownian.bridge.dyn(mov,
                                   location.error=location.error, #this is the location error of your collars
-                                  raster=raster::raster(grd2),
+                                  raster=grd2,
                                   margin=dbbmm.margin,    # margin and window.size are params of the dynBB. I have put the defaults
                                   window.size=dbbmm.window,
                                   burstType="yes"), 
@@ -152,39 +152,34 @@ CalcDBBMM <- function(
   }else{
     bb <- bb[[1]]
   }
-  bb <- terra::rast(bb) # bring back into a terra object
   
   #set to 0 any values that are outside of the < 0.9999 contour
-  mxx <- global(bb, "sum")[1,1]
-  bb <- app(bb, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1
-
-  cutoff <- sort(terra::values(bb, mat=FALSE), decreasing=TRUE)
+  bb <- values(bb)
+  bb <- bb/sum(bb)  #rescale probabilities so they sum to equal 1
+  cutoff <- sort(bb, decreasing=TRUE)
   vlscsum <- cumsum(cutoff)
   cutoff <- cutoff[vlscsum > .9999][1]
   bb[bb < cutoff] <- 0
-  
-  mxx <- global(bb, "sum")[1,1]
-  bb <- app(bb, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1  
+  bb <- bb/sum(bb)  #rescale probabilities so they sum to equal 1
   
   # write to raster
-  grd[cels] <- terra::values(bb, mat=FALSE)
-  terra::writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
-              filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+  grd[cels] <- bb
+  writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
+              format = "GTiff", overwrite = TRUE, datatype='FLT4S')
   
   #output the footprint based on contour
-  grd <- terra::rast(paste0(UD.fldr,"/",seq.name,".tif"))
-  cutoff <- sort(terra::values(grd, mat=FALSE), decreasing=TRUE)
+  cutoff <- sort(bb, decreasing=TRUE)
   vlscsum <- cumsum(cutoff)
-  cutoff <- cutoff[vlscsum > contour/100][1]
-  grd <- terra::classify(grd, rcl=matrix(c(-Inf,cutoff,0,
-                                           cutoff, Inf, 1),ncol=3, byrow=TRUE))
-  terra::writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
-                     filetype = "GTiff", overwrite = TRUE, datatype='INT1U')
+  cutoff <- cutoff[vlscsum > (contour/100)][1]
+  bb <- ifelse(bb < cutoff, 0, 1)
+  grd[cels] <- bb
+  writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
+              format = "GTiff", overwrite = TRUE, datatype='INT1U')
   
   toreturn <- data.frame(seq.name=seq.name,
                          dbb.mean.motion.variance=mean.motion.var,
-                         grid.size=terra::ncell(bb),
-                         grid.cell.size=terra::res(grd)[1],
+                         grid.size=length(bb),
+                         grid.cell.size=res(grd)[1],
                          date.created=Sys.time(),
                          execution_time=paste(round(difftime(Sys.time(), start.time, units="min"),2)," minutes",sep=""),
                          num.locs=nrow(seq.sf),
@@ -193,7 +188,7 @@ CalcDBBMM <- function(
                          num.days=length(unique(jul)),
                          errors="None")
   
-  rm(bb, grd, grd2, mov, cels, seq.sf, jul, cutoff, vlscsum, mxx) # remove some of the larger objects
+  rm(bb, grd, grd2, mov, cels, contours, seq.sf, jul, cutoff, vlscsum) # remove some of the larger objects
   gc()
   
   #gather summary info

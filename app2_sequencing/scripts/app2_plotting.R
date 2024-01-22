@@ -17,7 +17,8 @@ plotInit<-function(){
   dataForPlots<<-reactive({
 
     tempIndex<-input$currentIndividualSelector
-    tempDat<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear == tempIndex,c('newMasterDate','newUid')]
+    # tempDat<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear == tempIndex,c('newMasterDate','newUid')]
+    tempDat<-importedDatasetMaster[importedDatasetMaster$id_bioYear == tempIndex,c('newMasterDate','newUid')]
     tempUid<<-tempDat[1,'newUid']
     minDate<<-min(tempDat[,'newMasterDate'])
     maxDate<<-max(tempDat[,'newMasterDate'])
@@ -26,21 +27,37 @@ plotInit<-function(){
     sixMonthMax<-as.Date(maxDate)+182
 
 
-    plotData<-importedDatasetMaster@data[
-      importedDatasetMaster@data$id_bioYear == tempIndex,
+    # plotData<-importedDatasetMaster@data[
+    #   importedDatasetMaster@data$id_bioYear == tempIndex & 
+    #   importedDatasetMaster@data$problem != 1 &
+    #   importedDatasetMaster@data$mortality != 1,
+    #   c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
+    # ]
+    plotData<-importedDatasetMaster[
+      importedDatasetMaster$id_bioYear == tempIndex & 
+      importedDatasetMaster$problem != 1 &
+      importedDatasetMaster$mortality != 1,
       c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
     ]
 
-    plotDataSixMonth<-importedDatasetMaster@data[
-      which(importedDatasetMaster@data$newUid == tempUid & as.Date(importedDatasetMaster@data$newMasterDate)>=sixMonthMin & as.Date(importedDatasetMaster@data$newMasterDate)<=sixMonthMax),
+    # plotDataSixMonth<-importedDatasetMaster@data[
+    #   which(importedDatasetMaster@data$newUid == tempUid & 
+    #   as.Date(importedDatasetMaster@data$newMasterDate)>=sixMonthMin & 
+    #   as.Date(importedDatasetMaster@data$newMasterDate)<=sixMonthMax) &
+    #   importedDatasetMaster@data$problem != 1 &
+    #   importedDatasetMaster@data$mortality != 1,
+    #   c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
+    # ]
+    plotDataSixMonth<-importedDatasetMaster[
+      which(importedDatasetMaster$newUid == tempUid & 
+      as.Date(importedDatasetMaster$newMasterDate)>=sixMonthMin & 
+      as.Date(importedDatasetMaster$newMasterDate)<=sixMonthMax) &
+      importedDatasetMaster$problem != 1 &
+      importedDatasetMaster$mortality != 1,
       c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
     ]
 
-    # plotData<-plotData[which(plotData$problem != 1),]
-    # plotData<-plotData[which(plotData$mortality != 1),]
-
-    # plotDataSixMonth<-plotDataSixMonth[which(plotDataSixMonth$problem != 1),]
-    # plotDataSixMonth<-plotDataSixMonth[which(plotDataSixMonth$mortality != 1),]
+    
 
 
     tempList<<-list()
@@ -55,10 +72,16 @@ plotInit<-function(){
 
   })
 
+  # dataForSequencePlots<<-reactive({
+  #   trig<-input$nsdTypeSelect
+  #   tempD<-importedDatasetMaster@data[
+  #     importedDatasetMaster@data$id_bioYear == currentIndividual,
+  #     c('newMasterDate','nsdBio','displacementBio','speed','elev')
+  #   ]
   dataForSequencePlots<<-reactive({
     trig<-input$nsdTypeSelect
-    tempD<-importedDatasetMaster@data[
-      importedDatasetMaster@data$id_bioYear == currentIndividual,
+    tempD<-importedDatasetMaster[
+      importedDatasetMaster$id_bioYear == currentIndividual,
       c('newMasterDate','nsdBio','displacementBio','speed','elev')
     ]
 
@@ -252,6 +275,7 @@ plotInit<-function(){
     })
 
 
+    dawg<<-dataForPlots()$plotData
 
   output$plot1 <- renderPlot({
     nsdPlot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate), get(nsdType))) +

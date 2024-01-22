@@ -2,10 +2,11 @@ hasMapRendered<<-FALSE
 
 mapInit<-function(){
 
-  dataSetExtent<-importedDatasetMaster@bbox
+  # dataSetExtent<-importedDatasetMaster@bbox
+
   if(!hasMapRendered){
     output$sequencesMap <- renderMapboxer({
-    mapboxer(center = c(importedDatasetMaster@data[1,'lon'],importedDatasetMaster@data[1,'lat']), style = 'mapbox://styles/wmi-merkle/ckxqg5r429gpr14sd3o6dlno4' ,zoom = 6) %>%
+    mapboxer(center = c(importedDatasetMaster[1,'lon'],importedDatasetMaster[1,'lat']), style = 'mapbox://styles/wmi-merkle/ckxqg5r429gpr14sd3o6dlno4' ,zoom = 6) %>%
       add_navigation_control()
     })
     observeEvent(input$sequencesMap_onclick, {
@@ -37,8 +38,8 @@ mapCurrentIndividual<-function(){
 
 
   pointsForMap<<-importedDatasetMaster[which(importedDatasetMaster$id_bioYear==currentIndividual),]
-  pointsForMap<<-pointsForMap[which(pointsForMap@data$problem != 1),]
-  pointsForMap<<-pointsForMap[which(pointsForMap@data$mortality != 1),]
+  pointsForMap<<-pointsForMap[which(pointsForMap$problem != 1),]
+  pointsForMap<<-pointsForMap[which(pointsForMap$mortality != 1),]
 
   if(nrow(pointsForMap)==0){
     thereAreNoPointsToMap<<-TRUE
@@ -47,10 +48,20 @@ mapCurrentIndividual<-function(){
     thereAreNoPointsToMap<<-FALSE
   }
 
-  pointsForMap<<-spTransform(pointsForMap,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0', SRS_string='EPSG:4326'))
-  linesData<<-pointsToLines(pointsForMap)
-  linesData<<-st_as_sf(linesData)
-  thisBbox<-pointsForMap@bbox
+  # pointsForMap<<-spTransform(pointsForMap,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0', SRS_string='EPSG:4326'))
+  pointsForMap<<-st_as_sf(pointsForMap,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+
+  linesData<<-Points2Lines(pointsForMap)
+
+
+
+  # linesData<<-pointsToLines(pointsForMap)
+  # linesData<<-st_as_sf(linesData)
+  # thisBbox<-pointsForMap@bbox
+
+  thisBbox<-st_bbox(pointsForMap)
+  theseBounds<-c(thisBbox$xmin-0.01, thisBbox$ymin-0.01,thisBbox$xmax+0.01, thisBbox$ymax+0.01)
+  names(theseBounds)<-NULL
 
   if(!isSourceAdded){
 
@@ -78,17 +89,17 @@ mapCurrentIndividual<-function(){
 
 
     mapboxer_proxy("sequencesMap") %>%
-      add_source(as_mapbox_source(pointsForMap@data,lat="lat",lng="lon"),'pointsSource')%>%
+      add_source(as_mapbox_source(pointsForMap),'pointsSource')%>%
       add_circle_layer(
         source = 'pointsSource',
         circle_color = '#000cff',
         circle_radius = 5,
         id='pointLayer'
       )%>%
-      fit_bounds(c(c(thisBbox[1,1]-0.01, thisBbox[2,1]-0.01),c(thisBbox[1,2]+0.01, thisBbox[2,2]+0.01)))%>%
+      fit_bounds(theseBounds)%>%
       update_mapboxer()
 
-    sequencePoints<-pointsForMap@data
+    sequencePoints<-pointsForMap
     sequencePoints$alpha<-0
     sequencePoints$color<-'#ffffff'
     mapboxer_proxy("sequencesMap") %>%
@@ -105,7 +116,7 @@ mapCurrentIndividual<-function(){
 
 
     mapboxer_proxy("sequencesMap") %>%
-      add_source(as_mapbox_source(pointsForMap@data[0,],lat="lat",lng="lon"),'hoverSource')%>%
+      add_source(as_mapbox_source(pointsForMap[0,],lat="lat",lng="lon"),'hoverSource')%>%
       add_circle_layer(
         source = 'hoverSource',
         circle_color = '#000000',
@@ -127,8 +138,8 @@ mapCurrentIndividual<-function(){
       update_mapboxer()
 
     mapboxer_proxy("sequencesMap") %>%
-      set_data(pointsForMap@data,lat="lat",lng='lon','pointsSource')%>%
-      fit_bounds(c(c(thisBbox[1,1]-0.01, thisBbox[2,1]-0.01),c(thisBbox[1,2]+0.01, thisBbox[2,2]+0.01)))%>%
+      set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%
+      fit_bounds(theseBounds)%>%
       update_mapboxer()
   }
 
@@ -159,7 +170,9 @@ updateMapSequencePoints<-function(){
 
 
 
-    sequencePoints<-pointsForMap@data
+    # sequencePoints<-pointsForMap@data
+    sequencePoints<-pointsForMap
+
     sequencePoints$alpha<-0
     sequencePoints$color<-'#ffffff'
 

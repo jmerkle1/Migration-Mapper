@@ -37,12 +37,14 @@ CalcPopUse <- function(
 ){
 
   #manage packages
-  if(all(c("sf","terra","stringr","smoothr") %in% installed.packages()[,1])==FALSE)
-    stop("You must install the following packages: sf, terra, stringr, smoothr")
+  if(all(c("sf","raster","stringr","move","smoothr", "rgeos") %in% installed.packages()[,1])==FALSE)
+    stop("You must install the following packages: sf, raster, stringr, move, smoothr, rgeos")
   require(sf)
-  require(terra)
+  require(raster)
   require(stringr)
+  require(move)
   require(smoothr)
+  require(rgeos)
 
   # some checks
   if(length(dir(out.fldr))> 0)
@@ -149,40 +151,40 @@ CalcPopUse <- function(
       sub1.fls <- fls[get(names(opts.order)[1]) %in% opts.order[[1]][i]]
       sub1.nms <- nms[get(names(opts.order)[1]) %in% opts.order[[1]][i]]
 
-      s <- terra::rast(sub1.fls)
-      if(terra::nlyr(s)>1){
-        s <- mean(s)
+      s <- stack(sub1.fls)
+      if(nlayers(s)>1){
+        s <- sum(s)
+        s <- s/sum(values(s))
         # remove cutoff, and restandardize to sum to equal 1
-        cutoff <- sort(terra::values(s, mat=FALSE), decreasing=TRUE)
+        cutoff <- sort(values(s), decreasing=TRUE)
         vlscsum <- cumsum(cutoff)
         cutoff <- cutoff[vlscsum > contour/100][1]
-        s[s < cutoff] <- 0
-        mxx <- terra::global(s, sum)[1,1]
-        s <- terra::app(s, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1 
+        s <- reclassify(s, rcl=matrix(c(-1,cutoff,0),2,3, byrow=T))
+        s <- s/sum(values(s))   #verify that they add up to 1
       }  # end of work if there are multiple layers in s
 
       # write out file. Will be named by first merge underscore second merge.
-      terra::writeRaster(s, filename = paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i], ".tif"),
-                  filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+      writeRaster(s, filename = paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i], ".tif"),
+                  format = "GTiff", overwrite = TRUE, datatype='FLT4S')
     } # end of loop over opt1
     rm(s)
     gc()
 
     # Create final population UD
-    Pop.UD <- terra::rast(list.files(paste0(out.fldr, "/", names(opts.order)[1]), ".tif$", full.names = TRUE))  # bring them back in to do mean value. Maybe do need upper level for year so these can go in there!
-    if(terra::nlyr(Pop.UD)>1){
-      Pop.UD <- mean(Pop.UD)  # average values
+    Pop.UD <- stack(list.files(paste0(out.fldr, "/", names(opts.order)[1]), ".tif$", full.names = TRUE))  # bring them back in to do mean value. Maybe do need upper level for year so these can go in there!
+    if(nlayers(Pop.UD)>1){
+      Pop.UD <- sum(Pop.UD)  # sum up values
+      Pop.UD <- Pop.UD/sum(values(Pop.UD))
       # remove cutoff, and restandardize to sum to equal 1
-      cutoff <- sort(terra::values(Pop.UD, mat=FALSE), decreasing=TRUE)
+      cutoff <- sort(values(Pop.UD), decreasing=TRUE)
       vlscsum <- cumsum(cutoff)
       cutoff <- cutoff[vlscsum > contour/100][1]
-      Pop.UD[Pop.UD < cutoff] <- 0
-      mxx <- terra::global(Pop.UD, sum)[1,1]
-      Pop.UD <- terra::app(Pop.UD, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1 
+      Pop.UD <- reclassify(Pop.UD, rcl=matrix(c(-1,cutoff,0),2,3, byrow=T))
+      Pop.UD <- Pop.UD/sum(values(Pop.UD))   #verify that they add up to 1
     }  # end of work if there are multiple layers in opt1.stack
 
-    terra::writeRaster(Pop.UD, filename = paste0(out.fldr, "/Pop_UD.tif"),
-                filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+    writeRaster(Pop.UD, filename = paste0(out.fldr, "/Pop_UD.tif"),
+                format = "GTiff", overwrite = TRUE, datatype='FLT4S')
 
   } # end of section with only 1 level for merging
 
@@ -208,64 +210,61 @@ CalcPopUse <- function(
         sub2.fls <- sub1.fls[opt2 %in% opt2.unique[e]]
         sub2.nms <- sub1.nms[opt2 %in% opt2.unique[e]]
 
-        s <- terra::rast(sub2.fls)
-        if(terra::nlyr(s)>1){
-          s <- mean(s)  # mean the values
+        s <- stack(sub2.fls)
+        if(nlayers(s)>1){
+          s <- sum(s)  # sum up values
+          s <- s/sum(values(s))
           # remove cutoff, and restandardize to sum to equal 1
-          cutoff <- sort(terra::values(s, mat=FALSE), decreasing=TRUE)
+          cutoff <- sort(values(s), decreasing=TRUE)
           vlscsum <- cumsum(cutoff)
           cutoff <- cutoff[vlscsum > contour/100][1]
-          s[s < cutoff] <- 0
-          mxx <- terra::global(s, sum)[1,1]
-          s <- terra::app(s, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1 
+          s <- reclassify(s, rcl=matrix(c(-1,cutoff,0),2,3, byrow=T))
+          s <- s/sum(values(s))   #verify that they add up to 1
         }  # end of work if there are multiple layers in s
 
         # write out file. Will be named by first merge underscore second merge.
-        terra::writeRaster(s, filename = paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i],"/", opts.order[[1]][i], "_", opt2.unique[e], ".tif"),
-                    filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+        writeRaster(s, filename = paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i],"/", opts.order[[1]][i], "_", opt2.unique[e], ".tif"),
+                    format = "GTiff", overwrite = TRUE, datatype='FLT4S')
 
       }  # end of loop over opt2
       rm(s)
       gc()
 
       # bring in opt2 layers to merge
-      opt2.stack <- terra::rast(list.files(paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i]), ".tif$", full.names = TRUE))  # bring them back in to do mean value. Maybe do need upper level for year so these can go in there!
-      if(terra::nlyr(opt2.stack)>1){
-        opt2.stack <- mean(opt2.stack)  # sum up values
-        
+      opt2.stack <- stack(list.files(paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i]), ".tif$", full.names = TRUE))  # bring them back in to do mean value. Maybe do need upper level for year so these can go in there!
+      if(nlayers(opt2.stack)>1){
+        opt2.stack <- sum(opt2.stack)  # sum up values
+        opt2.stack <- opt2.stack/sum(values(opt2.stack))
         # remove cutoff, and restandardize to sum to equal 1
-        cutoff <- sort(terra::values(opt2.stack, mat=FALSE), decreasing=TRUE)
+        cutoff <- sort(values(opt2.stack), decreasing=TRUE)
         vlscsum <- cumsum(cutoff)
         cutoff <- cutoff[vlscsum > contour/100][1]
-        opt2.stack[opt2.stack < cutoff] <- 0
-        # opt2.stack <- terra::classify(opt2.stack, rcl=matrix(c(-1,cutoff,0),ncol=3, byrow=T))
-        mxx <- terra::global(opt2.stack, sum)[1,1]
-        opt2.stack <- terra::app(opt2.stack, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1 
+        opt2.stack <- reclassify(opt2.stack, rcl=matrix(c(-1,cutoff,0),2,3, byrow=T))
+        opt2.stack <- opt2.stack/sum(values(opt2.stack))   #verify that they add up to 1
       }  # end of work if there are multiple layers in opt2.stack
 
-      terra::writeRaster(opt2.stack, filename = paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i], ".tif"),
-                  filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+      writeRaster(opt2.stack, filename = paste0(out.fldr, "/", names(opts.order)[1], "/", opts.order[[1]][i], ".tif"),
+                  format = "GTiff", overwrite = TRUE, datatype='FLT4S')
 
     } # end of loop over opt1
     rm(opt2.stack)
     gc()
 
     # Create final population UD
-    Pop.UD <- terra::rast(list.files(paste0(out.fldr, "/", names(opts.order)[1]), ".tif$", full.names = TRUE))  # bring them back in to do mean value. Maybe do need upper level for year so these can go in there!
-    if(terra::nlyr(Pop.UD)>1){
-      Pop.UD <- mean(Pop.UD)  # sum up values
+    Pop.UD <- stack(list.files(paste0(out.fldr, "/", names(opts.order)[1]), ".tif$", full.names = TRUE))  # bring them back in to do mean value. Maybe do need upper level for year so these can go in there!
+    if(nlayers(Pop.UD)>1){
+      Pop.UD <- sum(Pop.UD)  # sum up values
+      Pop.UD <- Pop.UD/sum(values(Pop.UD))
       # remove cutoff, and restandardize to sum to equal 1
-      cutoff <- sort(terra::values(Pop.UD, mat=FALSE), decreasing=TRUE)
+      cutoff <- sort(values(Pop.UD), decreasing=TRUE)
       vlscsum <- cumsum(cutoff)
       cutoff <- cutoff[vlscsum > contour/100][1]
-      Pop.UD[Pop.UD < cutoff] <- 0
-      # Pop.UD <- terra::classify(Pop.UD, rcl=matrix(c(-1,cutoff,0),ncol=3, byrow=T))
-      mxx <- terra::global(Pop.UD, sum)[1,1]
-      Pop.UD <- terra::app(Pop.UD, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1 
+      Pop.UD <- reclassify(Pop.UD, rcl=matrix(c(-1,cutoff,0),2,3, byrow=T))
+      Pop.UD <- Pop.UD/sum(values(Pop.UD))   #verify that they add up to 1
     }  # end of work if there are multiple layers in opt1.stack
 
-    terra::writeRaster(Pop.UD, filename = paste0(out.fldr, "/Pop_UD.tif"),
-                filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+    writeRaster(Pop.UD, filename = paste0(out.fldr, "/Pop_UD.tif"),
+                format = "GTiff", overwrite = TRUE, datatype='FLT4S')
 
   } # end of section with 2 levels for merging
 
@@ -278,48 +277,42 @@ CalcPopUse <- function(
   # Final Contours ####
   # ------------------#
 
-  popUDVol <- terra::rast(paste0(out.fldr, "/Pop_UD.tif"))
-  
-  # make it like the old getvolumeUD (where high values are lowest and low values are highest UD)
-  vals <- terra::values(popUDVol)
-  rnk <- (1:length(vals))[rank(vals)]
-  terra::values(popUDVol) <- 
-  popUDVol[] <- 1 - cumsum(sort(vals))[rnk]  
-  
+  popUDVol <- raster(paste0(out.fldr, "/Pop_UD.tif"))
+  #identify the contour
+  popUDVol <- getVolumeUD(as(popUDVol, Class = "DBBMM"))
+
   #identify the contour
   contour.levels2 <- c(0, contour.levels)  # add the 0 to make the cuts correct
 
   # This denotes whether we want contours based on area or volume
   if(contour.type == "Area"){
-    breakValues <- terra::quantile(popUDVol[popUDVol != 1], probs = contour.levels2/100)
+    breakValues <- raster::quantile(popUDVol[popUDVol != 1], probs = contour.levels2/100)
     # compute the contours
-    rcl <- matrix(c(breakValues[1:(length(breakValues)-1)],
-                    breakValues[2:length(breakValues)],
-                    contour.levels), ncol=3, byrow=FALSE)
-    
-    classifiedRaster = terra::classify(popUDVol, rcl, others=NA)
+    classifiedRaster = raster::cut(popUDVol, breaks=breakValues)
   }else{  # if contour.type == "Volume"
     # compute the contours
-    rcl <- matrix(c(contour.levels2[1:(length(contour.levels2)-1)]/100,
-                    contour.levels2[2:length(contour.levels2)]/100,
-                    contour.levels), ncol=3, byrow=FALSE)
-    classifiedRaster = terra::classify(popUDVol, rcl, others=NA)
+    classifiedRaster = raster::cut(popUDVol, breaks=contour.levels2/100)
   }
 
   # extract the contours as polygons
-  classifiedPoly <- terra::as.polygons(classifiedRaster,dissolve=T)
-  classifiedPoly <- sf::st_as_sf(classifiedPoly)
+  classifiedPoly <- rasterToPolygons(classifiedRaster,dissolve=T)
+  classifiedPoly <- as(classifiedPoly, "sf")
 
-  # rename the column
-  classifiedPoly$contour <- classifiedPoly$lyr.1  
-  classifiedPoly$lyr.1 <- NULL
+  # add proper labels
+  classifiedPoly <- classifiedPoly[order(classifiedPoly$layer),]
+  contour.levels2 <- contour.levels2[2:length(contour.levels2)]  # reomve the 0
+  classifiedPoly$contour <- contour.levels2[classifiedPoly$layer]  # put only the names of the layers that were identified
+  classifiedPoly$layer <- NULL
+
+  # plot(classifiedPoly, color=classifiedPoly)
+  # mapview(classifiedPoly, zcol="contour")
 
   # aggregate the different corridor levels
   # make it so the top level includes the ones below it!
   codes <- sort(unique(classifiedPoly$contour))
   classifiedPoly <- do.call(rbind, lapply(codes, function(i){
 
-    tmp <- sf::st_union(classifiedPoly[classifiedPoly$contour <= i,])
+    tmp <- st_union(classifiedPoly[classifiedPoly$contour <= i,])
 
     # this removes polygon segments smaller than a specific threshold
     tmp <- drop_crumbs(tmp, threshold = min_area_drop)

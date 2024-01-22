@@ -34,10 +34,10 @@ CalcKernel <- function(
 ){
 
   #manage packages
-  if(all(c("sf","terra","adehabitatHR","R.utils","dplyr") %in% installed.packages()[,1])==FALSE)
-    stop("You must install the following packages: sf, terra, adehabitatHR, R.utils, dplyr")
+  if(all(c("sf","raster","adehabitatHR","R.utils","dplyr") %in% installed.packages()[,1])==FALSE)
+    stop("You must install the following packages: sf, raster, adehabitatHR, R.utils, dplyr")
   require(sf)
-  require(terra)
+  require(raster)
   require(adehabitatHR)
   require(R.utils)
   require(dplyr)
@@ -46,13 +46,13 @@ CalcKernel <- function(
     stop("seq.sf must be a sf data frame from package sf!")
 
   # load up the population grid
-  grd <- terra::rast(Pop.grd)
+  grd <- raster(Pop.grd)
 
   # ensure data are in same projection as grid
-  seq.sf <- sf::st_transform(seq.sf, crs=sf::st_crs(grd))
+  seq.sf <- st_transform(seq.sf, crs=projection(grd))
 
   # work on date
-  seq.sf$date1234 <- sf::st_drop_geometry(seq.sf)[,date.name]  # make new column for date
+  seq.sf$date1234 <- st_drop_geometry(seq.sf)[,date.name]  # make new column for date
   if("POSIXct" %in% class(seq.sf$date1234) == FALSE)
     stop("Your date.name column should be POSIXct!")
   if(any(is.na(seq.sf$date1234)))
@@ -63,7 +63,6 @@ CalcKernel <- function(
     seq.sf$year <- as.numeric(strftime(seq.sf$date1234, format = "%Y", tz = attr(seq.sf$date1234,"tzone")))
     seq.sf$jul <- as.numeric(strftime(seq.sf$date1234, format = "%j", tz = attr(seq.sf$date1234,"tzone")))
     seq.sf$yr_jul <- paste(seq.sf$year, seq.sf$jul, sep="_")
-    
     # subsample the data using slice in dplyr
     seq.sf <- seq.sf %>%
       group_by(yr_jul) %>%
@@ -78,14 +77,14 @@ CalcKernel <- function(
 
 
   #prepare only the cells to run kernel over
-  ext2 <- terra::ext(seq.sf)
+  ext2 <- raster::extent(seq.sf)
   multiplyers <- c((ext2[2]-ext2[1])*mult4buff, (ext2[4]-ext2[3])*mult4buff)   # add about mult4buff around the edges of your extent (you can adjust this if necessary)
-  ext2 <- terra::extend(ext2, multiplyers)
-  cels <- terra::cells(grd, ext2)
-  grd2 <- terra::crop(grd, ext2)
-  if(length(cels)!=terra::ncell(grd2))
+  ext2 <- raster::extend(ext2, multiplyers)
+  cels <- cellsFromExtent(grd, ext2)
+  grd2 <- crop(grd, ext2)
+  if(length(cels)!=ncell(grd2))
     stop("There is a problem with cropping down the population grid!")
-  
+
   start.time <- Sys.time()
 
   if(nrow(seq.sf) < 5){
@@ -102,12 +101,12 @@ CalcKernel <- function(
                       errors="Less than 5 points."))
   }
 
-  # this is the function to calculate the regular kern
+  # this is the function to calculate the regular BB
   if(class(smooth.param)=="NULL"){
     kern <- R.utils::withTimeout({
       try(kernelUD(as(seq.sf$geometry,"Spatial"),
                    h="href",
-                   grid=as(raster::raster(grd2), "SpatialPixels"),
+                   grid=as(grd2, "SpatialPixels"),
                    kern="bivnorm"),
           silent=TRUE)
     }, envir=environment(), timeout = max.timeout, onTimeout = "warning")
@@ -117,7 +116,7 @@ CalcKernel <- function(
     kern <- R.utils::withTimeout({
       try(kernelUD(as(seq.sf$geometry,"Spatial"),
                    h=smooth.param,
-                   grid=as(raster::raster(grd2), "SpatialPixels"),
+                   grid=as(grd2, "SpatialPixels"),
                    kern="bivnorm"),
           silent=TRUE)
     }, envir=environment(), timeout = max.timeout, onTimeout = "warning")
@@ -144,39 +143,32 @@ CalcKernel <- function(
   h <- kern@h$h  # pull out the h smooth factor
 
   #set to 0 any values that are outside of the < 0.9999 contour
-  kern <- terra::rast(raster::raster(kern)) # bring back into a spatrast object
-  
-  #set to 0 any values that are outside of the < 0.9999 contour
-  mxx <- terra::global(kern, "sum")[1,1]
-  kern <- terra::app(kern, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1
-  
-  cutoff <- sort(terra::values(kern, mat=FALSE), decreasing=TRUE)
+  kern <- values(raster(kern))  # turn the estUD object to a raster
+  kern <- kern/sum(kern)  #rescale probabilities so they sum to equal 1
+  cutoff <- sort(kern, decreasing=TRUE)
   vlscsum <- cumsum(cutoff)
   cutoff <- cutoff[vlscsum > .9999][1]
   kern[kern < cutoff] <- 0
-  
-  mxx <- terra::global(kern, "sum")[1,1]
-  kern <- terra::app(kern, function(xxy){xxy/mxx}) #rescale probabilities so they sum to equal 1  
-  
+  kern <- kern/sum(kern)  #rescale probabilities so they sum to equal 1
+
   # write to raster
-  grd[cels] <- terra::values(kern, mat=FALSE)
-  terra::writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
-              filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
-  
+  grd[cels] <- kern
+  writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
+              format = "GTiff", overwrite = TRUE, datatype='FLT4S')
+
   #output the footprint based on contour
-  grd <- terra::rast(paste0(UD.fldr,"/",seq.name,".tif"))
-  cutoff <- sort(terra::values(grd, mat=FALSE), decreasing=TRUE)
+  cutoff <- sort(kern, decreasing=TRUE)
   vlscsum <- cumsum(cutoff)
-  cutoff <- cutoff[vlscsum > contour/100][1]
-  grd <- terra::classify(grd, rcl=matrix(c(-Inf,cutoff,0,
-                                           cutoff, Inf, 1),ncol=3, byrow=TRUE))
-  terra::writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
-                     filetype = "GTiff", overwrite = TRUE, datatype='INT1U')
+  cutoff <- cutoff[vlscsum > (contour/100)][1]
+  kern <- ifelse(kern < cutoff, 0, 1)
+  grd[cels] <- kern
+  writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
+              format = "GTiff", overwrite = TRUE, datatype='INT1U')
 
   toreturn <- data.frame(seq.name=seq.name,
                          kernel.smooth.param=h,
-                         grid.size=terra::ncell(kern),
-                         grid.cell.size=terra::res(grd)[1],
+                         grid.size=length(kern),
+                         grid.cell.size=res(grd)[1],
                          date.created=Sys.time(),
                          execution_time=paste(round(difftime(Sys.time(), start.time, units="min"),2)," minutes",sep=""),
                          num.locs=nrow(seq.sf),
