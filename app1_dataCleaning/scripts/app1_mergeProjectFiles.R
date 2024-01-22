@@ -127,8 +127,6 @@ projectShapefilesHandler<-function(){
   importedDatasetMaster <<- st_transform(importedDatasetMaster, crs = UTMcrs)
 
   progressIndicator('adding x y columns','start')
-  # importedDatasetMaster@data$x<<-importedDatasetMaster@coords[,1]
-  # importedDatasetMaster@data$y<<-importedDatasetMaster@coords[,2]
   coords<-st_coordinates(importedDatasetMaster)
   importedDatasetMaster$x<<-coords[,1]
   importedDatasetMaster$y<<-coords[,2]  
@@ -141,7 +139,7 @@ projectShapefilesHandler<-function(){
   
 
 
-  # importedDatasetMaster@data$rowIds<<-row.names(importedDatasetMaster@data)
+  
   rowIds<-c(1:nrow(importedDatasetMaster))
   importedDatasetMaster$rowIds<<-rowIds
 
@@ -155,8 +153,7 @@ projectShapefilesHandler<-function(){
       "DATASET IMPORT ERROR",'There was a fatal error while importing your dataset(s). Sometimes this occurs because of null values from imported points. Double check your dataset validity and try again.'
     )
     return()
-  } else{
-    # saveWorkingFile();
+  } else{    
     showDateTimeSelectionPanel()
   }
 }

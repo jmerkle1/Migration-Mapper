@@ -18,8 +18,7 @@ showDateTimeSelectionPanel<-function(){
       processDates();
       })
 
-  ##------------------ show the first 20 rows of data
-  # rowsToShow<-importedDatasetMaster@data[1:20,]
+  ##------------------ show the first 20 rows of data  
   rowsToShow<-st_drop_geometry(importedDatasetMaster[1:20,])
   if('timestamp'%in%names(rowsToShow)){
     rowsToShow$timestamp<-as.character(rowsToShow$timestamp)
@@ -69,8 +68,6 @@ processDates<-function(){
 
 
   ##------------------ show the first 20 rows of data
-  # rowsToShow<-importedDatasetMaster@data[1:20,]
-  # rowsToShow<-importedDatasetMaster[1:20,]
   rowsToShow<-st_drop_geometry(importedDatasetMaster[1:20,])
   if('timestamp'%in%names(rowsToShow)){
     rowsToShow$timestamp<-as.character(rowsToShow$timestamp)
@@ -400,15 +397,8 @@ processDates<-function(){
       stringFormat<-"%Y-%m-%d %I:%M:%S %p"
     }
 
-    ttt<<-importedDatasetMaster
-    sss<<-newDateTime
-    # importedDatasetMaster<-ttt
-    # 
-
-
     importedDatasetMaster$dateTest<<-newDateTime
-
-    # importedDatasetMaster@data$newMasterDate<<-tryCatch({
+    
     importedDatasetMaster$newMasterDate<<-tryCatch({
       as.POSIXct(strptime(
         newDateTime,
@@ -425,11 +415,10 @@ processDates<-function(){
       }
     )
 
-    # naDatesLength<<-nrow(importedDatasetMaster@data[is.na(as.Date(importedDatasetMaster@data$newMasterDate)),])
+    
     naDatesLength<<-nrow(importedDatasetMaster[is.na(as.Date(importedDatasetMaster$newMasterDate)),])
     configOptions$naDates<<-NULL
-    configOptions$naDatesLength<<-naDatesLength
-    # if(naDatesLength==nrow(importedDatasetMaster@data)){
+    configOptions$naDatesLength<<-naDatesLength    
     if(naDatesLength==nrow(importedDatasetMaster)){
       modalMessager('ERROR','Your selection of date elements failed.
       Check your selection of date/time elements and try again')
@@ -438,13 +427,9 @@ processDates<-function(){
       return()
     }
     ### if NA dates are produced
-    # importedDatasetMaster$naDates<<-0
     if(naDatesLength>0){
-        # naDatesObservations<-importedDatasetMaster@data[is.na(as.Date(importedDatasetMaster@data$newMasterDate)),]
         naDatesObservations<-importedDatasetMaster[is.na(as.Date(importedDatasetMaster$newMasterDate)),]
-        modalMessager('Warning',paste0('You had ',naDatesLength,' NA dates in your dataset. These have been saved to your working directory as naDates.csv if you would like to review them.'))
-        # write.csv(naDatesObservations,paste0(masterWorkingDirectory,'\\naDates.csv'))
-        # importedDatasetMaster<<-importedDatasetMaster[!is.na(as.Date(importedDatasetMaster@data$newMasterDate)),]
+        modalMessager('Warning',paste0('You had ',naDatesLength,' NA dates in your dataset. These have been saved to your working directory as naDates.csv if you would like to review them.'))        
         importedDatasetMaster<<-importedDatasetMaster[!is.na(as.Date(importedDatasetMaster$newMasterDate)),]
         progressIndicator('Done importing dates','stop')
         createUniqueIdsHanlder()
