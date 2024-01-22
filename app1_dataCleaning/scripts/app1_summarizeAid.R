@@ -62,10 +62,4 @@ updateSummaryStats<-function(){
         HTML('<span>MCP 100% - Area: ',round(mcp100,digits=1),' km2</span><br><span>MCP 99% - Area: ',round(mcp99,digits=1),' km2</span><br><span>MCP 95% - Area: ',round(mcp95,digits=1),' km2</span>')
       })
     }
-
-
-
-  
-  
-
 }
