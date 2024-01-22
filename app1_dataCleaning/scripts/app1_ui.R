@@ -1,5 +1,4 @@
 app1_init<-function(input,output,session){
-
   input<<-input
   output<<-output
   session<<-session
@@ -202,8 +201,7 @@ exportShapefile=function(){
       time<-gsub(":", "", time, fixed = TRUE)
       fileExportName<<-paste0(fileExportName,'_',time)
     }
-
-    # selectedTimezone<<-input$timezoneSelector
+    
     tryCatch({
       if('originalProjection' %in% names(configOptions)){
         dataToExport<-spTransform(importedDatasetMaster, CRS(configOptions$originalProjection))

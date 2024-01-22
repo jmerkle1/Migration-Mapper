@@ -12,25 +12,18 @@ source("scripts/app1_calculateMovementParams.R",local=TRUE)
 source("scripts/app1_mapImportedData.R",local=TRUE)
 source("scripts/app1_summarizeAid.R",local=TRUE)
 
-
 source("../globalScripts/globalUiFunctions.R",local=TRUE)
 source("../globalScripts/sqlLiteQueries.R",local=TRUE)
 
-# source("scripts/creat.burst.R",local=TRUE)
-# source("scripts/find.problem.pts.R",local=TRUE)
-# source("scripts/mov.param.R",local=TRUE)
-# source("scripts/mort.check.R",local=TRUE)
 source("wmiScripts/CalcBurst.R",local=TRUE)
 source("wmiScripts/FindProblemPts.R",local=TRUE)
 source("wmiScripts/CalcMovParams.R",local=TRUE)
 source("wmiScripts/Check4Morts.R",local=TRUE)
 
 
-# dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","sp","ggplot2","mapboxer","rgdal","adehabitatHR",'RSQLite','move','shinycssloaders','raster','terra','tcltk')
+
 dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk')
 loadDependencies(dependencies)
-# only need rbindlist from data.table.. other functions cause errors with time conversions
-# library(data.table, include.only = c("rbindlist"))
 
 # lubridate can cause issues when loaded in app2 if the R session is not terminated before reloading app1
 if("lubridate" %in% (.packages())){
@@ -40,8 +33,7 @@ if("lubridate" %in% (.packages())){
 Sys.setenv(MAPBOX_API_TOKEN = "pk.eyJ1Ijoid21pLW1lcmtsZSIsImEiOiJja3RrYmluMnMxazRlMm9xbnN3bXluYjQzIn0.wOmx_vSC944YRdF8LSjZRQ")
 
 ui <- fluidPage(
-  tags$head(tags$style("body{ overflow-x:hidden}")),
-  # HTML(id="underSurface","<div id='underSurface' style='width:100%; height:100%; background-color:rgba(255, 255, 255,0); color:rgba(255, 255, 255,0); position:absolute; top:0px; left:0px; z-index:1000;'></div>"),
+  tags$head(tags$style("body{ overflow-x:hidden}")),  
   uiOutput("loading"),
   HTML("<div id='loadingScreen' style='width:100%; display:none; height:200%; background-color:rgba(0, 0, 0,0.5); color:white; position:absolute; top:0px; left:0px; z-index:5000;'>
   <div id='loadingMessage' style='position:absolute; top:10%; text-align:center; font-size:15px; color:white; width:100%;'></div>
