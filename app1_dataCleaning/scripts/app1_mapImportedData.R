@@ -490,7 +490,11 @@ addPointsToMap<-function(){
     if(allPoints==FALSE){
       pointsForMap <<- pointsForMap[!duplicated(pointsForMap$idDate),]
     }    
+    templat<-pointsForMap$lat
+    templon<-pointsForMap$lon
     pointsForMap<<-st_as_sf(pointsForMap,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    pointsForMap$lat<<-templat
+    pointsForMap$lon<<-templon
     thisBbox<-st_bbox(pointsForMap)
     print(thisBbox)
     if(!exists('emptyLine')){

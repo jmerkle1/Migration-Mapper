@@ -1,11 +1,10 @@
 calcFirstPassage<-function(){
   loadingScreenToggle('show','Calculating First Passage Times')
   progressIndicator('Calculating First Passage Times','start')
-  # ids <- unique(importedDatasetMaster@data$newUid)
+  
   ids <- unique(importedDatasetMaster$newUid)
   # need to use the loop because as.ltraj is a memory hog.
-  fpt.dat <- do.call(rbind, lapply(1:length(ids), function(i){
-    # sub <- importedDatasetMaster@data[importedDatasetMaster@data$newUid == ids[i], c("newUid","newMasterDate","x","y")]  # subset data
+  fpt.dat <- do.call(rbind, lapply(1:length(ids), function(i){    
     sub <- importedDatasetMaster[importedDatasetMaster$newUid == ids[i], c("newUid","newMasterDate","x","y")]  # subset data
     # turn into ltraj object
     sub <- adehabitatLT::as.ltraj(sub[,c("x", "y")],
@@ -14,21 +13,18 @@ calcFirstPassage<-function(){
     fptsub <- adehabitatLT::fpt(sub, c(50, 150, 300), "hours")[[1]]
     return(data.frame(FPT50=fptsub$r1, FPT150=fptsub$r2, FPT300=fptsub$r3))
   }))
-
-  # importedDatasetMaster@data[,c('FPT50','FPT150','FPT300')]<<-NULL
-  importedDatasetMaster[,c('FPT50','FPT150','FPT300')]<<-NULL
-
-  # importedDatasetMaster@data <<- cbind(importedDatasetMaster@data, fpt.dat)
+  
+  importedDatasetMaster[,c('FPT50','FPT150','FPT300')]<<-NULL  
   importedDatasetMaster <<- cbind(importedDatasetMaster, fpt.dat)
   progressIndicator('Calculating First Passage Times','stop')
 
-  # rowsWithLongFixes<-which(importedDatasetMaster@data$fixRateHours>24)
+  
   rowsWithLongFixes<-which(importedDatasetMaster$fixRateHours>24)
   if(length(rowsWithLongFixes)>0){
     fptsToNa <- lapply(rowsWithLongFixes, function(x) (x-1):(x+1))
     fptsToNa<-unlist(fptsToNa)
     fptsToNa<-fptsToNa[!duplicated(fptsToNa)]
-    # importedDatasetMaster@data[fptsToNa,c('FPT50','FPT150','FPT300')]<<-NA
+  
     importedDatasetMaster[fptsToNa,c('FPT50','FPT150','FPT300')]<<-NA
   }
   loadingScreenToggle('hide','Calculating First Passage Times')
@@ -40,8 +36,7 @@ calcBioYearParams<-function(){
   loadingScreenToggle('show','Calculating Bio Year Params')
   progressIndicator('Calculating Bio Year Params','start')
 
-  # uniqueYears<-unique(format(as.Date(importedDatasetMaster@data[,"newMasterDate"]),"%y"))
-  # uniqueYearsFull<-unique(format(as.Date(importedDatasetMaster@data[,"newMasterDate"]),"%Y"))
+  
   uniqueYears<-unique(format(as.Date(importedDatasetMaster[,"newMasterDate"]),"%y"))
   uniqueYearsFull<-unique(format(as.Date(importedDatasetMaster[,"newMasterDate"]),"%Y"))
 
@@ -78,15 +73,7 @@ calcBioYearParams<-function(){
     thisYearEndDate<-as.Date(paste(nextYear,thisYearEndMonth,thisYearEndDay,sep="-"),"%Y-%m-%d")
 
 
-    # importedDatasetMaster@data[
-    #   as.Date(importedDatasetMaster@data$newMasterDate)>=thisYearStartDate &
-    #   as.Date(importedDatasetMaster@data$newMasterDate)<=thisYearEndDate,"bioYear"
-    # ]<<-thisYearShort
-
-    # importedDatasetMaster@data[
-    #   as.Date(importedDatasetMaster@data$newMasterDate)>=thisYearStartDate &
-    #   as.Date(importedDatasetMaster@data$newMasterDate)<=thisYearEndDate,"bioYearFull"
-    # ]<<-thisYear
+    
 
     importedDatasetMaster[
       as.Date(importedDatasetMaster$newMasterDate)>=thisYearStartDate &
@@ -101,7 +88,7 @@ calcBioYearParams<-function(){
   }
 
   # FOR THOSE SEQUENCES AT THE START OF AN ANIMAL BEFORE BIO START DATE.... WHAT TO DO? DROPPING FOR NOW
-  # importedDatasetMaster@data$id_bioYear <<- paste(importedDatasetMaster@data$newUid, importedDatasetMaster@data$bioYear, sep="_")
+  
   importedDatasetMaster$id_bioYear <<- paste(importedDatasetMaster$newUid, importedDatasetMaster$bioYear, sep="_")
   progressIndicator('Calculating Bio Year Params','stop')
   loadingScreenToggle('hide','Calculating Bio Year Params')
@@ -113,7 +100,7 @@ buildMigtime<-function(){
   loadingScreenToggle('show','Building Migtime Table and calculating NSD')
   progressIndicator('Building Migtime Table and calculating NSD','start')
 
-  # migtime <<- importedDatasetMaster@data[duplicated(importedDatasetMaster@data$id_bioYear)==FALSE,c("id_bioYear","newUid","bioYear","bioYearFull")]
+  
   migtime <<- importedDatasetMaster[duplicated(importedDatasetMaster$id_bioYear)==FALSE,c("id_bioYear","newUid","bioYear","bioYearFull")]
   migtime <<- migtime[!is.na(migtime$bioYear),]
 
@@ -144,8 +131,7 @@ buildMigtime<-function(){
   migtime$mig8end <<- as.Date(tempEndDate)
   migtime$notes <<- '' 
 
-  # importedDatasetMaster@data$nsdBio<<-0
-  # importedDatasetMaster@data$displacementBio<<-0
+  
   importedDatasetMaster$nsdBio<<-0
   importedDatasetMaster$displacementBio<<-0
 
@@ -154,26 +140,14 @@ buildMigtime<-function(){
     print(i)
     print(thisIdYr)
     
-    # temp<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==thisIdYr,]
+    
     temp<-importedDatasetMaster[importedDatasetMaster$id_bioYear==thisIdYr,]
     temp<-temp[which(temp$problem != 1),]
     temp<-temp[which(temp$mortality != 1),]
     # if there are no rows for this individual/id, then it should not have a row in migtime table
     if(nrow(temp)==0){
       print('no nsd!!!')      
-    }else{
-
-      # whichPoints<-which(importedDatasetMaster@data$id_bioYear==thisIdYr &
-      #   importedDatasetMaster@data$problem != 1 &
-      #   importedDatasetMaster@data$mortality != 1)
-      
-      # thesePoints<-importedDatasetMaster@data[whichPoints,c('x','y')]
-      
-      # importedDatasetMaster@data[whichPoints,"nsdBio"]<<-
-      #   (sqrt((mean(thesePoints$x[1:20])-thesePoints$x)^2 + (mean(thesePoints$y[1:20])-thesePoints$y)^2)^2)/1000000
-
-      # importedDatasetMaster@data[whichPoints,"displacementBio"]<<-
-      #   (sqrt((mean(thesePoints$x[1:20])-thesePoints$x)^2 + (mean(thesePoints$y[1:20])-thesePoints$y)^2))/1000
+    }else{    
       whichPoints<-which(importedDatasetMaster$id_bioYear==thisIdYr &
         importedDatasetMaster$problem != 1 &
         importedDatasetMaster$mortality != 1)
@@ -191,8 +165,7 @@ buildMigtime<-function(){
 
 
   for(i in 1:nrow(migtime)){
-    thisIdYr<-migtime$id_bioYear[i]
-    # temp<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear==thisIdYr,]
+    thisIdYr<-migtime$id_bioYear[i]    
     temp<-importedDatasetMaster[importedDatasetMaster$id_bioYear==thisIdYr,]
     temp<-temp[which(temp$problem != 1),]
     temp<-temp[which(temp$mortality != 1),]

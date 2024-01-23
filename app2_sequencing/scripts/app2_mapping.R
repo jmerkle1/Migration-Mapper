@@ -1,9 +1,6 @@
 hasMapRendered<<-FALSE
 
 mapInit<-function(){
-
-  # dataSetExtent<-importedDatasetMaster@bbox
-
   if(!hasMapRendered){
     output$sequencesMap <- renderMapboxer({
     mapboxer(center = c(importedDatasetMaster[1,'lon'],importedDatasetMaster[1,'lat']), style = 'mapbox://styles/wmi-merkle/ckxqg5r429gpr14sd3o6dlno4' ,zoom = 6) %>%
@@ -13,13 +10,6 @@ mapInit<-function(){
       print(input$sequencesMap_onclick)
     },ignoreInit=TRUE)
   }
-
-
-
-
-
-
-
 
   updateSelectMenus();
   adjustSequences()
@@ -48,16 +38,11 @@ mapCurrentIndividual<-function(){
     thereAreNoPointsToMap<<-FALSE
   }
 
-  # pointsForMap<<-spTransform(pointsForMap,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0', SRS_string='EPSG:4326'))
+  
   pointsForMap<<-st_as_sf(pointsForMap,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
 
   linesData<<-Points2Lines(pointsForMap)
 
-
-
-  # linesData<<-pointsToLines(pointsForMap)
-  # linesData<<-st_as_sf(linesData)
-  # thisBbox<-pointsForMap@bbox
 
   thisBbox<-st_bbox(pointsForMap)
   theseBounds<-c(thisBbox$xmin-0.01, thisBbox$ymin-0.01,thisBbox$xmax+0.01, thisBbox$ymax+0.01)
@@ -168,9 +153,6 @@ updateMapSequencePoints<-function(){
     seq8min<-thisRow$mig8start
     seq8max<-thisRow$mig8end
 
-
-
-    # sequencePoints<-pointsForMap@data
     sequencePoints<-pointsForMap
 
     sequencePoints$alpha<-0

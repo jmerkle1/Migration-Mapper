@@ -72,8 +72,8 @@ observeEvent(input$movebankLoginButton,{
 
   observeEvent(input$loadProjectButton,{
       tryCatch({
-        # rdsLocation <- choose.dir(caption = "select your project folder and press OK")
-        rdsLocation<<-tk_choose.dir(caption = "select your project folder and press OK")
+        rdsLocation <- choose.dir(caption = "select your project folder and press OK")
+        # rdsLocation<<-tk_choose.dir(caption = "select your project folder and press OK")
         appOneReload(rdsLocation)
       }, error = function(ex) {
         modalMessager('Error',paste0('Try choosing a file again'))

@@ -59,11 +59,17 @@ movementParamsProcessing<-function(){
     progressIndicator('calculating movement parameters','start')    
     tempx<-importedDatasetMaster$x
     tempy<-importedDatasetMaster$y
+    templat<-importedDatasetMaster$lat
+    templon<-importedDatasetMaster$lon
     importedDatasetMaster<<-CalcMovParams(st_as_sf(importedDatasetMaster,coords = c("x", "y"), crs = configOptions$masterCrs),'newUid','newMasterDate')    
     # needed this for graphing
     importedDatasetMaster$fixRateHours<<-importedDatasetMaster$dt/3600
     importedDatasetMaster$x<<-tempx
     importedDatasetMaster$y<<-tempy
+    importedDatasetMaster$lat<<-templat
+    importedDatasetMaster$lon<<-templon
+
+    print(names(importedDatasetMaster))
     
     progressIndicator('calculating movement parameters','stop')
 
@@ -78,10 +84,11 @@ findProblemPoints<-function(){
   progressIndicator('finding problem points','start')
   importedDatasetMaster$problem<<-0
 
-  probPoints<-FindProblemPts(importedDatasetMaster,date_name='newMasterDate',id_name='newUid',speedlim=configOptions$maxSpeedParameter)
+  probPoints<-FindProblemPts(st_as_sf(importedDatasetMaster,coords = c("x", "y"), crs = configOptions$masterCrs),date_name='newMasterDate',id_name='newUid',speedlim=configOptions$maxSpeedParameter)
   if(any(probPoints)){
     importedDatasetMaster[probPoints,'problem']<<-1
   }  
+  print(names(importedDatasetMaster))
   progressIndicator('finding problem points','stop')
 
   

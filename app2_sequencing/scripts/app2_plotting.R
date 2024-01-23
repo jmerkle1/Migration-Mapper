@@ -16,8 +16,7 @@ plotInit<-function(){
 
   dataForPlots<<-reactive({
 
-    tempIndex<-input$currentIndividualSelector
-    # tempDat<-importedDatasetMaster@data[importedDatasetMaster@data$id_bioYear == tempIndex,c('newMasterDate','newUid')]
+    tempIndex<-input$currentIndividualSelector    
     tempDat<-importedDatasetMaster[importedDatasetMaster$id_bioYear == tempIndex,c('newMasterDate','newUid')]
     tempUid<<-tempDat[1,'newUid']
     minDate<<-min(tempDat[,'newMasterDate'])
@@ -26,13 +25,6 @@ plotInit<-function(){
     sixMonthMin<-as.Date(minDate)-182
     sixMonthMax<-as.Date(maxDate)+182
 
-
-    # plotData<-importedDatasetMaster@data[
-    #   importedDatasetMaster@data$id_bioYear == tempIndex & 
-    #   importedDatasetMaster@data$problem != 1 &
-    #   importedDatasetMaster@data$mortality != 1,
-    #   c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
-    # ]
     plotData<-importedDatasetMaster[
       importedDatasetMaster$id_bioYear == tempIndex & 
       importedDatasetMaster$problem != 1 &
@@ -40,14 +32,6 @@ plotInit<-function(){
       c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
     ]
 
-    # plotDataSixMonth<-importedDatasetMaster@data[
-    #   which(importedDatasetMaster@data$newUid == tempUid & 
-    #   as.Date(importedDatasetMaster@data$newMasterDate)>=sixMonthMin & 
-    #   as.Date(importedDatasetMaster@data$newMasterDate)<=sixMonthMax) &
-    #   importedDatasetMaster@data$problem != 1 &
-    #   importedDatasetMaster@data$mortality != 1,
-    #   c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
-    # ]
     plotDataSixMonth<-importedDatasetMaster[
       which(importedDatasetMaster$newUid == tempUid & 
       as.Date(importedDatasetMaster$newMasterDate)>=sixMonthMin & 
@@ -71,13 +55,7 @@ plotInit<-function(){
 
 
   })
-
-  # dataForSequencePlots<<-reactive({
-  #   trig<-input$nsdTypeSelect
-  #   tempD<-importedDatasetMaster@data[
-  #     importedDatasetMaster@data$id_bioYear == currentIndividual,
-  #     c('newMasterDate','nsdBio','displacementBio','speed','elev')
-  #   ]
+  
   dataForSequencePlots<<-reactive({
     trig<-input$nsdTypeSelect
     tempD<-importedDatasetMaster[
