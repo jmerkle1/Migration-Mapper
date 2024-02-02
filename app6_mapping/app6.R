@@ -32,10 +32,7 @@ ui <- fluidPage(
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
   actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
   actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP"),
-  ),
-  # HTML("<div style='width:100%; height:3rem; padding:4rem; font-size:3rem; margin-bottom:2rem; padding-bottom:6rem; background-color:black; color:white; text-align:center !important;'>Migration Mapper 3.0</div>"),
-  # actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:25px !important;", "Reload Existing Project Folder"),
-  # actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:25px !important;", "X - CLOSE MAPP"),
+  ),  
   fluidRow(
     column(12,
       actionButton('basemapButton',style="margin-top:23px !important;",'Toggle Basemap'),

@@ -101,11 +101,6 @@ addPolygonsToMap<-function(thisFileType,thisFileName){
   thisSourceName<-paste0(thisFileName,'Source')
   thisLayerName<-paste0(thisFileName,'Layer')
 
-  # mapboxer._widget.map.map.getStyle().layers
-  # mapboxer._widget.map.map.setPaintProperty('fall_spring_SSSPPPAAANNN_Footprint_contoursLayer','fill-outline-color','rgb(0, 0, 0)')
-  # mapboxer._widget.map.map.setPaintProperty('fall_spring_SSSPPPAAANNN_Footprint_contoursLayer','fill-color','rgba(255, 255, 255,0.25)')
-
-
 
   mapboxer_proxy("map") %>%
     add_source(as_mapbox_source(thisFile),thisSourceName)%>%
