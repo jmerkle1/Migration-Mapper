@@ -144,9 +144,6 @@ calculatePopFootprint<-function(){
   write.csv(popFootprintParams, file=paste0(footprintsMergedFolder,"/",mergeName,"_popFootprintParams.csv"), row.names = FALSE)
 
 
+  loadingScreenToggle('hide',paste0('calculating population footprints for seasons ',paste(seasonsToMerge)))  
 
-
-
-
-  loadingScreenToggle('hide',paste0('calculating population footprints for seasons ',paste(seasonsToMerge)))
 }

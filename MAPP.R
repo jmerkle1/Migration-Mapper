@@ -35,7 +35,7 @@ ui <- fluidPage(
   useShinyjs(),
   fluidRow(id='importDataRow',
   column(12,
-    HTML("<div style='width:100%; height:3rem; padding:4rem; font-size:3rem; margin-bottom:2rem; padding-bottom:6rem; background-color:black; color:white;'>Welcome to Migration Mapper v3.0!</div>"),
+    HTML("<div style='width:100%; height:3rem; padding:4rem; font-size:3rem; margin-bottom:2rem; padding-bottom:6rem; background-color:black; color:white;'>Welcome to Migration Mapper v3.1!</div>"),
     column(12,
       column(4,
         HTML("<h3>Module 1 - Data Import and Preparation</h3><div style='height:3rem !important;'>Use this module to get started. This module will import your dataset(s), process date information, allow you to explore movement parameters and let you select problem points to drop from analysis.</div>"),

@@ -45,8 +45,8 @@ CalcDBBMM <- function(
   require(move)
   require(R.utils)
   
-  if("sf" %in% class(seq.sf)==FALSE)
-    stop("seq.sf must be a sf data frame from package sf!")
+  # if("sf" %in% class(seq.sf)==FALSE)
+  #   stop("seq.sf must be a sf data frame from package sf!")
   
   # load up the population grid
   grd <- terra::rast(Pop.grd)
