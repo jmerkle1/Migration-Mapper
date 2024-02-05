@@ -3,6 +3,12 @@ app1_init<-function(input,output,session){
   output<<-output
   session<<-session
 
+  observeEvent(input$confirmProjectRebuild,{
+    rebuildOlderProject()
+    # toggleModal(session,'rebuild30modal',toggle='close')
+    removeModal()    
+  },ignoreInit=TRUE)
+
   whichAppIsRunning<<-'app1'
   observeEvent(input$changeAppsButton, {
     changeToOtherApp()

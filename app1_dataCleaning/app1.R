@@ -34,12 +34,19 @@ Sys.setenv(MAPBOX_API_TOKEN = "pk.eyJ1Ijoid21pLW1lcmtsZSIsImEiOiJja3RrYmluMnMxaz
 
 ui <- fluidPage(
   tags$head(tags$style("body{ overflow-x:hidden}")),  
-  uiOutput("loading"),
+  uiOutput("loading"),  
   HTML("<div id='loadingScreen' style='width:100%; display:none; height:200%; background-color:rgba(0, 0, 0,0.5); color:white; position:absolute; top:0px; left:0px; z-index:5000;'>
   <div id='loadingMessage' style='position:absolute; top:10%; text-align:center; font-size:15px; color:white; width:100%;'></div>
   <img src='spinner.gif' style='position:absolute; top:25%; left:45%;'>
   </div>"),
   useShinyjs(),
+
+      bsModal("rebuild30modal", "Rebuild Older Migration Mapper Project", NULL, size = "medium",
+        p('It appears you are trying to load an older Migration Mapper project. To use your project with this version you will need to rebuild your project folder.'),
+        p('To do this, create a new empty project folder and then click the "choose new project folder" button below.'),
+        actionButton("confirmProjectRebuild", "choose new project folder"),
+        tags$head(tags$style("#moreDataModal .modal-footer{ display:none}"))
+      ),
 
       bsModal("movebankModal", "Movebank Project Download", NULL, size = "medium",
             strong('user name'),
@@ -380,21 +387,27 @@ appOneReload <- function(filePath){
     loadingScreenToggle('show','loading existing project file')
     workingFile<<-readRDS(rdsLocation)
     importedDatasetMaster<<-workingFile$importedDatasetMaster
-    workingFile$masterWorkingDirectory<<-filePath
     masterWorkingDirectory<<-filePath
-    loadConfig()
-    dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
-    updateMasterTableFromDatabase()
-    removeModal()
-    # print(!'newMasterDate'%in%names(importedDatasetMaster@data))
-    print(!'newMasterDate'%in%names(importedDatasetMaster))
-    hideElement(id = 'importDataRow', anim = TRUE)
-    showElement(id = 'importedDataMapRow', anim = TRUE)
-    hide('loadProjectButton')
-    showElement('exportDataButton')
-    mapInit()
-    loadingScreenToggle('hide','')
-    saveWorkingFile();
+    if(typeof(importedDatasetMaster)=='S4'){
+        loadingScreenToggle('hide','')
+        toggleModal(session,'rebuild30modal',toggle='open')
+      }else{
+        workingFile$masterWorkingDirectory<<-filePath
+        masterWorkingDirectory<<-filePath
+        loadConfig()
+        dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
+        updateMasterTableFromDatabase()
+        removeModal()
+        # print(!'newMasterDate'%in%names(importedDatasetMaster@data))
+        print(!'newMasterDate'%in%names(importedDatasetMaster))
+        hideElement(id = 'importDataRow', anim = TRUE)
+        showElement(id = 'importedDataMapRow', anim = TRUE)
+        hide('loadProjectButton')
+        showElement('exportDataButton')
+        mapInit()
+        loadingScreenToggle('hide','')
+        saveWorkingFile();
+      }    
   }else{
     modalMessager('Error',paste0('Data file from this session does not exist at ',filePath,'. Please try loading the data file manually using the "Reload Existing Project Folder" button.'))
     sessionCheckLocation<-paste0(dirname(getwd()),'//session.rds')
@@ -408,6 +421,65 @@ loadConfig<-function(){
   updateNumericInput(session, 'maxSpeedSelector', value= configOptions$maxSpeedParameter )
   updateNumericInput(session, 'mortDistance', value= configOptions$mortDistance)
   updateNumericInput(session, 'mortTime', value=configOptions$mortTime)
+}
+
+rebuildOlderProject<-function(){
+  print('rebuild here')
+
+  newProjectFolder <- choose.dir(caption = "select your project folder and press OK")
+  files<-list.files(newProjectFolder)
+  if(length(files)>0){
+    delay(100,
+      modalMessager('error','The folder you chose is not empty.
+      Please empty the folder or choose a different directory and try again.')        
+    )    
+    return()
+  }
+
+  if(file.exists(paste0(masterWorkingDirectory,'//migtime.rds'))){
+    migtime<<-readRDS(paste0(masterWorkingDirectory,'//migtime.rds'))
+    saveMigtime()
+  }
+
+  toggleModal(session,'rebuild30modal',toggle='close')
+  configOptions<<-readRDS(paste0(masterWorkingDirectory,'//configOptions.rds'))
+  importedDatasetMaster<<-data.frame(importedDatasetMaster)  
+  crs4326<-crs(elevation)
+  configOptions$masterCrs4326<<-crs4326
+  midLatLong <- c(importedDatasetMaster[1,]$lat,importedDatasetMaster[1,]$lon)
+  zone <- find_UTM_zone(midLatLong[2], midLatLong[1])
+  UTMcrs <- paste0("+proj=utm +zone=", zone, " +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")  
+  configOptions$masterCrs<<-UTMcrs
+  masterWorkingDirectory<<-newProjectFolder
+
+  
+
+  saveWorkingFile()
+  saveConfig()
+
+  mapInit()
+
+
+
+  # importedDatasetMaster<<-data.frame(importedDatasetMaster)  
+  # configOptions<<-readRDS(paste0(masterWorkingDirectory,'//configOptions.rds'))
+  # configOptions$masterWorkingDirectory<<-masterWorkingDirectory
+
+  if(1==2){
+    workingFile$masterWorkingDirectory<<-filePath
+    masterWorkingDirectory<<-filePath
+    loadConfig()
+    dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
+    updateMasterTableFromDatabase()
+    removeModal()
+    hideElement(id = 'importDataRow', anim = TRUE)
+    showElement(id = 'importedDataMapRow', anim = TRUE)
+    hide('loadProjectButton')
+    showElement('exportDataButton')
+    mapInit()
+    loadingScreenToggle('hide','')
+    saveWorkingFile();
+  }  
 }
 
 

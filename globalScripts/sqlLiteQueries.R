@@ -14,10 +14,7 @@ updateTable<-function(tableName,column,where,value){
 
 
 updateMasterTableFromDatabase<-function(){
-  dbResults<-data.frame(dbGetQuery(dbConnection, "SELECT * FROM importedDatasetMaster"))
-  # importedDatasetMaster@data$comments<<-dbResults$comments
-  # importedDatasetMaster@data$problem<<-dbResults$problem
-  # importedDatasetMaster@data$mortality<<-dbResults$mortality
+  dbResults<-data.frame(dbGetQuery(dbConnection, "SELECT * FROM importedDatasetMaster"))  
   importedDatasetMaster$comments<<-dbResults$comments
   importedDatasetMaster$problem<<-dbResults$problem
   importedDatasetMaster$mortality<<-dbResults$mortality

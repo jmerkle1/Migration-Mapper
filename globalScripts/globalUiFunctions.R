@@ -24,9 +24,7 @@ startOther<<-function(appToRun){
 }
 
 
-modalMessager <<- function(header, body) {
-    jjj<<-header
-    kkk<<-body
+modalMessager <<- function(header, body) {    
     if(length(body)>1){
       body<-body[1]
     }
