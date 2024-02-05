@@ -128,6 +128,9 @@ saveWorkingFile<<-function(){
 }
 
 saveMigtime<-function(){
+
+  print(masterWorkingDirectory)
+
   dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
 
   migtimeTemp<-migtime
@@ -147,6 +150,10 @@ saveMigtime<-function(){
   migtimeTemp$mig7end <- as.character(migtimeTemp$mig7end)
   migtimeTemp$mig8start <- as.character(migtimeTemp$mig8start)
   migtimeTemp$mig8end <- as.character(migtimeTemp$mig8end)
+
+  print('migtime exists')
+  print(exists('migtime'))
+
 
   if(exists('migtime')){
     dbWriteTable(dbConnection, "migtime", migtimeTemp, overwrite=T)

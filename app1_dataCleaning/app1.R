@@ -436,9 +436,11 @@ rebuildOlderProject<-function(){
     return()
   }
 
-  if(file.exists(paste0(masterWorkingDirectory,'//migtime.rds'))){
-    migtime<<-readRDS(paste0(masterWorkingDirectory,'//migtime.rds'))
-    saveMigtime()
+  print('migtime exists')
+  print(file.exists(paste0(masterWorkingDirectory,'//migtime.rds')))
+
+  if(file.exists(paste0(masterWorkingDirectory,'//migtime.rds'))){    
+    migtime<<-readRDS(paste0(masterWorkingDirectory,'//migtime.rds'))    
   }
 
   toggleModal(session,'rebuild30modal',toggle='close')
@@ -451,6 +453,10 @@ rebuildOlderProject<-function(){
   UTMcrs <- paste0("+proj=utm +zone=", zone, " +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")  
   configOptions$masterCrs<<-UTMcrs
   masterWorkingDirectory<<-newProjectFolder
+  if(exists('migtime')){
+    saveMigtime()
+  }
+  
 
   
 
