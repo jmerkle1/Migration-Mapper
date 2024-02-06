@@ -466,27 +466,13 @@ rebuildOlderProject<-function(){
 
   mapInit()
 
+  hideElement(id = 'importDataRow', anim = TRUE)
+  showElement(id = 'importedDataMapRow', anim = TRUE)
+  hide('loadProjectButton')
+  showElement('exportDataButton')
+  
+  loadingScreenToggle('hide','')
 
-
-  # importedDatasetMaster<<-data.frame(importedDatasetMaster)  
-  # configOptions<<-readRDS(paste0(masterWorkingDirectory,'//configOptions.rds'))
-  # configOptions$masterWorkingDirectory<<-masterWorkingDirectory
-
-  if(1==2){
-    workingFile$masterWorkingDirectory<<-filePath
-    masterWorkingDirectory<<-filePath
-    loadConfig()
-    dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
-    updateMasterTableFromDatabase()
-    removeModal()
-    hideElement(id = 'importDataRow', anim = TRUE)
-    showElement(id = 'importedDataMapRow', anim = TRUE)
-    hide('loadProjectButton')
-    showElement('exportDataButton')
-    mapInit()
-    loadingScreenToggle('hide','')
-    saveWorkingFile();
-  }  
 }
 
 
