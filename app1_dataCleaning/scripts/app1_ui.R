@@ -3,11 +3,22 @@ app1_init<-function(input,output,session){
   output<<-output
   session<<-session
 
+  volumes<<-getVolumes()()
+
+  shinyDirChoose(input, "confirmProjectRebuild", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
   observeEvent(input$confirmProjectRebuild,{
-    rebuildOlderProject()
-    # toggleModal(session,'rebuild30modal',toggle='close')
-    removeModal()    
+      thisSelectedFolder<-getFolderPathFromShinyDirChoose(volumes,input$confirmProjectRebuild)
+      if(is.null(thisSelectedFolder)){
+        return ()
+      }    
+      rebuildOlderProject(thisSelectedFolder)  
   },ignoreInit=TRUE)
+
+  # observeEvent(input$confirmProjectRebuild,{
+  #   rebuildOlderProject()
+  #   # toggleModal(session,'rebuild30modal',toggle='close')
+  #   removeModal()    
+  # },ignoreInit=TRUE)
 
   whichAppIsRunning<<-'app1'
   observeEvent(input$changeAppsButton, {
@@ -72,19 +83,23 @@ observeEvent(input$movebankLoginButton,{
     )
   },ignoreInit=TRUE)
 
+  
+  
 
-
-
-
+  
+  shinyDirChoose(input, "loadProjectButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
   observeEvent(input$loadProjectButton,{
-      tryCatch({
-        rdsLocation <- choose.dir(caption = "select your project folder and press OK")
-        # rdsLocation<<-tk_choose.dir(caption = "select your project folder and press OK")
-        appOneReload(rdsLocation)
-      }, error = function(ex) {
-        modalMessager('Error',paste0('Try choosing a file again'))
-      })
+      thisSelectedFolder<-getFolderPathFromShinyDirChoose(volumes,input$loadProjectButton)
+      if(!is.null(thisSelectedFolder)){
+        appOneReload(thisSelectedFolder)
+      }      
   },ignoreInit=TRUE)
+
+  
+  
+
+
+  
 
 
 
@@ -123,49 +138,48 @@ observeEvent(input$movebankLoginButton,{
   },ignoreInit=TRUE)
 
 
+  shinyDirChoose(input, "chooseDirButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
+  observeEvent(input$chooseDirButton, {  
+    dataFolder<-getFolderPathFromShinyDirChoose(volumes,input$chooseDirButton)  
+    if(is.null(dataFolder)){
+      return()
+    }
 
+    print(dataFolder)
+    availableShapefiles <<- list.files(dataFolder, pattern = '.shp$')
+    if (length(availableShapefiles) == 0) {
+      modalMessager(
+        "Folder Selection Error",
+        "No valid shapefile are present in this directory. Please check the
+        directory and try again"
+      )
+      return
+    }
+    availableShapefiles <- append("", availableShapefiles)
 
+    ##--------------------------------make a label showing selected folder
+    output$selectedDirectoryLabel <- renderUI({
+      p(paste("You successfully imported ", dataFolder, sep = ""))
+    })
 
+    ##--------------------------------render the dropdown for available shapes
+    output$selectedShapefileHeaderLabel <- renderUI({
+      strong('(2) Choose shapefile(s) from the selected data directory')
+    })
+    output$fileUploadSelectorHolder <- renderUI({
+      selectInput(
+        "fileUploadSelector",
+        "",
+        availableShapefiles,
+        selected = NULL,
+        multiple = TRUE
+      )
+    })
 
-  observeEvent(input$chooseDirButton, {
-  print("choose dir")    
-  dataFolder<<-choose.dir()
-  # dataFolder<<-tk_choose.dir(caption="choose the folder containing GPS files")
-  print(dataFolder)
-  availableShapefiles <<- list.files(dataFolder, pattern = '.shp$')
-  if (length(availableShapefiles) == 0) {
-    modalMessager(
-      "Folder Selection Error",
-      "No valid shapefile are present in this directory. Please check the
-      directory and try again"
-    )
-    return
-  }
-  availableShapefiles <- append("", availableShapefiles)
-
-  ##--------------------------------make a label showing selected folder
-  output$selectedDirectoryLabel <- renderUI({
-    p(paste("You successfully imported ", dataFolder, sep = ""))
-  })
-
-  ##--------------------------------render the dropdown for available shapes
-  output$selectedShapefileHeaderLabel <- renderUI({
-    strong('(2) Choose shapefile(s) from the selected data directory')
-  })
-  output$fileUploadSelectorHolder <- renderUI({
-    selectInput(
-      "fileUploadSelector",
-      "",
-      availableShapefiles,
-      selected = NULL,
-      multiple = TRUE
-    )
-  })
-
-  ##------------------ start file import
-  output$fileUploadExecute<-renderUI({
-      actionButton('fileUploadExecute','Begin File Import')
-  })
+    ##------------------ start file import
+    output$fileUploadExecute<-renderUI({
+        actionButton('fileUploadExecute','Begin File Import')
+    })
 })
 
 
@@ -217,10 +231,12 @@ exportShapefile=function(){
         dataToExport<-dataToExport[,c(configOptions$originalColumns,'problem','mortality','comments')]
       }
       loadingScreenToggle('show',paste0('exporting file to ',fileExportFolder))
-      writeOGR(dataToExport, fileExportFolder, fileExportName, driver = "ESRI Shapefile")
+      # riteOGR(dataToExport, fileExportFolder, fileExportName, driver = "ESRI Shapefile")
+      st_write(dataToExport,paste0(fileExportFolder,'/',fileExportName,'.shp'))
       modalMessager('File Exported',paste0('File exported succesfully.'))
       loadingScreenToggle('hide',paste0('exporting file to ',exportDirectory))
     }, error = function(ex) {
+      print(ex)
       modalMessager('Error',paste0('Try choosing a directory again'))
       loadingScreenToggle('hide',paste0('exporting file to ',fileExportFolder))
     })

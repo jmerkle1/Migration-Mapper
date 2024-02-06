@@ -22,7 +22,7 @@ source("wmiScripts/Check4Morts.R",local=TRUE)
 
 
 
-dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk')
+dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk','shinyFiles')
 loadDependencies(dependencies)
 
 # lubridate can cause issues when loaded in app2 if the R session is not terminated before reloading app1
@@ -44,7 +44,10 @@ ui <- fluidPage(
       bsModal("rebuild30modal", "Rebuild Older Migration Mapper Project", NULL, size = "medium",
         p('It appears you are trying to load an older Migration Mapper project. To use your project with this version you will need to rebuild your project folder.'),
         p('To do this, create a new empty project folder and then click the "choose new project folder" button below.'),
-        actionButton("confirmProjectRebuild", "choose new project folder"),
+        # actionButton("confirmProjectRebuild", "choose new project folder"),
+        br(),
+        shinyDirButton("confirmProjectRebuild", "choose new project folder", "Please select a directory"),
+        br(),
         tags$head(tags$style("#moreDataModal .modal-footer{ display:none}"))
       ),
 
@@ -86,7 +89,8 @@ ui <- fluidPage(
     </div>"),
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
   actionButton("parametersButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Configuration Parameters"),
-  actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  # actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  shinyDirButton("loadProjectButton", "Reload Existing Project Folder", "Please select a directory",style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;"),
   actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP"),
   hidden(actionButton("exportDataButton", style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;", "Export Updated File"))
   ),
@@ -114,7 +118,8 @@ ui <- fluidPage(
       column(3,
         strong('(1) Choose directory containing files to import by clicking the button below'),
         br(),
-        actionButton("chooseDirButton", "Click to Choose Folder"),
+        # actionButton("chooseDirButton", "Click to Choose Folder"),
+        shinyDirButton("chooseDirButton", "Click to Choose Folder", "Please select a directory",style = "margin-left:10px !important; margin-bottom:10px !important;"),
         uiOutput("selectedDirectoryLabel"),
         uiOutput("fileUploadSelectorHolder"),
         uiOutput("fileUploadExecute"),
@@ -381,6 +386,7 @@ server <- function(input, output, session) {
 }
 
 appOneReload <- function(filePath){
+  print('app one reload')
   rdsLocation<-paste0(filePath,'//workingFile.rds')
   print(rdsLocation)
   if(file.exists(rdsLocation)){
@@ -390,6 +396,7 @@ appOneReload <- function(filePath){
     masterWorkingDirectory<<-filePath
     if(typeof(importedDatasetMaster)=='S4'){
         loadingScreenToggle('hide','')
+        print('toggle modal 395')
         toggleModal(session,'rebuild30modal',toggle='open')
       }else{
         workingFile$masterWorkingDirectory<<-filePath
@@ -423,10 +430,10 @@ loadConfig<-function(){
   updateNumericInput(session, 'mortTime', value=configOptions$mortTime)
 }
 
-rebuildOlderProject<-function(){
+rebuildOlderProject<-function(newProjectFolder){
   print('rebuild here')
 
-  newProjectFolder <- choose.dir(caption = "select your project folder and press OK")
+  # newProjectFolder <- choose.dir(caption = "select your project folder and press OK")
   files<-list.files(newProjectFolder)
   if(length(files)>0){
     delay(100,
@@ -443,6 +450,7 @@ rebuildOlderProject<-function(){
     migtime<<-readRDS(paste0(masterWorkingDirectory,'//migtime.rds'))    
     saveRDS(migtime,paste0(newProjectFolder,'//migtime.rds'))
   }
+
 
   toggleModal(session,'rebuild30modal',toggle='close')
   configOptions<<-readRDS(paste0(masterWorkingDirectory,'//configOptions.rds'))

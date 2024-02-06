@@ -171,17 +171,22 @@ importShapefile<-function(fileToImport,lastOne,i){
       HTML('<strong>(2) Click the button below to choose and empty Project Folder where all outputs will be stored.</strong>')
     })
 
+    volumes<<-getVolumes()()
     output$chooseWorkingDirButton<-renderUI({
-      actionButton("chooseWorkingDirButton", "Click to Choose Directory")
+      # actionButton("chooseWorkingDirButton", "Click to Choose Directory")
+      shinyDirButton("chooseWorkingDirButton", "Click to Choose Folder", "Click to Choose Directory",style = "margin-left:10px !important; margin-bottom:10px !important;")
     })
+    shinyDirChoose(input, "chooseWorkingDirButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
 
     ##------------------choose a folder where all export files will be stored
-    observeEvent(input$chooseWorkingDirButton, {
-      masterWorkingDirectory<<-NULL
+    observeEvent(input$chooseWorkingDirButton, {      
+      masterWorkingDirectory<<-getFolderPathFromShinyDirChoose(volumes,input$chooseWorkingDirButton)
+      print(masterWorkingDirectory)
+      if(is.null(masterWorkingDirectory)){
+        return()
+      }      
 
-      shinyjs::disable("chooseWorkingDirButton")
 
-      masterWorkingDirectory<<-choose.dir(dataFolder)
       print('**********************')
       print(masterWorkingDirectory)
 

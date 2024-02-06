@@ -387,3 +387,23 @@ saveConfig<-function(){
     saveRDS(configOptions,paste0(masterWorkingDirectory,'\\','configOptions.rds'))
   }
 }
+
+
+getFolderPathFromShinyDirChoose<-function(volumes,input){
+  if('root'%in%names(input)){        
+        rootDrive<-volumes[input$root]
+        names(rootDrive)<-NULL
+        rootPaths<-input$path
+        rootPath<-rootDrive
+        for(i in 1:length(rootPaths)){
+          thisFolder<-rootPaths[[i]]
+          if(nchar(thisFolder)>0){
+            rootPath<-paste0(rootPath,'/',thisFolder)
+          }
+        }
+        rootPath<-paste0(rootPath,'/')        
+        return(rootPath)
+      }else{
+        return(NULL)
+      }
+}
