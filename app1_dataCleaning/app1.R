@@ -441,6 +441,7 @@ rebuildOlderProject<-function(){
 
   if(file.exists(paste0(masterWorkingDirectory,'//migtime.rds'))){    
     migtime<<-readRDS(paste0(masterWorkingDirectory,'//migtime.rds'))    
+    saveRDS(migtime,paste0(newProjectFolder,'//migtime.rds'))
   }
 
   toggleModal(session,'rebuild30modal',toggle='close')
