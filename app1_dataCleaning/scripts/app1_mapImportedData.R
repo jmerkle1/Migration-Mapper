@@ -799,7 +799,8 @@ forwardBackHandler=function(which){
     )
     return()
   }  
-  clickedId<<-pointsForMap[thisRow,'rowIds']
+  clickedId<<-st_drop_geometry(pointsForMap[thisRow,'rowIds'])
+  clickedId<<-clickedId$rowIds
   pointClickEvent(clickedId,TRUE)
 }
 

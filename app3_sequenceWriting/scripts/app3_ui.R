@@ -52,17 +52,15 @@ app3_init<-function(input, output, session){
   },ignoreInit=TRUE)
 
 
-
+  volumes<<-getVolumes()()
+  shinyDirChoose(input, "loadProjectButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
   observeEvent(input$loadProjectButton,{
-      tryCatch({
-        # rdsLocation <- file.choose();
-        rdsLocation <- choose.dir(caption = "select your project folder and press OK")
-        appThreeReload(rdsLocation)
-      }, error = function(ex) {
-        modalMessager('Error',paste0('Try choosing a file again'))
-        dawg<<-ex
-      })
+      thisSelectedFolder<-getFolderPathFromShinyDirChoose(volumes,input$loadProjectButton)
+      if(!is.null(thisSelectedFolder)){
+        appThreeReload(thisSelectedFolder)
+      }      
   },ignoreInit=TRUE)
+
 
   observeEvent(input$calcDefinedSequencesButton,{
     calculateDefinedSequences()

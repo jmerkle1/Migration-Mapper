@@ -335,10 +335,10 @@ processDates<-function(){
           return()
         }
         if(!exists('minute')){
-          minute<-"00"
+          minute<-1
         }
         if(!exists('second')){
-          second<-"00"
+          second<-1
         }
 
         # need to check for any decimals in the data
@@ -373,6 +373,7 @@ processDates<-function(){
         }
 
         newDate<<-paste(year,month,day,sep="-")
+        
         newTime<<-paste(hour,minute,second,sep=":")
         if(ampmtime){
           newTime<<-paste0(newTime,' ',ampm)

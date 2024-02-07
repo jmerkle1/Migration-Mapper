@@ -16,7 +16,7 @@ source("wmiScripts\\CalcKernel.R")
 source("wmiScripts\\CalcLineBuff.R")
 source("wmiScripts\\CalcCTMM.R")
 
-dependencies<-c("shiny","shinyjs","parallel","RSQLite","adehabitatHR", "R.utils","BBMM","R.utils","dplyr", "ctmm", "move","sf","raster","sp","fields",'shinyBS')
+dependencies<-c("shiny","shinyjs","parallel","RSQLite","adehabitatHR", "R.utils","BBMM","R.utils","dplyr", "ctmm", "move","sf","raster","sp","fields",'shinyBS','shinyFiles')
 loadDependencies(dependencies)
 
 ui <- fluidPage(
@@ -32,7 +32,8 @@ ui <- fluidPage(
     Migration Mapper 3.1 - App 4
     </div>"),
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
-  actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  # actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  shinyDirButton("loadProjectButton", "Reload Existing Project Folder", "Please select a directory",style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;"),
   actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP")
   ),
   # HTML("<div style='width:100%; height:3rem; padding:4rem; font-size:3rem; margin-bottom:2rem; padding-bottom:6rem; background-color:black; color:white; text-align:center !important;'>Migration Mapper 3.0</div>"),

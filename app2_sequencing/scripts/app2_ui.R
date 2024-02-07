@@ -213,17 +213,16 @@ app2_init<-function(input, output, session){
     updateTable('migtime','notes',paste0('where id_bioYear = "',currentIndividual,'"'),paste0('"',theseNotes,'"'))
   },ignoreInit=TRUE)
 
-
-
+  volumes<<-getVolumes()()
+  shinyDirChoose(input, "loadProjectButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
   observeEvent(input$loadProjectButton,{
-      tryCatch({
-        rdsLocation <- choose.dir(caption = "select your project folder and press 'OK'")
-        appTwoReload(rdsLocation)
-      }, error = function(ex) {
-        modalMessager('Error',paste0('Try choosing a file again'))
-        dawg<<-ex
-      })
+      thisSelectedFolder<-getFolderPathFromShinyDirChoose(volumes,input$loadProjectButton)
+      if(!is.null(thisSelectedFolder)){
+        appTwoReload(thisSelectedFolder)
+      }      
   },ignoreInit=TRUE)
+
+
 
 }
 

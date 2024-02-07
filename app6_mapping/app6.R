@@ -14,7 +14,7 @@ Sys.setenv(MAPBOX_API_TOKEN = "pk.eyJ1Ijoid21pLW1lcmtsZSIsImEiOiJja3RrYmluMnMxaz
 
 
 
-dependencies<-c("shiny","shinyjs","RSQLite",'sf', 'raster', 'mapboxer')
+dependencies<-c("shiny","shinyjs","RSQLite",'sf', 'raster', 'mapboxer','shinyFiles')
 loadDependencies(dependencies)
 
 ui <- fluidPage(
@@ -30,7 +30,7 @@ ui <- fluidPage(
     Migration Mapper 3.1 - App 6
     </div>"),
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
-  actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  shinyDirButton("loadProjectButton", "Reload Existing Project Folder", "Please select a directory",style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;"),
   actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP"),
   ),  
   fluidRow(
