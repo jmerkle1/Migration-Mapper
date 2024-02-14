@@ -140,7 +140,7 @@ observeEvent(input$movebankLoginButton,{
 
   shinyDirChoose(input, "chooseDirButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
   observeEvent(input$chooseDirButton, {  
-    dataFolder<-getFolderPathFromShinyDirChoose(volumes,input$chooseDirButton)  
+    dataFolder<<-getFolderPathFromShinyDirChoose(volumes,input$chooseDirButton)  
     if(is.null(dataFolder)){
       return()
     }

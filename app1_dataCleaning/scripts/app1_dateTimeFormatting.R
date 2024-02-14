@@ -1,9 +1,7 @@
 showDateTimeSelectionPanel<-function(){
   hide(id='uidSeletorRow',anim=TRUE)
   print('showing date time')
-  if(thisIsTestingRun){
-    hasObjectsHandler()
-  }
+  
   showElement(id = 'dateTimeRow', anim = TRUE)
 
 

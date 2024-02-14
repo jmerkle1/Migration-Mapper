@@ -287,11 +287,7 @@ importShapefile<-function(fileToImport,lastOne,i){
         showDateTimeSelectionPanel()
       }
 
-    })
-
-    if(thisIsTestingRun){
-      mergeShapfilesHandler()
-    }
+    })   
 
   }
 

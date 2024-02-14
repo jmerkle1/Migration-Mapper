@@ -1,9 +1,6 @@
-mergeShapfilesHandler<-function(){
+mergeShapfilesHandler<-function(){   
 
-    if(!thisIsTestingRun){
-      selectedUid<<-input$uniqueIdSelector
-    }
-
+    selectedUid<<-input$uniqueIdSelector
 
     if(selectedUid==""){
       modalMessager('Error','You need to select a field for the unique
