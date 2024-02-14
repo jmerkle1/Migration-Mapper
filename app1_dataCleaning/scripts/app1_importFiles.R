@@ -296,53 +296,9 @@ importShapefile<-function(fileToImport,lastOne,i){
   }
 
 
-
-  filesToImport<-c("gps_318.shp","gps_318dead.shp","gps_320.shp","gps_317.shp","gps_321.shp","gps_344.shp","gps_346.shp")
-  availableShapefiles<<-c("gps_318.shp","gps_318dead.shp","gps_320.shp","gps_317.shp","gps_321.shp","gps_344.shp","gps_346.shp")
-  dataFolder<-"D:\\sampleData"
-  fileImportTracker<<-list()
-  importedShapefilesHolder<<-list()
-  thisIsTestingRun<<-FALSE
-
-  testImport<<-function(){
-
-    thisIsTestingRun<<-TRUE
-    dateColumns<<-c('date','hour')
-    selectedUid<<-"aid"
-    validatorObject<<-list()
-    validatorObject$year<<-c('year','1',"%Y","date")
-    validatorObject$month<<-c('month','2',"%m","date")
-    validatorObject$day<<-c('day','3',"%d","date")
-    validatorObject$hour<<-c('hour','1',"%H","hour")
-
-
-    loadingScreenToggle('show','importing files')
-    for(i in 1:length(filesToImport)){
-      fileToImport <- tools::file_path_sans_ext(filesToImport[i])
-      # HANDLER TO INDICATE THIS IS THE LAST ONE
-      if(i<length(filesToImport)){
-        importShapefile(fileToImport,FALSE,i)
-      } else{
-        importShapefile(fileToImport,TRUE,i)
-      }
-    }
-  }
-
-
   downloadMovebankData<-function(user,pw,movebankId){
-
-
     show('downloadSpinner')
-
-
-
-
     storedLogin<-movebankLogin('username' = user, 'password' = pw)
-
-
-
-
-
     loadingScreenToggle('show','downloading movebank data.. please be patient.. depending on file size, this can take a while.')
 
     movebankData <<- tryCatch({
@@ -364,11 +320,6 @@ importShapefile<-function(fileToImport,lastOne,i){
       processMovebankData(data.frame(movebankData))
 
     }
-
-
-
-
-
   }
 
   processMovebankData<-function(movebankData){
