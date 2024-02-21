@@ -3,9 +3,8 @@ app1_init<-function(input,output,session){
   output<<-output
   session<<-session
 
-  volumes<<-getVolumes()()
-
-  shinyDirChoose(input, "confirmProjectRebuild", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
+  volumes<<-getVolumes()()  
+  
   observeEvent(input$confirmProjectRebuild,{
       thisSelectedFolder<-getFolderPathFromShinyDirChoose(volumes,input$confirmProjectRebuild)
       if(is.null(thisSelectedFolder)){
@@ -13,6 +12,7 @@ app1_init<-function(input,output,session){
       }    
       rebuildOlderProject(thisSelectedFolder)  
   },ignoreInit=TRUE)
+  # shinyDirChoose(input, "confirmProjectRebuild", roots=volumes, filetypes = NULL, allowDirCreate = FALSE)  
 
   # observeEvent(input$confirmProjectRebuild,{
   #   rebuildOlderProject()

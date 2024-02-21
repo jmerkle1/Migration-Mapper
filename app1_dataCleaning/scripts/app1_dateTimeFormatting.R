@@ -396,6 +396,8 @@ processDates<-function(){
       stringFormat<-"%Y-%m-%d %I:%M:%S %p"
     }
 
+    configOptions$stringFormat<<-stringFormat
+
     importedDatasetMaster$dateTest<<-newDateTime
     
     importedDatasetMaster$newMasterDate<<-tryCatch({

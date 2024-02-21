@@ -1,7 +1,7 @@
 objs <- ls(pos = ".GlobalEnv")
-rm(list = objs, pos = ".GlobalEnv")
-rm(list = ls())
-gc()
+  rm(list = objs, pos = ".GlobalEnv")
+  rm(list = ls())
+  gc()
 
 source("scripts/globalVars.R",local=TRUE)
 source("scripts/app1_ui.R",local=TRUE)
@@ -19,8 +19,6 @@ source("wmiScripts/CalcBurst.R",local=TRUE)
 source("wmiScripts/FindProblemPts.R",local=TRUE)
 source("wmiScripts/CalcMovParams.R",local=TRUE)
 source("wmiScripts/Check4Morts.R",local=TRUE)
-
-
 
 dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk','shinyFiles')
 loadDependencies(dependencies)
@@ -46,7 +44,7 @@ ui <- fluidPage(
         p('To do this, create a new empty project folder and then click the "choose new project folder" button below.'),
         # actionButton("confirmProjectRebuild", "choose new project folder"),
         br(),
-        shinyDirButton("confirmProjectRebuild", "choose new project folder", "Please select a directory"),
+        shinyDirButton("confirmProjectRebuild", "choose new project folder", "Please select a directory", style = "font-weight:bolder;"),
         br(),
         tags$head(tags$style("#moreDataModal .modal-footer{ display:none}"))
       ),
@@ -397,7 +395,7 @@ appOneReload <- function(filePath){
     if(typeof(importedDatasetMaster)=='S4'){
         loadingScreenToggle('hide','')
         print('toggle modal 395')
-        toggleModal(session,'rebuild30modal',toggle='open')
+        toggleModal(session,'rebuild30modal',toggle='open')        
       }else{
         workingFile$masterWorkingDirectory<<-filePath
         masterWorkingDirectory<<-filePath

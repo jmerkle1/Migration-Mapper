@@ -1,5 +1,9 @@
 plotInit<-function(){
 
+  if(is.null(configOptions$stringFormat)){
+    configOptions$stringFormat<<-"%Y-%m-%d %H:%M:%S"
+  }
+
   seqCols<<-c('#1b9e77','#d95f02','#7570b3','#e7298a','#66a61e','#e6ab02','#a6761d','#666666')
 
   yearBio<<-reactive({
@@ -253,10 +257,8 @@ plotInit<-function(){
     })
 
 
-    dawg<<-dataForPlots()$plotData
-
   output$plot1 <- renderPlot({
-    nsdPlot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate), get(nsdType))) +
+    nsdPlot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate,format=configOptions$stringFormat), get(nsdType))) +
       annotate("rect", xmin=seq1min(), xmax=seq1max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[1])+
       annotate("rect", xmin=seq2min(), xmax=seq2max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[2])+
       annotate("rect", xmin=seq3min(), xmax=seq3max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[3])+
@@ -275,7 +277,7 @@ plotInit<-function(){
   })
 
   output$plot7 <- renderPlot({
-    nsdPlot<-ggplot(dataForPlots()$plotDataSixMonth, aes(as.Date(newMasterDate), get(nsdType))) +
+    nsdPlot<-ggplot(dataForPlots()$plotDataSixMonth, aes(as.Date(newMasterDate,format=configOptions$stringFormat), get(nsdType))) +
       annotate("rect", xmin=seq1min(), xmax=seq1max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[1])+
       annotate("rect", xmin=seq2min(), xmax=seq2max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[2])+
       annotate("rect", xmin=seq3min(), xmax=seq3max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[3])+
@@ -294,7 +296,7 @@ plotInit<-function(){
   })
 
   output$plot2 <- renderPlot({
-      speedPlot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate), speed)) +
+      speedPlot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate,format=configOptions$stringFormat), speed)) +
       annotate("rect", xmin=seq1min(), xmax=seq1max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[1])+
       annotate("rect", xmin=seq2min(), xmax=seq2max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[2])+
       annotate("rect", xmin=seq3min(), xmax=seq3max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[3])+
@@ -313,7 +315,7 @@ plotInit<-function(){
   })
 
   output$plot3 <- renderPlot({
-    elevPlot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate), elev)) +
+    elevPlot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate,format=configOptions$stringFormat), elev)) +
       annotate("rect", xmin=seq1min(), xmax=seq1max(), ymin=min(dataForPlots()$plotData$elev), ymax=max(dataForPlots()$plotData$elev),alpha=0.65, fill=seqCols[1])+
       annotate("rect", xmin=seq2min(), xmax=seq2max(), ymin=min(dataForPlots()$plotData$elev), ymax=max(dataForPlots()$plotData$elev),alpha=0.65, fill=seqCols[2])+
       annotate("rect", xmin=seq3min(), xmax=seq3max(), ymin=min(dataForPlots()$plotData$elev), ymax=max(dataForPlots()$plotData$elev),alpha=0.65, fill=seqCols[3])+
@@ -333,7 +335,7 @@ plotInit<-function(){
   })
 
   output$plot4 <- renderPlot({
-    fpt50Plot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate), FPT50)) +
+    fpt50Plot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate,format=configOptions$stringFormat), FPT50)) +
       annotate("rect", xmin=seq1min(), xmax=seq1max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[1])+
       annotate("rect", xmin=seq2min(), xmax=seq2max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[2])+
       annotate("rect", xmin=seq3min(), xmax=seq3max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[3])+
@@ -352,7 +354,7 @@ plotInit<-function(){
   })
 
   output$plot5 <- renderPlot({
-    fpt150Plot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate), FPT150)) +
+    fpt150Plot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate,format=configOptions$stringFormat), FPT150)) +
       annotate("rect", xmin=seq1min(), xmax=seq1max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[1])+
       annotate("rect", xmin=seq2min(), xmax=seq2max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[2])+
       annotate("rect", xmin=seq3min(), xmax=seq3max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[3])+
@@ -371,7 +373,7 @@ plotInit<-function(){
   })
 
   output$plot6 <- renderPlot({
-    fpt300Plot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate), FPT300)) +
+    fpt300Plot<-ggplot(dataForPlots()$plotData, aes(as.Date(newMasterDate,format=configOptions$stringFormat), FPT300)) +
       annotate("rect", xmin=seq1min(), xmax=seq1max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[1])+
       annotate("rect", xmin=seq2min(), xmax=seq2max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[2])+
       annotate("rect", xmin=seq3min(), xmax=seq3max(), ymin=0, ymax=Inf,alpha=0.65, fill=seqCols[3])+

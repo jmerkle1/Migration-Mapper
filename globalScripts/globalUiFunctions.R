@@ -1,7 +1,8 @@
 appRoot<<-getwd()
 appRoot<<-dirname(appRoot)
 
-startOther<<-function(appToRun){    
+startOther<<-function(appToRun){ 
+
     if(appToRun=='app1'){
       runApp(paste0(appRoot,'/app1_dataCleaning/',appToRun,'.R'),launch.browser=T)
     }
@@ -406,4 +407,26 @@ getFolderPathFromShinyDirChoose<-function(volumes,input){
       }else{
         return(NULL)
       }
+}
+
+unloadPackages<<-function(){
+
+  objs <- ls(pos = ".GlobalEnv")
+  rm(list = objs, pos = ".GlobalEnv")
+  rm(list = ls())
+  gc()
+
+  allPackages<-names(sessionInfo()$otherPkgs)
+
+  if(length(allPackages)>1){
+    for(i in 1:length(allPackages)){
+      thisPackage<-allPackages[i]
+      print('*************')
+      print('*************')
+      print('*************')
+      print(thisPackage)
+    }
+  }
+
+  
 }
