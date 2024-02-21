@@ -176,7 +176,7 @@ importShapefile<-function(fileToImport,lastOne,i){
       # actionButton("chooseWorkingDirButton", "Click to Choose Directory")
       shinyDirButton("chooseWorkingDirButton", "Click to Choose Folder", "Click to Choose Directory",style = "margin-left:10px !important; margin-bottom:10px !important;")
     })
-    shinyDirChoose(input, "chooseWorkingDirButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
+    shinyDirChoose(input, "chooseWorkingDirButton", roots=volumes, filetypes = NULL)
 
     ##------------------choose a folder where all export files will be stored
     observeEvent(input$chooseWorkingDirButton, {      
