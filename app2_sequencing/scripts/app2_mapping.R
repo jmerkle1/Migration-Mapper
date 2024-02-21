@@ -88,7 +88,8 @@ mapCurrentIndividual<-function(){
     sequencePoints$alpha<-0
     sequencePoints$color<-'#ffffff'
     mapboxer_proxy("sequencesMap") %>%
-      add_source(as_mapbox_source(sequencePoints,lat="lat",lng="lon"),'sequencePointsSource')%>%
+      # add_source(as_mapbox_source(sequencePoints,lat="lat",lng="lon"),'sequencePointsSource')%>%
+      add_source(as_mapbox_source(sequencePoints),'sequencePointsSource')%>%
       add_circle_layer(
         source = 'sequencePointsSource',
         circle_color = c("get", "color"),
@@ -170,6 +171,8 @@ updateMapSequencePoints<-function(){
     }
 
     if(nrow(sequencePoints)>0){
+      print('-------------')
+      print('update sequencesMap')
       mapboxer_proxy("sequencesMap") %>%
         set_data(sequencePoints,lat="lat",lng='lon','sequencePointsSource')%>%
         update_mapboxer()
