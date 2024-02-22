@@ -85,7 +85,7 @@ findProblemPoints<-function(){
   importedDatasetMaster$problem<<-0
 
   probPoints<-FindProblemPts(st_as_sf(importedDatasetMaster,coords = c("x", "y"), crs = configOptions$masterCrs),date_name='newMasterDate',id_name='newUid',speedlim=configOptions$maxSpeedParameter)
-  if(any(probPoints)){
+  if(any(probPoints)){    
     importedDatasetMaster[probPoints,'problem']<<-1
   }  
   print(names(importedDatasetMaster))
@@ -101,15 +101,15 @@ checkForAllNaSpeedsEtc<-function(){
   for(i in 1:length(idYrs)){     
       temp<- importedDatasetMaster[importedDatasetMaster$id_yr==idYrs[i],]      
       nonNaSpeeds<-length(which(!is.na(temp$speed)))      
-      if(nonNaSpeeds<3){        
+      if(nonNaSpeeds<3){          
         importedDatasetMaster[importedDatasetMaster$id_yr==idYrs[i],"problem"]<<-1
       }
       nonNaBurst<-length(which(!is.na(temp$burst)))
-      if(nonNaBurst<3){
+      if(nonNaBurst<3){        
         importedDatasetMaster[importedDatasetMaster$id_yr==idYrs[i],"problem"]<<-1
       }
       nonNaNsd<-length(which(!is.na(temp$nsdYear)))
-      if(nonNaNsd<3){
+      if(nonNaNsd<3){        
         importedDatasetMaster[importedDatasetMaster$id_yr==idYrs[i],"problem"]<<-1
       }
   }

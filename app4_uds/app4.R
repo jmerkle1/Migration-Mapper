@@ -16,7 +16,8 @@ source("wmiScripts\\CalcKernel.R")
 source("wmiScripts\\CalcLineBuff.R")
 source("wmiScripts\\CalcCTMM.R")
 
-dependencies<-c("shiny","shinyjs","parallel","RSQLite","adehabitatHR", "R.utils","BBMM","R.utils","dplyr", "ctmm", "move","sf","raster","sp","fields",'shinyBS','shinyFiles')
+# dependencies<-c("shiny","shinyjs","parallel","RSQLite","adehabitatHR", "R.utils","BBMM","R.utils","dplyr", "ctmm", "move","sf","raster","sp","fields",'shinyBS','shinyFiles')
+dependencies<-c("shiny","shinyjs","parallel","RSQLite","adehabitatHR", "R.utils","BBMM","R.utils","dplyr", "ctmm", "move","sf","fields",'shinyBS','shinyFiles')
 loadDependencies(dependencies)
 
 ui <- fluidPage(

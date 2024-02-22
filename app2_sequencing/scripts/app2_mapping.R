@@ -170,9 +170,7 @@ updateMapSequencePoints<-function(){
       as.Date(sequencePoints$newMasterDate)<thisMax,'alpha']<-1
     }
 
-    if(nrow(sequencePoints)>0){
-      print('-------------')
-      print('update sequencesMap')
+    if(nrow(sequencePoints)>0){      
       mapboxer_proxy("sequencesMap") %>%
         set_data(sequencePoints,lat="lat",lng='lon','sequencePointsSource')%>%
         update_mapboxer()

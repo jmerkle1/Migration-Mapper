@@ -118,9 +118,11 @@ runUdProcessing<-function(seqName){
   loadingScreenToggle('show',paste0('starting UD calcuations using method ',configOptions$udConfigOptions$udMethod," for sequence ",seqName))
   d<-readRDS(availableSequences[[seqName]][1])
   loopit <- unique(d$mig)  # you will loop over each id_yr_seas
-  # Setup cluster
-  clust <- makeCluster(configOptions$udConfigOptions$numberOfCores)
+  
+  # Setup cluster  
+  clust <- makeCluster(configOptions$udConfigOptions$numberOfCores, outfile=paste0(masterWorkingDirectory,"//parallel_log.txt"))
   opts=configOptions$udConfigOptions$udMethod
+  
   # export the objects you need for your calculations from your environment to each node's environment
   if(is.null(configOptions$udConfigOptions$BMVar)){
     BMVar<-NULL
