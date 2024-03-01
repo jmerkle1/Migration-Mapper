@@ -4,8 +4,9 @@ app1_init<-function(input,output,session){
   session<<-session
 
   volumes<<-getVolumes()()  
-  
-  observeEvent(input$confirmProjectRebuild,{
+
+  shinyDirChoose(input, "confirmProjectRebuild", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)  
+  observeEvent(input$confirmProjectRebuild,{      
       thisSelectedFolder<-getFolderPathFromShinyDirChoose(volumes,input$confirmProjectRebuild)
       if(is.null(thisSelectedFolder)){
         return ()
