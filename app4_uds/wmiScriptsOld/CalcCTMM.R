@@ -32,49 +32,22 @@ CalcCTMM <- function(
 ){
   
   #manage packages
-  if(all(c("sf","terra","ctmm","R.utils","move") %in% installed.packages()[,1])==FALSE)
-    stop("You must install the following packages: sf, terra, ctmm, R.utils, move")
+  if(all(c("sf","raster","ctmm","R.utils","move") %in% installed.packages()[,1])==FALSE)
+    stop("You must install the following packages: sf, raster, ctmm, R.utils, move")
   require(sf)
-  require(terra)
+  require(raster)
   require(ctmm)
   require(R.utils)
   require(move)
   
-  # if("sf" %in% class(seq.sf)==FALSE)
-  #   stop("seq.sf must be a sf data frame from package sf!")
+  if("sf" %in% class(seq.sf)==FALSE)
+    stop("seq.sf must be a sf data frame from package sf!")
   
   # load up the population grid
-  grd <- terra::rast(Pop.grd)
+  grd <- raster(Pop.grd)
   
   # ensure data are in same projection as grid
-  seq.sf <- sf::st_transform(seq.sf, crs=sf::st_crs(grd))
-  
-  #prepare only the cells to run BB over
-  ext2 <- terra::ext(seq.sf)
-  multiplyers <- c((ext2[2]-ext2[1])*mult4buff, (ext2[4]-ext2[3])*mult4buff)   # add about mult4buff around the edges of your extent (you can adjust this if necessary)
-  ext2 <- terra::extend(ext2, multiplyers)
-  cels <- terra::cells(grd, ext2)
-  grd2 <- terra::crop(grd, ext2)
-  if(length(cels)!=terra::ncell(grd2))
-    stop("There is a problem with cropping down the population grid!")
-  
-  # take out of sf
-  seq.sf$x <- sf::st_coordinates(seq.sf)[,1]
-  seq.sf$y <- sf::st_coordinates(seq.sf)[,2]
-  seq.sf <- sf::st_drop_geometry(seq.sf)
-  
-  if("POSIXct" %in% class(seq.sf[,date.name]) == FALSE)
-    stop("Your date.name column should be POSIXct!")
-  if(any(is.na(seq.sf[,date.name])))
-    stop("You have NAs in your date.name column!")
-  
-  #order by date
-  seq.sf <- seq.sf[order(seq.sf[,date.name]),]
-  seq.sf$date1234 <- seq.sf[,date.name]  # make new column for date
-  
-  jul <- as.numeric(strftime(seq.sf$date1234, format = "%j", tz = attr(seq.sf$date1234,"tzone")))
-  
-  start.time <- Sys.time()
+  seq.sf <- st_transform(seq.sf, crs=projection(grd))
   
   if(nrow(seq.sf) < 4){
     return(data.frame(seq.name=seq.name,
@@ -90,14 +63,41 @@ CalcCTMM <- function(
                       errors="Less than 4 points"))
   }
   
+  #prepare only the cells to run BB over
+  ext2 <- raster::extent(seq.sf)
+  multiplyers <- c((ext2[2]-ext2[1])*mult4buff, (ext2[4]-ext2[3])*mult4buff)   # add about mult4buff around the edges of your extent (you can adjust this if necessary)
+  ext2 <- raster::extend(ext2, multiplyers)
+  cels <- cellsFromExtent(grd, ext2)
+  grd2 <- crop(grd, ext2)
+  if(length(cels)!=ncell(grd2))
+    stop("There is a problem with cropping down the population grid!")
+  
+  # take out of sf
+  seq.sf$x <- st_coordinates(seq.sf)[,1]
+  seq.sf$y <- st_coordinates(seq.sf)[,2]
+  seq.sf <- st_drop_geometry(seq.sf)
+  
+  if("POSIXct" %in% class(seq.sf[,date.name]) == FALSE)
+    stop("Your date.name column should be POSIXct!")
+  if(any(is.na(seq.sf[,date.name])))
+    stop("You have NAs in your date.name column!")
+  
+  #order by date
+  seq.sf <- seq.sf[order(seq.sf[,date.name]),]
+  seq.sf$date1234 <- seq.sf[,date.name]  # make new column for date
+  
+  jul <- as.numeric(strftime(seq.sf$date1234, format = "%j", tz = attr(seq.sf$date1234,"tzone")))
+  
+  start.time <- Sys.time()
+  
   # create telem object with point data
-  telem <- move::move(x=seq.sf$x, y=seq.sf$y,
+  telem <- move(x=seq.sf$x, y=seq.sf$y,
                 time=seq.sf$date1234, 
-                proj=sp::CRS(st_crs(grd)$proj4string))
-  telem <- ctmm::as.telemetry(telem)
+                proj=CRS(projection(grd)))
+  telem <- as.telemetry(telem)
   
   # store guesstimated parameters of models (not including BM)
-  GUESS <- ctmm::ctmm.guess(telem, interactive = FALSE)
+  GUESS <- ctmm.guess(telem, interactive = FALSE)
   
   # run model selection
   FITS <- R.utils::withTimeout({
@@ -127,11 +127,11 @@ CalcCTMM <- function(
   rkrig <- R.utils::withTimeout({
     try(ctmm::occurrence(telem, 
                          CTMM = FITS, 
-                         grid = list(list(x=terra::crds(grd2)[,1],
-                                     y=terra::crds(grd2)[,2]),
-                                     dr=terra::res(grd2),
+                         grid = list(x=coordinates(grd2)[,1],
+                                     y=coordinates(grd2)[,2],
+                                     dr=res(grd2),
                                      align.to.origin=FALSE,
-                                     extent=ctmm::extent(raster::raster(grd2)))), 
+                                     extent=extent(grd2))), 
         silent=TRUE)
   }, envir=environment(), timeout = max.timeout, onTimeout = "warning")
   
@@ -150,7 +150,7 @@ CalcCTMM <- function(
   }
   
   # extract the vector of values for teh cells in grd2
-  rkrig <- raster::values(raster::raster(rkrig, DF = "PDF", values = TRUE))
+  rkrig <- values(raster(rkrig, DF = "PDF", values = TRUE))
   rkrig[is.na(rkrig)] <- 0   # make sure there are no NAs
   
   #set to 0 any values that are outside of the < 0.9999 contour
@@ -163,8 +163,8 @@ CalcCTMM <- function(
   
   # write to raster
   grd[cels] <- rkrig
-  terra::writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
-              filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+  writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
+              format = "GTiff", overwrite = TRUE, datatype='FLT4S')
   
   #output the footprint based on contour
   cutoff <- sort(rkrig, decreasing=TRUE)
@@ -172,8 +172,8 @@ CalcCTMM <- function(
   cutoff <- cutoff[vlscsum > (contour/100)][1]
   rkrig <- ifelse(rkrig < cutoff, 0, 1)
   grd[cels] <- rkrig
-  terra::writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
-              filetype = "GTiff", overwrite = TRUE, datatype='INT1U')
+  writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
+              format = "GTiff", overwrite = TRUE, datatype='INT1U')
   
   # some inforation to spit out?
   # dofs <- t(as.data.frame(summary(FITS)$DOF)) # these are the degrees of freedom

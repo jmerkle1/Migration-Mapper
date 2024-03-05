@@ -24,19 +24,19 @@ CalcLineBuff <- function(
 ){
   
   #manage packages
-  if(all(c("sf","terra") %in% installed.packages()[,1])==FALSE)
-    stop("You must install the following packages: sf, terra")
+  if(all(c("sf","raster") %in% installed.packages()[,1])==FALSE)
+    stop("You must install the following packages: sf, raster")
   require(sf)
-  require(terra)
+  require(raster)
   
-  # if("sf" %in% class(seq.sf)==FALSE)
-  #   stop("seq.sf must be a sf data frame from package sf!")
+  if("sf" %in% class(seq.sf)==FALSE)
+    stop("seq.sf must be a sf data frame from package sf!")
   
   # load up the population grid
-  grd <- terra::rast(Pop.grd)
+  grd <- raster(Pop.grd)
   
   # ensure data are in same projection as grid
-  seq.sf <- sf::st_transform(seq.sf, crs=sf::st_crs(grd))
+  seq.sf <- st_transform(seq.sf, crs=projection(grd))
   
   # work on date and make sure it's ordered by date
   seq.sf$date1234 <- st_drop_geometry(seq.sf)[,date.name]  # make new column for date
@@ -71,7 +71,7 @@ CalcLineBuff <- function(
   })
   ln <- sf::st_as_sfc(ln, crs = sf::st_crs(seq.sf))
   
-  ln <- try(sf::st_buffer(ln, dist=buff), silent=TRUE) # add buffer
+  ln <- try(st_buffer(ln, dist=buff), silent=TRUE) # add buffer
 
   print('-------------')
   print('-------------')
@@ -94,19 +94,19 @@ CalcLineBuff <- function(
                       errors="Buffering issue. No footprint was written out."))
   }
   
-  ln <- sf::st_union(ln)  # union up all the buffered line segments
+  ln <- st_union(ln)  # union up all the buffered line segments
   
-  grd <- terra::rasterize(vect(ln), grd, background=0) # rasterize onto the grid.
+  grd <- rasterize(as(ln, "Spatial"), grd, background=0) # rasterize onto the grid.
   
-  terra::writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
-              filetype = "GTiff", overwrite = TRUE, datatype='INT1U')
+  writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
+              format = "GTiff", overwrite = TRUE, datatype='INT1U')
   
   gc()
   
   #gather summary info
   return(data.frame(seq.name=seq.name,
-                    numb.cells=terra::global(grd, "sum")[1,1],
-                    grid.cell.size=terra::res(grd)[1],
+                    numb.cells=cellStats(grd, sum),
+                    grid.cell.size=res(grd)[1],
                     date.created=Sys.time(),
                     execution_time=paste(round(difftime(Sys.time(), start.time, units="min"),2)," minutes",sep=""),
                     num.locs=nrow(seq.sf),

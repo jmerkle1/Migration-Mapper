@@ -22,11 +22,11 @@ CalcSeqDistances <- function(datasf=d,
   require(sf)
   require(fields)
   
-  # if("sf" %in% class(datasf)==FALSE)
-  #   stop("datasf must be a sf data frame from package sf!")
-  # if(grepl("units=m", st_crs(datasf)$proj4string)==FALSE)
-  #   stop("Your datasf is not in a projection with units=m!")
-  
+  if("sf" %in% class(datasf)==FALSE)
+    stop("datasf must be a sf data frame from package sf!")
+  if(grepl("units=m", st_crs(datasf)$proj4string)==FALSE)
+    stop("Your datasf is not in a projection with units=m!")
+  # take out of sf
   datasf$x <- st_coordinates(datasf)[,1]
   datasf$y <- st_coordinates(datasf)[,2]
   datasf <- st_drop_geometry(datasf)  

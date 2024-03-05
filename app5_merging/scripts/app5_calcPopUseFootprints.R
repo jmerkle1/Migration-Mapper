@@ -80,19 +80,23 @@ calculatePopUse<-function(){
 
   loadingScreenToggle('show',paste0('calculating population use for seasons ',paste(seasonsToMerge)))
 
+  seasonsToMergeUd<<-seasonsToMergeUd
+  theseContLevels<<-processContours(configOptions$popConfigOption$contourLevelsPopUse)
+
   tryCatch({
     CalcPopUse(UD.fldr=udFolder,
       out.fldr=popUseFolder,
       seas2merge=seasonsToMergeUd,
       udFootprintsToDrop=udFootprintsToDrop,
-      contour.levels=processContours(configOptions$popConfigOption$contourLevelsPopUse),
+      contour.levels=theseContLevels,
       merge.order=mergeOrder,
+      contour = 99.99,
       contour.type=configOptions$popConfigOption$contourType,
       min_area_drop=as.numeric(configOptions$popConfigOption$minAreaDrop),
       min_area_fill=as.numeric(configOptions$popConfigOption$minAreaFill),
       simplify=configOptions$popConfigOption$simplify,
       ksmooth_smoothness=configOptions$popConfigOption$kSmoothSmoothness,
-      out.proj=configOptions$originalProjection
+      out.proj=configOptions$masterCrs
     )
   }, error = function(ex) {
     bigMessage<<-ex
@@ -121,14 +125,14 @@ calculatePopFootprint<-function(){
   tryCatch({
     CalcPopFootprint(Foot.fldr=footPrintsFolder,
       out.fldr=footprintsMergedFolder,
-      contour.levels=processContours(configOptions$popConfigOption$contourLevelsPopFootprints),
       udFootprintsToDrop=udFootprintsToDrop,
       seas2merge=seasonsToMerge,
+      contour.levels=processContours(configOptions$popConfigOption$contourLevelsPopFootprints),      
       min_area_drop=as.numeric(configOptions$popConfigOption$minAreaDrop),
       min_area_fill=as.numeric(configOptions$popConfigOption$minAreaFill),
       simplify=configOptions$popConfigOption$simplify,
       ksmooth_smoothness=configOptions$popConfigOption$kSmoothSmoothness,
-      out.proj=configOptions$originalProjection
+      out.proj=configOptions$masterCrs
     )
   }, error = function(ex) {
     modalMessager('Error',ex$message)
@@ -140,9 +144,6 @@ calculatePopFootprint<-function(){
   write.csv(popFootprintParams, file=paste0(footprintsMergedFolder,"/",mergeName,"_popFootprintParams.csv"), row.names = FALSE)
 
 
+  loadingScreenToggle('hide',paste0('calculating population footprints for seasons ',paste(seasonsToMerge)))  
 
-
-
-
-  loadingScreenToggle('hide',paste0('calculating population footprints for seasons ',paste(seasonsToMerge)))
 }

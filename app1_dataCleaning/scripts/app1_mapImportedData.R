@@ -39,9 +39,7 @@ mapInit<-function(){
 
   loadingScreenToggle('hide','')
 
-
-
-  dummyPoint<<-importedDatasetMaster@data[1,]
+  dummyPoint<<-importedDatasetMaster[1,]
   dummyPoint$lat<<-0
   dummyPoint$lon<<-0
 
@@ -59,27 +57,25 @@ mapInit<-function(){
     if(input$isMortalitySelector=='yes'){
       newValue<-TRUE
     }
-    importedDatasetMaster@data[which(importedDatasetMaster@data$rowIds==clickedId),'mortality']<<-newValue
-    pointsForMap@data[which(pointsForMap@data$rowIds==clickedId),'mortality']<<-newValue
+    importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),'mortality']<<-newValue
+    pointsForMap[which(pointsForMap$rowIds==clickedId),'mortality']<<-newValue
     updateTable('importedDatasetMaster','mortality',paste0('where rowIds = ',clickedId),newValue)
     updatePopupTable(clickedId)
-
-    updateProblemAndMortPoints()
-    # saveWorkingFile();
+    updateProblemAndMortPoints()    
     mapboxer_proxy("importedDataMapBox") %>%
-      set_data(pointsForMap@data,lat="lat",lng='lon','pointsSource')%>%
+      set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%
       update_mapboxer()
   },ignoreInit=TRUE)
 
   observeEvent(input$commentInput, {
-    pointToChange<-clickedMapPoint$props$rowIds
-    importedDatasetMaster@data[which(importedDatasetMaster@data$rowIds==clickedId),'comments']<<-input$commentInput
+    pointToChange<-clickedMapPoint$props$rowIds    
+    importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),'comments']<<-input$commentInput
     updateTable('importedDatasetMaster','comments',paste0('where rowIds = ',clickedId),paste0('"',input$commentInput,'"'))
     updatePopupTable(clickedId)
-    pointsForMap@data[which(pointsForMap@data$rowIds==clickedId),'comments']<<-input$commentInput
+    pointsForMap[which(pointsForMap$rowIds==clickedId),'comments']<<-input$commentInput
 
-    mapboxer_proxy("importedDataMapBox") %>%
-      set_data(pointsForMap@data,lat="lat",lng='lon','pointsSource')%>%
+    mapboxer_proxy("importedDataMapBox") %>%      
+      set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%
       update_mapboxer()
 
   },ignoreInit=TRUE)
@@ -89,14 +85,14 @@ mapInit<-function(){
     newValue<-FALSE
     if(input$isProblemSelector=='yes'){
       newValue<-TRUE
-    }
-    importedDatasetMaster@data[which(importedDatasetMaster@data$rowIds==clickedId),'problem']<<-newValue
-    pointsForMap@data[which(pointsForMap@data$rowIds==clickedId),'problem']<<-newValue
+    }            
+    importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),'problem']<<-newValue
+    pointsForMap[which(pointsForMap$rowIds==clickedId),'problem']<<-newValue    
     updateProblemAndMortPoints()
     updateTable('importedDatasetMaster','problem',paste0('where rowIds = ',clickedId),newValue)
     updatePopupTable(clickedId)
-    mapboxer_proxy("importedDataMapBox") %>%
-      set_data(pointsForMap@data,lat="lat",lng='lon','pointsSource')%>%
+    mapboxer_proxy("importedDataMapBox") %>%      
+      set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%
       update_mapboxer()
 
 
@@ -104,8 +100,8 @@ mapInit<-function(){
 
 
 
-  observeEvent(input$forwardHandlerButton, {
-    allAnimals<-unique(importedDatasetMaster@data$newUid)
+  observeEvent(input$forwardHandlerButton, {    
+    allAnimals<-unique(importedDatasetMaster$newUid)
     thisAnimalIndex<-which(allAnimals==selectedAnimal)
     if(thisAnimalIndex==length(allAnimals)){
       return()
@@ -115,8 +111,8 @@ mapInit<-function(){
     updateSelectInput(session, 'individualsSelector', selected=selectedAnimal)
   },ignoreInit=TRUE)
 
-  observeEvent(input$backwardHandlerButton, {
-    allAnimals<-unique(importedDatasetMaster@data$newUid)
+  observeEvent(input$backwardHandlerButton, {    
+    allAnimals<-unique(importedDatasetMaster$newUid)
     thisAnimalIndex<-which(allAnimals==selectedAnimal)
     if(thisAnimalIndex==1){
       return()
@@ -180,10 +176,10 @@ showMortalityProblemBox<-function(){
 animalYearAverages<<-list()
 
 getAnimalYearAverages=function(){
-  allAnimals<-unique(importedDatasetMaster@data$newUid)
+  allAnimals<-unique(importedDatasetMaster$newUid)
   for(i in 1:length(allAnimals)){
-    thisAnimal<-allAnimals[i]
-    availableYears<-unique(importedDatasetMaster@data[which(importedDatasetMaster@data$newUid==thisAnimal),'year'])
+    thisAnimal<-allAnimals[i]    
+    availableYears<-unique(importedDatasetMaster[which(importedDatasetMaster$newUid==thisAnimal),'year'])
     animalYearAverages[[thisAnimal]]<<-availableYears
   }
 
@@ -226,14 +222,8 @@ renderMap<-function(){
   hideElement(id = 'loadProjectButton', anim = TRUE)
   showElement(id = 'exportDataButton', anim = TRUE)
 
-
-
-  dataSetExtent<-importedDatasetMaster@bbox
-
-
-
-  output$importedDataMapBox <- renderMapboxer({
-   mapboxer(center = c(importedDatasetMaster@data[1,'lon'],importedDatasetMaster@data[1,'lat']), style = 'mapbox://styles/wmi-merkle/ckxqg5r429gpr14sd3o6dlno4' ,zoom = 6) %>%
+  output$importedDataMapBox <- renderMapboxer({  
+  mapboxer(center = c(importedDatasetMaster[1,'lon'],importedDatasetMaster[1,'lat']), style = 'mapbox://styles/wmi-merkle/ckxqg5r429gpr14sd3o6dlno4' ,zoom = 6) %>%
     add_navigation_control()
   })
 
@@ -359,10 +349,11 @@ observeEvent(input$manyPointsIsProblemSelector, {
   newValue<-FALSE
   if(input$manyPointsIsProblemSelector=='yes'){
     newValue<-TRUE
-  }
-  whichRows<-which(importedDatasetMaster@data$rowIds%in%pointIdsInDrawBox)
-  importedDatasetMaster@data[whichRows,'problem']<<-newValue
-  pointsForMap@data[pointsInDrawBox,'problem']<<-newValue
+  }  
+  whichRows<-which(importedDatasetMaster$rowIds%in%pointIdsInDrawBox)
+  importedDatasetMaster[whichRows,'problem']<<-newValue
+  whichRows<-which(pointsForMap$rowIds%in%pointIdsInDrawBox)
+  pointsForMap[whichRows,'problem']<<-newValue
   updateTable('importedDatasetMaster','problem',paste0('where rowIds IN (',toString(pointIdsInDrawBox),') '),newValue)
   updateProblemAndMortPoints()
 },ignoreInit=TRUE)
@@ -378,10 +369,11 @@ observeEvent(input$manyPointsIsMortalitySelector, {
   newValue<-FALSE
   if(thisValue=='yes'){
     newValue<-TRUE
-  }
-  whichRows<-which(importedDatasetMaster@data$rowIds%in%pointIdsInDrawBox)
-  importedDatasetMaster@data[whichRows,'mortality']<<-newValue
-  pointsForMap@data[pointsInDrawBox,'mortality']<<-newValue
+  }  
+  whichRows<-which(importedDatasetMaster$rowIds%in%pointIdsInDrawBox)
+  importedDatasetMaster[whichRows,'mortality']<<-newValue  
+  whichRows<-which(pointsForMap$rowIds%in%pointIdsInDrawBox)
+  pointsForMap[whichRows,'mortality']<<-newValue
   updateTable('importedDatasetMaster','mortality',paste0('where rowIds IN (',toString(pointIdsInDrawBox),') '),newValue)
   updateProblemAndMortPoints()
 },ignoreInit=TRUE)
@@ -392,10 +384,11 @@ observeEvent(input$manyPointsCommentInput, {
     return()
   }
 
-  thisValue<-input$manyPointsCommentInput
-  whichRows<-which(importedDatasetMaster@data$rowIds%in%pointIdsInDrawBox)
-  importedDatasetMaster@data[whichRows,'comments']<<-thisValue
-  pointsForMap@data[pointsInDrawBox,'comments']<<-thisValue
+  thisValue<-input$manyPointsCommentInput  
+  whichRows<-which(importedDatasetMaster$rowIds%in%pointIdsInDrawBox)
+  importedDatasetMaster[whichRows,'comments']<<-thisValue  
+  whichRows<-which(pointsForMap$rowIds%in%pointIdsInDrawBox)
+  pointsForMap[whichRows,'comments']<<-thisValue
   updateTable('importedDatasetMaster','comments',paste0('where rowIds IN (',toString(pointIdsInDrawBox),') '),paste0('"',thisValue,'"'))
 },ignoreInit=TRUE)
 
@@ -423,15 +416,23 @@ observeEvent(input$polygonHolder, {
     xCoords<-c(xCoords,thisX)
     yCoords<-c(yCoords,thisY)
   }
+  thisPolyCoords <- cbind(xCoords, yCoords)  
+  thisPoly <- st_polygon(list(thisPolyCoords)) %>%
+    st_sfc(crs = configOptions$masterCrs4326) %>%
+    st_as_sf()
 
-  thisPolyCoords <- cbind(xCoords, yCoords)
-  thisPoly = Polygon(thisPolyCoords)
-  thisPoly = Polygons(list(thisPoly),1)
-  thisPoly = SpatialPolygons(list(thisPoly),proj4string=CRS("EPSG:4326"))
-  thisPoly<-spTransform(thisPoly, importedDatasetMaster@proj4string)
+  if(!st_is_valid(thisPoly)){
+    modalMessager("drawing error",'drawn polygon was invalid.. please try again')
+    runjs('draw.deleteAll()
+    drawnData = draw.getAll();
+    console.log(drawnData)
+    Shiny.setInputValue("polygonHolder", 999);')
+    return()
+  }   
 
-  pointsInDrawBox<<-over(pointsForMap,thisPoly)
-  pointsInDrawBox<<-which(!is.na(pointsInDrawBox))
+
+
+  pointsInDrawBox<<-st_intersection(pointsForMap, thisPoly)  
 
   if(length(pointsInDrawBox)==0){
     mapboxer_proxy("importedDataMapBox") %>%
@@ -439,15 +440,12 @@ observeEvent(input$polygonHolder, {
       update_mapboxer()
       return()
   }
-
-
-  drawSelectedPointsToShow<-pointsForMap@data[pointsInDrawBox,]
-
-  pointIdsInDrawBox<<-drawSelectedPointsToShow[,'rowIds']
+  pointIdsInDrawBox<<-pointsInDrawBox[,'rowIds']
+  pointIdsInDrawBox<<-st_drop_geometry(pointIdsInDrawBox)$rowIds
 
 
   mapboxer_proxy("importedDataMapBox") %>%
-    set_data(drawSelectedPointsToShow,lat="lat",lng='lon','polygonSelectedSource')%>%
+    set_data(pointsInDrawBox,lat="lat",lng='lon','polygonSelectedSource')%>%
     update_mapboxer()
 
 
@@ -456,7 +454,6 @@ observeEvent(input$polygonHolder, {
     updateTextInput(session, 'manyPointsCommentInput', value='no comments added')
     toggleModal(session,'manyPointsSelectedModal',toggle='open')
 })
-
 
 isDrawAdded<<-TRUE
 }
@@ -489,32 +486,23 @@ addPointsToMap<-function(){
 
 
   if(nrow(pointsForMap)>0){
-
-
-
-    pointsForMap@data$idDate<<-paste0(pointsForMap$year,pointsForMap$month,pointsForMap$day,pointsForMap$newUid)
+    pointsForMap$idDate<<-paste0(pointsForMap$year,pointsForMap$month,pointsForMap$day,pointsForMap$newUid)
     if(allPoints==FALSE){
       pointsForMap <<- pointsForMap[!duplicated(pointsForMap$idDate),]
-    }
-    pointsForMap<<-spTransform(pointsForMap,CRS('+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0', SRS_string='EPSG:4326'))
-    thisBbox<-pointsForMap@bbox
-
+    }    
+    templat<-pointsForMap$lat
+    templon<-pointsForMap$lon
+    pointsForMap<<-st_as_sf(pointsForMap,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    pointsForMap$lat<<-templat
+    pointsForMap$lon<<-templon
+    thisBbox<-st_bbox(pointsForMap)
+    print(thisBbox)
     if(!exists('emptyLine')){
-      emptyLinePoints<-pointsForMap[1,]
-      emptyLine<<-pointsToLines(emptyLinePoints)
-      emptyLine<<-st_as_sf(emptyLine)
+      emptyLinePoints<-pointsForMap[1,]      
+      emptyLine<<-Points2Lines(emptyLinePoints)             
     }
-
-
-
-    linesData<<-pointsToLines(pointsForMap)
-
-
-    linesData<<-st_as_sf(linesData)
-
+    linesData<<-Points2Lines(pointsForMap)
     if(!isSourceAdded){
-
-
       mapboxer_proxy("importedDataMapBox") %>%
         add_source(as_mapbox_source(linesData),'linesUnderSource')%>%
         add_line_layer(
@@ -536,18 +524,19 @@ addPointsToMap<-function(){
         )%>%
         update_mapboxer()
 
+        theseBounds<-c(thisBbox$xmin-0.01, thisBbox$ymin-0.01,thisBbox$xmax+0.01, thisBbox$ymax+0.01)
+        names(theseBounds)<-NULL
 
 
-
-      mapboxer_proxy("importedDataMapBox") %>%
-        add_source(as_mapbox_source(pointsForMap@data,lat="lat",lng="lon"),'pointsSource')%>%
+      mapboxer_proxy("importedDataMapBox") %>%        
+        add_source(as_mapbox_source(pointsForMap),'pointsSource')%>%
         add_circle_layer(
           source = 'pointsSource',
           circle_color = '#000cff',
           circle_radius = 5,
           id='pointLayer'
-        )%>%
-        fit_bounds(c(c(thisBbox[1,1]-0.01, thisBbox[2,1]-0.01),c(thisBbox[1,2]+0.01, thisBbox[2,2]+0.01)))%>%
+        )%>%        
+        fit_bounds(theseBounds)%>%
         update_mapboxer()
 
 
@@ -584,8 +573,8 @@ addPointsToMap<-function(){
             update_mapboxer()
 
 
-      mapboxer_proxy("importedDataMapBox") %>%
-        add_source(as_mapbox_source(pointsForMap@data[0,],lat="lat",lng="lon"),'hoverSource')%>%
+      mapboxer_proxy("importedDataMapBox") %>%        
+        add_source(as_mapbox_source(pointsForMap[0,],lat="lat",lng="lon"),'hoverSource')%>%
         add_circle_layer(
           source = 'hoverSource',
           circle_color = '#000000',
@@ -593,14 +582,6 @@ addPointsToMap<-function(){
           id='hoverLayer'
         )%>%
         update_mapboxer()
-
-
-
-
-
-
-
-
 
       isSourceAdded<<-TRUE;
     }else{
@@ -613,12 +594,13 @@ addPointsToMap<-function(){
         set_data(linesData,'linesSource')%>%
         update_mapboxer()
 
+        theseBounds<-c(thisBbox$xmin-0.01, thisBbox$ymin-0.01,thisBbox$xmax+0.01, thisBbox$ymax+0.01)        
+        names(theseBounds)<-NULL
 
 
-
-      mapboxer_proxy("importedDataMapBox") %>%
-        set_data(pointsForMap@data,lat="lat",lng='lon','pointsSource')%>%
-        fit_bounds(c(c(thisBbox[1,1]-0.01, thisBbox[2,1]-0.01),c(thisBbox[1,2]+0.01, thisBbox[2,2]+0.01)))%>%
+      mapboxer_proxy("importedDataMapBox") %>%        
+        set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%        
+        fit_bounds(theseBounds)%>%
         update_mapboxer()
     }
 
@@ -646,8 +628,8 @@ addPointsToMap<-function(){
 
 
 
-    mapboxer_proxy("importedDataMapBox") %>%
-      set_data(pointsForMap@data,lat="lat",lng='lon','pointsSource')%>%
+    mapboxer_proxy("importedDataMapBox") %>%      
+      set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%
       update_mapboxer()
 
     if(exists('emptyLine')){
@@ -660,11 +642,6 @@ addPointsToMap<-function(){
         update_mapboxer()
     }
 
-
-    # modalMessager(
-    #   "No points",
-    #   "no points for this selection"
-    # )
 
     updateSummaryStats()
 
@@ -679,18 +656,21 @@ addPointsToMap<-function(){
 
 
 updateProblemAndMortPoints<-function(){
-  if(any(pointsForMap@data$problem==1)){
-    problemsToMap<-pointsForMap@data[which(pointsForMap@data$problem==1),]
+  print('update problems morts')  
+  if(any(pointsForMap$problem==1)){
+    print('YES PROBS')    
+    problemsToMap<-pointsForMap[which(pointsForMap$problem==1),]
     mapboxer_proxy("importedDataMapBox") %>%
       set_data(problemsToMap,lat="lat",lng='lon','problemsSource')%>%
       update_mapboxer()
   }else{
+    print('no PROBS')
     mapboxer_proxy("importedDataMapBox") %>%
       set_data(dummyPoint,lat="lat",lng='lon','problemsSource')%>%
       update_mapboxer()
-  }
-  if(any(pointsForMap@data$mortality==1)){
-    mortalitiesToMap<-pointsForMap@data[which(pointsForMap@data$mortality==1),]
+  }  
+  if(any(pointsForMap$mortality==1)){
+    mortalitiesToMap<-pointsForMap[which(pointsForMap$mortality==1),]
     mapboxer_proxy("importedDataMapBox") %>%
       set_data(mortalitiesToMap,lat="lat",lng='lon','mortalitiesSource')%>%
       update_mapboxer()
@@ -706,28 +686,15 @@ hasAssignedPlotHandler=FALSE;
 
 plotData=function(){
 
-  if(selectedYear=='All Years'){
-    if(selectedAnimal=='All Individuals'){
-      pointsForMap<<-importedDatasetMaster
-    }else{
-      pointsForMap<<-importedDatasetMaster[which(importedDatasetMaster$newUid==selectedAnimal),]
-    }
-  }else{
-    if(selectedAnimal=='All Individuals'){
-      pointsForMap<<-importedDatasetMaster[which(importedDatasetMaster$year==selectedYear),]
-    }else{
-      pointsForMap<<-importedDatasetMaster[which(importedDatasetMaster$newUid==selectedAnimal & importedDatasetMaster$year==selectedYear),]
-    }
-  }
-
-  pointsForMap$idDate<-paste0(pointsForMap$year,pointsForMap$month,pointsForMap$day,pointsForMap$newUid)
+  print('******** plot ****************')  
+  pointsForMap$idDate<<-paste0(pointsForMap$year,pointsForMap$month,pointsForMap$day,pointsForMap$newUid)
   if(allPoints==FALSE){
     pointsForMap <<- pointsForMap[!duplicated(pointsForMap$idDate),]
   }
 
 
-  output$speedPlot <- renderPlot({
-      speedPlot<-ggplot(pointsForMap@data, aes(x=newMasterDate, y=speed))+
+  output$speedPlot <- renderPlot({      
+      speedPlot<-ggplot(pointsForMap, aes(x=newMasterDate, y=speed))+
       geom_line(size= 0.5, color="black")+
       ylab('Speed (km/hr) ')+
       xlab("Date") +
@@ -737,8 +704,8 @@ plotData=function(){
       speedPlot
   })
 
-  output$fixRatePlot <- renderPlot({
-      fixRatePlot<-ggplot(pointsForMap@data, aes(x=newMasterDate, y=fixRateHours))+
+  output$fixRatePlot <- renderPlot({      
+      fixRatePlot<-ggplot(pointsForMap, aes(x=newMasterDate, y=fixRateHours))+
       geom_line(size= 0.5, color="black")+
       ylab("Fix rate (hours)") +
       xlab("Date") +
@@ -748,8 +715,8 @@ plotData=function(){
       fixRatePlot
   })
 
-  output$nsdPlot <- renderPlot({
-      nsdPlot<-ggplot(pointsForMap@data, aes(x=newMasterDate, y=nsdYear))+
+  output$nsdPlot <- renderPlot({      
+      nsdPlot<-ggplot(pointsForMap, aes(x=newMasterDate, y=nsdYear))+
       geom_line(size= 0.5, color="black")+
       ylab('Squared Displacement (KM^2; since 1 Jan)')+
       xlab("Date") +
@@ -762,12 +729,7 @@ plotData=function(){
 
   plotClickObserver$destroy()
   plotHoverObserver$destroy()
-
-  # print('-------daw')
-  # jj<<-pointsForMap
-  # print(!is.na(pointsForMap$speed))
-
-  # if(!is.na(pointsForMap$speed)){
+  
   if(any(!is.na(pointsForMap$speed))){
   plotClickObserver<<-observeEvent(input$plot_click, {
     clickedPlotPoint<<-nearPoints(pointsForMap, input$plot_click, threshold = 10, maxpoints = 1, addDist = TRUE)
@@ -791,8 +753,8 @@ plotData=function(){
 
 plotClickEvent=function(clickedPlotPoint){
 
-  thisLon<<-clickedPlotPoint@data[1,'lon']
-  thisLat<<-clickedPlotPoint@data[1,'lat']
+  thisLon<<-clickedPlotPoint[1,'lon']
+  thisLat<<-clickedPlotPoint[1,'lat']
 
 
   mapboxer_proxy("importedDataMapBox") %>%
@@ -801,8 +763,8 @@ plotClickEvent=function(clickedPlotPoint){
 }
 
 showHoverPoint=function(hoveredPoint){
-  mapboxer_proxy("importedDataMapBox") %>%
-    set_data(hoveredPoint@data,lat="lat",lng='lon','hoverSource')%>%
+  mapboxer_proxy("importedDataMapBox") %>%    
+    set_data(hoveredPoint,lat="lat",lng='lon','hoverSource')%>%
     update_mapboxer()
 }
 
@@ -813,8 +775,8 @@ clearHoverPoint=function(){
 }
 
 
-forwardBackHandler=function(which){
-  currentRow<-which(pointsForMap@data$rowIds==clickedId)
+forwardBackHandler=function(which){  
+  currentRow<-which(pointsForMap$rowIds==clickedId)
   if(which=='forward'){
     thisRow<-currentRow+1
   }else{
@@ -836,8 +798,9 @@ forwardBackHandler=function(which){
       "this point is the first in this animal/year"
     )
     return()
-  }
-  clickedId<<-pointsForMap@data[thisRow,'rowIds']
+  }  
+  clickedId<<-st_drop_geometry(pointsForMap[thisRow,'rowIds'])
+  clickedId<<-clickedId$rowIds
   pointClickEvent(clickedId,TRUE)
 }
 
@@ -847,8 +810,7 @@ pointClickEvent=function(clickedId,fromButton){
   if(is.null(clickedId)){
     return()
   }
-
-  rowToMap<-importedDatasetMaster@data[which(importedDatasetMaster@data$rowIds==clickedId),]
+  rowToMap<-importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),]
   thisLon<-rowToMap$lon
   thisLat<-rowToMap$lat
 
@@ -891,8 +853,8 @@ pointClickEvent=function(clickedId,fromButton){
 
 }
 
-updatePopupTable<-function(clickedId){
-  rowToMap<-importedDatasetMaster@data[which(importedDatasetMaster@data$rowIds==clickedId),]
+updatePopupTable<-function(clickedId){  
+  rowToMap<-importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),]
   allFields<-names(rowToMap)
   htmlToRender<-''
   mortalityPosition<-which(allFields=='mortality')

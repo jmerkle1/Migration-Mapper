@@ -1,7 +1,7 @@
 objs <- ls(pos = ".GlobalEnv")
-rm(list = objs, pos = ".GlobalEnv")
-rm(list = ls())
-gc()
+  rm(list = objs, pos = ".GlobalEnv")
+  rm(list = ls())
+  gc()
 
 source("scripts/globalVars.R",local=TRUE)
 source("scripts/app1_ui.R",local=TRUE)
@@ -12,18 +12,15 @@ source("scripts/app1_calculateMovementParams.R",local=TRUE)
 source("scripts/app1_mapImportedData.R",local=TRUE)
 source("scripts/app1_summarizeAid.R",local=TRUE)
 
-
 source("../globalScripts/globalUiFunctions.R",local=TRUE)
 source("../globalScripts/sqlLiteQueries.R",local=TRUE)
 
-source("scripts/dropDuplicates.R",local=TRUE)
-source("scripts/creat.burst.R",local=TRUE)
-source("scripts/find.problem.pts.R",local=TRUE)
-source("scripts/mov.param.R",local=TRUE)
-source("scripts/mort.check.R",local=TRUE)
+source("wmiScripts/CalcBurst.R",local=TRUE)
+source("wmiScripts/FindProblemPts.R",local=TRUE)
+source("wmiScripts/CalcMovParams.R",local=TRUE)
+source("wmiScripts/Check4Morts.R",local=TRUE)
 
-
-dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","sp","ggplot2","mapboxer","rgdal","adehabitatHR",'RSQLite','move','shinycssloaders','raster','terra','tcltk')
+dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk','shinyFiles')
 loadDependencies(dependencies)
 
 # lubridate can cause issues when loaded in app2 if the R session is not terminated before reloading app1
@@ -34,14 +31,23 @@ if("lubridate" %in% (.packages())){
 Sys.setenv(MAPBOX_API_TOKEN = "pk.eyJ1Ijoid21pLW1lcmtsZSIsImEiOiJja3RrYmluMnMxazRlMm9xbnN3bXluYjQzIn0.wOmx_vSC944YRdF8LSjZRQ")
 
 ui <- fluidPage(
-  tags$head(tags$style("body{ overflow-x:hidden}")),
-  # HTML(id="underSurface","<div id='underSurface' style='width:100%; height:100%; background-color:rgba(255, 255, 255,0); color:rgba(255, 255, 255,0); position:absolute; top:0px; left:0px; z-index:1000;'></div>"),
-  uiOutput("loading"),
+  tags$head(tags$style("body{ overflow-x:hidden}")),  
+  uiOutput("loading"),  
   HTML("<div id='loadingScreen' style='width:100%; display:none; height:200%; background-color:rgba(0, 0, 0,0.5); color:white; position:absolute; top:0px; left:0px; z-index:5000;'>
   <div id='loadingMessage' style='position:absolute; top:10%; text-align:center; font-size:15px; color:white; width:100%;'></div>
   <img src='spinner.gif' style='position:absolute; top:25%; left:45%;'>
   </div>"),
   useShinyjs(),
+
+      bsModal("rebuild30modal", "Rebuild Older Migration Mapper Project", NULL, size = "medium",
+        p('It appears you are trying to load an older Migration Mapper project. To use your project with this version you will need to rebuild your project folder.'),
+        p('To do this, create a new empty project folder and then click the "choose new project folder" button below.'),
+        # actionButton("confirmProjectRebuild", "choose new project folder"),
+        br(),
+        shinyDirButton("confirmProjectRebuild", "choose new project folder", "Please select a directory", style = "font-weight:bolder;"),
+        br(),
+        tags$head(tags$style("#moreDataModal .modal-footer{ display:none}"))
+      ),
 
       bsModal("movebankModal", "Movebank Project Download", NULL, size = "medium",
             strong('user name'),
@@ -77,11 +83,12 @@ ui <- fluidPage(
   column(12,
   HTML("<div style='width:110% !important; margin-left:-3rem !important; height:10rem !important; padding:4rem !important; background-color:black; color:white; text-align:center !important;'>
     <span style='text-align: center !important; font-size:3rem; width:100% !important; position:absolute !important; top:0px !important; left:0px !important; color:white;>Migration Mapper - Module 1</span>'>
-    Migration Mapper 3.0 - App 1
+    Migration Mapper 3.1 - App 1
     </div>"),
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
   actionButton("parametersButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Configuration Parameters"),
-  actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  # actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  shinyDirButton("loadProjectButton", "Reload Existing Project Folder", "Please select a directory",style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;"),
   actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP"),
   hidden(actionButton("exportDataButton", style = "font-weight:bolder; position:absolute !important; top:49px !important; left:-5px !important;", "Export Updated File"))
   ),
@@ -109,7 +116,8 @@ ui <- fluidPage(
       column(3,
         strong('(1) Choose directory containing files to import by clicking the button below'),
         br(),
-        actionButton("chooseDirButton", "Click to Choose Folder"),
+        # actionButton("chooseDirButton", "Click to Choose Folder"),
+        shinyDirButton("chooseDirButton", "Click to Choose Folder", "Please select a directory",style = "margin-left:10px !important; margin-bottom:10px !important;"),
         uiOutput("selectedDirectoryLabel"),
         uiOutput("fileUploadSelectorHolder"),
         uiOutput("fileUploadExecute"),
@@ -366,7 +374,8 @@ hidden(
 
 server <- function(input, output, session) {
   app1_init(input, output, session)
-  elevation<<-raster("globalDem/etopocompressed.tif")
+  # elevation<<-raster("globalDem/etopocompressed.tif")
+  elevation<<-rast("globalDem/etopocompressed.tif")
   checkForSession('app1')
   hide(id='dateTimeRow')
   onStop(function() {
@@ -375,26 +384,35 @@ server <- function(input, output, session) {
 }
 
 appOneReload <- function(filePath){
+  print('app one reload')
   rdsLocation<-paste0(filePath,'//workingFile.rds')
   print(rdsLocation)
   if(file.exists(rdsLocation)){
     loadingScreenToggle('show','loading existing project file')
     workingFile<<-readRDS(rdsLocation)
     importedDatasetMaster<<-workingFile$importedDatasetMaster
-    workingFile$masterWorkingDirectory<<-filePath
     masterWorkingDirectory<<-filePath
-    loadConfig()
-    dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
-    updateMasterTableFromDatabase()
-    removeModal()
-    print(!'newMasterDate'%in%names(importedDatasetMaster@data))
-    hideElement(id = 'importDataRow', anim = TRUE)
-    showElement(id = 'importedDataMapRow', anim = TRUE)
-    hide('loadProjectButton')
-    showElement('exportDataButton')
-    mapInit()
-    loadingScreenToggle('hide','')
-    saveWorkingFile();
+    if(typeof(importedDatasetMaster)=='S4'){
+        loadingScreenToggle('hide','')
+        print('toggle modal 395')
+        toggleModal(session,'rebuild30modal',toggle='open')        
+      }else{
+        workingFile$masterWorkingDirectory<<-filePath
+        masterWorkingDirectory<<-filePath
+        loadConfig()
+        dbConnection <<- dbConnect(RSQLite::SQLite(), paste0(masterWorkingDirectory,'//workingDb.db'))
+        updateMasterTableFromDatabase()
+        removeModal()
+        # print(!'newMasterDate'%in%names(importedDatasetMaster@data))
+        print(!'newMasterDate'%in%names(importedDatasetMaster))
+        hideElement(id = 'importDataRow', anim = TRUE)
+        showElement(id = 'importedDataMapRow', anim = TRUE)
+        hide('loadProjectButton')
+        showElement('exportDataButton')
+        mapInit()
+        loadingScreenToggle('hide','')
+        saveWorkingFile();
+      }    
   }else{
     modalMessager('Error',paste0('Data file from this session does not exist at ',filePath,'. Please try loading the data file manually using the "Reload Existing Project Folder" button.'))
     sessionCheckLocation<-paste0(dirname(getwd()),'//session.rds')
@@ -408,6 +426,59 @@ loadConfig<-function(){
   updateNumericInput(session, 'maxSpeedSelector', value= configOptions$maxSpeedParameter )
   updateNumericInput(session, 'mortDistance', value= configOptions$mortDistance)
   updateNumericInput(session, 'mortTime', value=configOptions$mortTime)
+}
+
+rebuildOlderProject<-function(newProjectFolder){
+  print('rebuild here')
+
+  # newProjectFolder <- choose.dir(caption = "select your project folder and press OK")
+  files<-list.files(newProjectFolder)
+  if(length(files)>0){
+    delay(100,
+      modalMessager('error','The folder you chose is not empty.
+      Please empty the folder or choose a different directory and try again.')        
+    )    
+    return()
+  }
+
+  print('migtime exists')
+  print(file.exists(paste0(masterWorkingDirectory,'//migtime.rds')))
+
+  if(file.exists(paste0(masterWorkingDirectory,'//migtime.rds'))){    
+    migtime<<-readRDS(paste0(masterWorkingDirectory,'//migtime.rds'))    
+    saveRDS(migtime,paste0(newProjectFolder,'//migtime.rds'))
+  }
+
+
+  toggleModal(session,'rebuild30modal',toggle='close')
+  configOptions<<-readRDS(paste0(masterWorkingDirectory,'//configOptions.rds'))
+  importedDatasetMaster<<-data.frame(importedDatasetMaster)  
+  crs4326<-crs(elevation)
+  configOptions$masterCrs4326<<-crs4326
+  midLatLong <- c(importedDatasetMaster[1,]$lat,importedDatasetMaster[1,]$lon)
+  zone <- find_UTM_zone(midLatLong[2], midLatLong[1])
+  UTMcrs <- paste0("+proj=utm +zone=", zone, " +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")  
+  configOptions$masterCrs<<-UTMcrs
+  masterWorkingDirectory<<-newProjectFolder
+  if(exists('migtime')){
+    saveMigtime()
+  }
+  
+
+  
+
+  saveWorkingFile()
+  saveConfig()
+
+  mapInit()
+
+  hideElement(id = 'importDataRow', anim = TRUE)
+  showElement(id = 'importedDataMapRow', anim = TRUE)
+  hide('loadProjectButton')
+  showElement('exportDataButton')
+  
+  loadingScreenToggle('hide','')
+
 }
 
 

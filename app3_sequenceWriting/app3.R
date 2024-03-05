@@ -9,7 +9,7 @@ source("scripts/app3_calcSequences.R",local=TRUE)
 source("../globalScripts/globalUiFunctions.R",local=TRUE)
 source("../globalScripts/sqlLiteQueries.R",local=TRUE)
 
-dependencies<-c("shiny","shinyjs","shinyBS","RSQLite","lubridate","stringr","sf","sp")
+dependencies<-c("shiny","shinyjs","shinyBS","RSQLite","lubridate","stringr","sf","sp",'shinyFiles')
 loadDependencies(dependencies)
 
 
@@ -28,10 +28,11 @@ ui <- fluidPage(
   column(12,
   HTML("<div style='width:110% !important; margin-left:-3rem !important; height:10rem !important; padding:4rem !important; background-color:black; color:white; text-align:center !important;'>
     <span style='text-align: center !important; font-size:3rem; width:100% !important; position:absolute !important; top:0px !important; left:0px !important; color:white;>Migration Mapper - Module 3</span>'>
-    Migration Mapper 3.0 - App 3
+    Migration Mapper 3.1 - App 3
     </div>"),
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
-  actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  # actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  shinyDirButton("loadProjectButton", "Reload Existing Project Folder", "Please select a directory",style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;"),
   actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP")
   ),
   fluidRow(

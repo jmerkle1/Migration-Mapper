@@ -43,10 +43,12 @@ importShapefile<-function(fileToImport,lastOne,i){
       }
     }
 
+
+
     importedDataset <<- tryCatch({
       fileImportTracker[[fileToImport]]<<-"inProgress"
       progressIndicator(paste('Importing ',fileToImport,' Please wait',sep=""),'start')
-      sf::as_Spatial(sf::st_read(paste0(dataFolder,'\\',fileToImport,'.shp')))
+      st_read(paste0(dataFolder,'\\',fileToImport,'.shp'))
     },
     error = function(cond) {
       fileImportTracker[[fileToImport]]<<-'failed'
@@ -63,14 +65,7 @@ importShapefile<-function(fileToImport,lastOne,i){
         )
       )
       return()
-    },
-    warning = function(cond) {
-      fileImportTracker[[fileToImport]]<<-'failed'
-      progressIndicator('Import Error','stop')
-
-      modalMessager("DATA IMPORT WARNING", cond)
-      return()
-    })
+      })    
     importSuccessHandler(fileToImport,lastOne,i,mergingFiles)
   }
 
@@ -86,18 +81,22 @@ importShapefile<-function(fileToImport,lastOne,i){
     # add this shapefile to list holder of imported shapefiles
     importedShapefilesHolder[[fileToImport]]<<-assign(fileToImport,importedDataset)
 
-    # change columns names to lowercase!!
-    # names(importedShapefilesHolder[[fileToImport]]@data)<<-tolower(names(importedShapefilesHolder[[fileToImport]]@data))
+    
     # change columns names to UPPERCASE!!
-    names(importedShapefilesHolder[[fileToImport]]@data)<<-toupper(names(importedShapefilesHolder[[fileToImport]]@data))
+    # names(importedShapefilesHolder[[fileToImport]]@data)<<-toupper(names(importedShapefilesHolder[[fileToImport]]@data))
+    newNames<-toupper(names(importedShapefilesHolder[[fileToImport]]))
+    whichIsGeom<-which(newNames=='GEOMETRY')
+    newNames[whichIsGeom]<-'geometry'
+    names(importedShapefilesHolder[[fileToImport]])<<-newNames
+    
+
     colsToCheck<-c("LAT","LON","newUid","elev","comments","rowIds","newMasterDate","burst","month","day","year","jul","id_yr","x","y","nsdYear","displacementYear","nsdOverall","displacementOverall","dist","dt","speed","abs.angle","rel.angle","fixRateHours","problem","mortality")
     colsToCheck<-toupper(colsToCheck)
-
     for(i in 1:length(colsToCheck)){
-      thisCol<-colsToCheck[i]
-      if(thisCol %in% names(importedShapefilesHolder[[fileToImport]]@data)){
-        whichCol<-which(names(importedShapefilesHolder[[fileToImport]]@data) == thisCol)
-        names(importedShapefilesHolder[[fileToImport]]@data)[whichCol]<<-paste0(thisCol,'_')
+      thisCol<-colsToCheck[i]      
+      if(thisCol %in% names(importedShapefilesHolder[[fileToImport]])){
+        whichCol<-which(names(importedShapefilesHolder[[fileToImport]]) == thisCol)
+        names(importedShapefilesHolder[[fileToImport]])[whichCol]<<-paste0(thisCol,'_')
       }
     }
 
@@ -130,9 +129,9 @@ importShapefile<-function(fileToImport,lastOne,i){
 
   checkColumnsPrjs<-function(){
     #### check if columns are the same between datasets
-    firstNames<-names(importedShapefilesHolder[[1]]@data)
-    for(i in 1:length(importedShapefilesHolder)){
-      theseNames<-names(importedShapefilesHolder[[i]]@data)
+    firstNames<-names(importedShapefilesHolder[[1]])
+    for(i in 1:length(importedShapefilesHolder)){      
+      theseNames<-names(importedShapefilesHolder[[i]])
       if(!setequal(firstNames,theseNames)){
         modalMessager('COLUMN NAMES ERROR',"Column names are not the same between your datasets.
         Reformat your data and try again")
@@ -145,16 +144,15 @@ importShapefile<-function(fileToImport,lastOne,i){
 
     # check that projections are the same between datasets
     for(i in 1:length(importedShapefilesHolder)){
-      if(importedShapefilesHolder[[1]]@proj4string@projargs!=importedShapefilesHolder[[i]]@proj4string@projargs){
-        modalMessager('PROJECTION ERROR',"Projections are not the same between your datasets.
-        Reformat your data and try again")
-        #### TO DO --- if this happens, we need to remove the shapefiles and the loaded buttons
-        clearShapefileSelector()
-        return()
-      }
-    }
-    configOptions$originalProjection<<-importedShapefilesHolder[[1]]@proj4string@projargs
-    configOptions$originalColumns<<-names(importedShapefilesHolder[[1]])
+      # if(importedShapefilesHolder[[1]]@proj4string@projargs!=importedShapefilesHolder[[i]]@proj4string@projargs){
+      #   modalMessager('PROJECTION ERROR',"Projections are not the same between your datasets.
+      #   Reformat your data and try again")
+      #   #### TO DO --- if this happens, we need to remove the shapefiles and the loaded buttons
+      #   clearShapefileSelector()
+      #   return()
+      # }
+    }   
+    
     saveConfig()
     showWorkingDirectorySelect();
   }
@@ -173,19 +171,24 @@ importShapefile<-function(fileToImport,lastOne,i){
       HTML('<strong>(2) Click the button below to choose and empty Project Folder where all outputs will be stored.</strong>')
     })
 
+    volumes<<-getVolumes()()
     output$chooseWorkingDirButton<-renderUI({
-      actionButton("chooseWorkingDirButton", "Click to Choose Directory")
+      # actionButton("chooseWorkingDirButton", "Click to Choose Directory")
+      shinyDirButton("chooseWorkingDirButton", "Click to Choose Folder", "Click to Choose Directory",style = "margin-left:10px !important; margin-bottom:10px !important;")
     })
+    shinyDirChoose(input, "chooseWorkingDirButton", roots=volumes, filetypes = NULL)
 
     ##------------------choose a folder where all export files will be stored
+    observeEvent(input$chooseWorkingDirButton, {      
+      masterWorkingDirectory<<-getFolderPathFromShinyDirChoose(volumes,input$chooseWorkingDirButton)
+      print(masterWorkingDirectory)
+      if(is.null(masterWorkingDirectory)){
+        return()
+      }      
 
 
-    observeEvent(input$chooseWorkingDirButton, {
-      masterWorkingDirectory<<-NULL
-
-      shinyjs::disable("chooseWorkingDirButton")
-
-      masterWorkingDirectory<<-choose.dir(dataFolder)
+      print('**********************')
+      print(masterWorkingDirectory)
 
       if(is.na(masterWorkingDirectory) | is.null(masterWorkingDirectory)){
         shinyjs::enable("chooseWorkingDirButton")
@@ -242,11 +245,11 @@ importShapefile<-function(fileToImport,lastOne,i){
     if(!exists('importedDatasetMaster')){
       columnNames<-names(importedShapefilesHolder[[1]])
       ##------------------ show the first 20 rows of data
-      rowsToShow<-importedShapefilesHolder[[1]][1:20,]
-    }else{
-      columnNames<-names(importedDatasetMaster@data)
-      importedDatasetMaster@data['comments']<<-''
-      rowsToShow<-importedDatasetMaster[1:20,]
+      rowsToShow<-st_drop_geometry(importedShapefilesHolder[[1]][1:20,])
+    }else{     
+      columnNames<-names(importedDatasetMaster)     
+      importedDatasetMaster['comments']<<-''
+      rowsToShow<-st_drop_geometry(importedDatasetMaster[1:20,])
     }
 
 
@@ -279,67 +282,19 @@ importShapefile<-function(fileToImport,lastOne,i){
       if(!exists('importedDatasetMaster')){
         mergeShapfilesHandler()
       }else{
-        newUid<-input$uniqueIdSelectorGo
-        importedDatasetMaster$newUid<<-importedDatasetMaster@data[,newUid]
+        newUid<-input$uniqueIdSelectorGo        
+        importedDatasetMaster$newUid<<-importedDatasetMaster[,newUid]
         showDateTimeSelectionPanel()
       }
 
-    })
+    })   
 
-    if(thisIsTestingRun){
-      mergeShapfilesHandler()
-    }
-
-  }
-
-
-
-  filesToImport<-c("gps_318.shp","gps_318dead.shp","gps_320.shp","gps_317.shp","gps_321.shp","gps_344.shp","gps_346.shp")
-  availableShapefiles<<-c("gps_318.shp","gps_318dead.shp","gps_320.shp","gps_317.shp","gps_321.shp","gps_344.shp","gps_346.shp")
-  dataFolder<-"D:\\sampleData"
-  fileImportTracker<<-list()
-  importedShapefilesHolder<<-list()
-  thisIsTestingRun<<-FALSE
-
-  testImport<<-function(){
-
-    thisIsTestingRun<<-TRUE
-    dateColumns<<-c('date','hour')
-    selectedUid<<-"aid"
-    validatorObject<<-list()
-    validatorObject$year<<-c('year','1',"%Y","date")
-    validatorObject$month<<-c('month','2',"%m","date")
-    validatorObject$day<<-c('day','3',"%d","date")
-    validatorObject$hour<<-c('hour','1',"%H","hour")
-
-
-    loadingScreenToggle('show','importing files')
-    for(i in 1:length(filesToImport)){
-      fileToImport <- tools::file_path_sans_ext(filesToImport[i])
-      # HANDLER TO INDICATE THIS IS THE LAST ONE
-      if(i<length(filesToImport)){
-        importShapefile(fileToImport,FALSE,i)
-      } else{
-        importShapefile(fileToImport,TRUE,i)
-      }
-    }
   }
 
 
   downloadMovebankData<-function(user,pw,movebankId){
-
-
     show('downloadSpinner')
-
-
-
-
     storedLogin<-movebankLogin('username' = user, 'password' = pw)
-
-
-
-
-
     loadingScreenToggle('show','downloading movebank data.. please be patient.. depending on file size, this can take a while.')
 
     movebankData <<- tryCatch({
@@ -361,11 +316,6 @@ importShapefile<-function(fileToImport,lastOne,i){
       processMovebankData(data.frame(movebankData))
 
     }
-
-
-
-
-
   }
 
   processMovebankData<-function(movebankData){
@@ -390,24 +340,21 @@ importShapefile<-function(fileToImport,lastOne,i){
                                data = movebankData,
                                proj4string = CRS("+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0")
                              )
+     importedDatasetMaster[["lon"]]<<-as.numeric(importedDatasetMaster[,thisLongField])
+     importedDatasetMaster[["lat"]]<<-as.numeric(importedDatasetMaster[,thisLatField])     
+     rowIds<-c(1:nrow(importedDatasetMaster))
+     importedDatasetMaster$rowIds<<-rowIds
 
-     importedDatasetMaster@data[["lon"]]<<-as.numeric(importedDatasetMaster@data[,thisLongField])
-     importedDatasetMaster@data[["lat"]]<<-as.numeric(importedDatasetMaster@data[,thisLatField])
-     importedDatasetMaster@data$rowIds<<-row.names(importedDatasetMaster@data)
-
-     # back to 5072
-     # prj to utm
-     # importedDatasetMaster<<-spTransform(importedDatasetMaster,CRS("+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"))
-     midLatLong <- c(importedDatasetMaster@data[1,'lat'],importedDatasetMaster@data[1,'lon'])
-     # zone <- find_UTM_zone(midLatLong[1], midLatLong[2])
+     
+     # prj to utm     
+     midLatLong <- c(importedDatasetMaster[1,'lat'],importedDatasetMaster[1,'lon'])     
      zone <- find_UTM_zone(midLatLong[2], midLatLong[1])
-     UTMcrs <<- paste0("+proj=utm +zone=", zone, " +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")
+     UTMcrs <- paste0("+proj=utm +zone=", zone, " +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")
+     configOptions$masterCrs<<-UTMcrs
      importedDatasetMaster <<- spTransform(importedDatasetMaster, CRS(UTMcrs))
 
 
      loadingScreenToggle('hide','')
      showFilesUploadedIndicator();
      showWorkingDirectorySelect();
-
-     # toggleModal(session,'movebankModal',toggle='close')
   }

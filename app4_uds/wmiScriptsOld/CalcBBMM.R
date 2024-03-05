@@ -38,10 +38,10 @@ CalcBBMM <- function(
 ){
   
   #manage packages
-  if(all(c("sf","terra","BBMM","R.utils") %in% installed.packages()[,1])==FALSE)
-    stop("You must install the following packages: sf, terra, BBMM, R.utils")
+  if(all(c("sf","raster","BBMM","R.utils") %in% installed.packages()[,1])==FALSE)
+    stop("You must install the following packages: sf, raster, BBMM, R.utils")
   require(sf)
-  require(terra)
+  require(raster)
   require(BBMM)
   require(R.utils)
   
@@ -125,21 +125,21 @@ CalcBBMM <- function(
     stop("seq.sf must be a sf data frame from package sf!")
   
   # load up the population grid
-  grd <- terra::rast(Pop.grd)
+  grd <- raster(Pop.grd)
   
   # ensure data are in same projection as grid
-  seq.sf <- sf::st_transform(seq.sf, crs=sf::st_crs(grd))
+  seq.sf <- st_transform(seq.sf, crs=projection(grd))
   
   #prepare only the cells to run BB over
-  ext2 <- terra::ext(seq.sf)
+  ext2 <- raster::extent(seq.sf)
   multiplyers <- c((ext2[2]-ext2[1])*mult4buff, (ext2[4]-ext2[3])*mult4buff)   # add about mult4buff around the edges of your extent (you can adjust this if necessary)
-  ext2 <- terra::extend(ext2, multiplyers)
-  cels <- terra::cells(grd, ext2)
+  ext2 <- raster::extend(ext2, multiplyers)
+  cels <- cellsFromExtent(grd, ext2)
   
   # take out of sf
-  seq.sf$x <- sf::st_coordinates(seq.sf)[,1]
-  seq.sf$y <- sf::st_coordinates(seq.sf)[,2]
-  seq.sf <- sf::st_drop_geometry(seq.sf) 
+  seq.sf$x <- st_coordinates(seq.sf)[,1]
+  seq.sf$y <- st_coordinates(seq.sf)[,2]
+  seq.sf <- st_drop_geometry(seq.sf) 
   
   if("POSIXct" %in% class(seq.sf[,date.name]) == FALSE)
     stop("Your date.name column should be POSIXct!")
@@ -188,7 +188,7 @@ CalcBBMM <- function(
         try(BBMM::brownian.bridge(x=seq.sf$x,
                                   y=seq.sf$y,
                                   time.lag=diff(as.numeric(seq.sf$date1234)/60),
-                                  area.grid=terra::crds(grd)[cels,],
+                                  area.grid=coordinates(grd)[cels,],
                                   max.lag=max.lag*60,
                                   time.step=time.step,
                                   location.error=location.error), #this is the location error of your collars
@@ -200,7 +200,7 @@ CalcBBMM <- function(
         try(BrownianBridgeCustom(x=seq.sf$x,
                                  y=seq.sf$y,
                                  time.lag=diff(as.numeric(seq.sf$date1234)/60),
-                                 area.grid=terra::crds(grd)[cels,],
+                                 area.grid=coordinates(grd)[cels,],
                                  max.lag=max.lag*60,
                                  time.step=time.step,
                                  BMvar=BMVar,
@@ -249,18 +249,16 @@ CalcBBMM <- function(
     
     # write to raster
     grd[cels] <- bb$probability
-    terra::writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
-                       filetype = "GTiff", overwrite = TRUE, datatype='FLT4S')
+    writeRaster(grd, filename = paste0(UD.fldr,"/",seq.name,".tif"),
+                format = "GTiff", overwrite = TRUE, datatype='FLT4S')
     
     #output the footprint based on contour
-    grd <- terra::rast(paste0(UD.fldr,"/",seq.name,".tif"))  # seems like we have to read it back in
-    cutoff <- sort(terra::values(grd, mat=FALSE), decreasing=TRUE)
-    vlscsum <- cumsum(cutoff)
-    cutoff <- cutoff[vlscsum > contour/100][1]
-    grd <- terra::classify(grd, rcl=matrix(c(-Inf,cutoff,0,
-                                      cutoff, Inf, 1),ncol=3, byrow=TRUE))
-    terra::writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
-                filetype = "GTiff", overwrite = TRUE, datatype='INT1U')
+    contours <- bbmm.contour(bb, levels=contour, plot=F)
+    rcl <- matrix(c(-Inf, contours$Z, 0,
+                    contours$Z, Inf, 1), ncol=3, byrow=TRUE)
+    grd <- reclassify(grd, rcl = rcl)
+    writeRaster(grd, filename = paste0(Footprint.fldr,"/",seq.name,".tif"),
+                format = "GTiff", overwrite = TRUE, datatype='INT1U')
     
     toreturn <- data.frame(seq.name=seq.name,
                            brownian.motion.variance=round(bb[[1]],2),
@@ -274,7 +272,7 @@ CalcBBMM <- function(
                            num.days=length(unique(jul)),
                            errors="None")
     
-    rm(bb, grd, seq.sf, jul, cutoff, vlscsum) # remove some of the larger objects
+    rm(bb, grd, contours, seq.sf, jul, rcl, cutoff, vlscsum) # remove some of the larger objects
     gc()
     
     #gather summary info

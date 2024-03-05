@@ -13,7 +13,7 @@ source("wmiScripts\\CalcPopUse.R")
 source("wmiScripts\\CalcPopFootprint.R")
 
 
-dependencies<-c("shiny","shinyjs","RSQLite",'sf', 'raster', 'stringr', 'move', 'smoothr', 'rgeos','shinyBS')
+dependencies<-c("shiny","shinyjs","RSQLite",'sf', 'raster', 'stringr', 'move', 'smoothr', 'rgeos','shinyBS','shinyFiles')
 loadDependencies(dependencies)
 
 ui <- fluidPage(
@@ -26,15 +26,12 @@ ui <- fluidPage(
   column(12,
   HTML("<div style='width:110% !important; margin-left:-3rem !important; height:10rem !important; padding:4rem !important; background-color:black; color:white; text-align:center !important;'>
     <span style='text-align: center !important; font-size:3rem; width:100% !important; position:absolute !important; top:0px !important; left:0px !important; color:white;>Migration Mapper - Module 5</span>'>
-    Migration Mapper 3.0 - App 5
+    Migration Mapper 3.1 - App 5
     </div>"),
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
-  actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Reload Existing Project Folder"),
+  shinyDirButton("loadProjectButton", "Reload Existing Project Folder", "Please select a directory",style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;"),
   actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:5px !important;", "X - CLOSE MAPP")
   ),
-  # HTML("<div style='width:100%; height:3rem; padding:4rem; font-size:3rem; margin-bottom:2rem; padding-bottom:6rem; background-color:black; color:white; text-align:center !important;'>Migration Mapper 3.0</div>"),
-  # actionButton("loadProjectButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:25px !important;", "Reload Existing Project Folder"),
-  # actionButton("closeMappButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; right:25px !important;", "X - CLOSE MAPP"),
   fluidRow(
   column(12,
     p('App 5 allows you to merge together your sequence-level outputs from App4 to create population level outputs that identify where the majority of a population moves or spends time.'),

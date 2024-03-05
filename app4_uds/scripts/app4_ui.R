@@ -105,21 +105,15 @@ app4_init<-function(input, output, session){
       saveConfig()
   },ignoreInit=TRUE)
 
-
-
+  volumes<<-getVolumes()()
+  shinyDirChoose(input, "loadProjectButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
   observeEvent(input$loadProjectButton,{
-      tryCatch({
-        # rdsLocation <- file.choose();
-        rdsLocation <- choose.dir(caption = "select your project folder and press OK")
-        appFourReload(rdsLocation)
-      }, error = function(ex) {
-        modalMessager('Error',paste0('Try choosing a file again'))
-        dawg<<-ex
-      })
+      thisSelectedFolder<-getFolderPathFromShinyDirChoose(volumes,input$loadProjectButton)
+      if(!is.null(thisSelectedFolder)){
+        appFourReload(thisSelectedFolder)
+      }      
   },ignoreInit=TRUE)
 
-
-  # showHideMenus()
 }
 
 getSequences<-function(){

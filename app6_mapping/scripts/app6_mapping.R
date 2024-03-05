@@ -23,7 +23,7 @@ mapInit<-function(){
   },ignoreInit=TRUE)
 
   output$map <- renderMapboxer({
-   mapboxer(center = c(importedDatasetMaster@data[1,'lon'],importedDatasetMaster@data[1,'lat']), style = 'mapbox://styles/wmi-merkle/ckxqg5r429gpr14sd3o6dlno4' ,zoom = 6) %>%
+   mapboxer(center = c(importedDatasetMaster[1,'lon'],importedDatasetMaster[1,'lat']), style = 'mapbox://styles/wmi-merkle/ckxqg5r429gpr14sd3o6dlno4' ,zoom = 6) %>%
     add_navigation_control()
   })
   delay(2500,dataInit())
@@ -58,9 +58,11 @@ mapProjectFiles<-function(){
 
     for(i in 1:length(theseFiles)){
       thisFileName<-theseFiles[i]
-      thisIdYrMig<-filesHolder$sequences[thisFileName][[thisFileName]]$id_yrb_[1]
-      thisSequence<-strsplit(thisIdYrMig,'_')
-      thisSequence<-thisSequence[[1]][length(thisSequence[[1]])]
+      thisSequence<-strsplit(thisFileName,'_')[[1]][1]
+      # thisIdYrMig<-filesHolder$sequences[thisFileName][[thisFileName]]$id_yrb_[1]
+      # thisIdYrMig<-filesHolder$sequences[thisFileName][[thisFileName]]$mig[1]
+      # thisSequence<-strsplit(thisIdYrMig,'_')
+      # thisSequence<-thisSequence[[1]][length(thisSequence[[1]])]
       if(!thisSequence%in%names(colorLookup)){
         if(length(names(colorLookup))==0){
           colorLookup[[thisSequence]]<<-mapColors[1]
@@ -98,11 +100,6 @@ addPolygonsToMap<-function(thisFileType,thisFileName){
 
   thisSourceName<-paste0(thisFileName,'Source')
   thisLayerName<-paste0(thisFileName,'Layer')
-
-  # mapboxer._widget.map.map.getStyle().layers
-  # mapboxer._widget.map.map.setPaintProperty('fall_spring_SSSPPPAAANNN_Footprint_contoursLayer','fill-outline-color','rgb(0, 0, 0)')
-  # mapboxer._widget.map.map.setPaintProperty('fall_spring_SSSPPPAAANNN_Footprint_contoursLayer','fill-color','rgba(255, 255, 255,0.25)')
-
 
 
   mapboxer_proxy("map") %>%
