@@ -4,7 +4,7 @@
 Migration Mapper is a free application designed for researchers, biologists, and managers to analyze fine-scale GPS collar data collected from terrestrial ungulates. While Migration Mapper is based in R, you do not need any coding ability to use it. Migration Mapper is written and maintained by Jerod Merkle (https://merkleresearchgroup.org/) and Josh Gage (https://www.gagecarto.com) with the Wyoming Migration Initiative (https://migrationinitiative.org/).  
 
 ## Downloading Migration Mapper
-You can download Migration Mapper directly from GitHub (above); however, we prefer if you download from the Wyoming Migration Initiative's website (https://migrationinitiative.org/content/migration-mapper-download) so we can keep in communication with you when Migration Mapper is updated. 
+You can download Migration Mapper directly from GitHub (above); however, we prefer if you download from the Wyoming Migration Initiative's website (https://migrationinitiative.org/projects/migration-mapper/download/) so we can keep in communication with you when Migration Mapper is updated. 
 
 ## Getting started
 Migration Mapper is a shiny app; thus, after it is downloaded, users need to unzip the folder, open the MAPP.R file in RStudio, and click 'run app'! A detailed video on **installation** can be found here: https://www.youtube.com/watch?v=GIUPm225yKk&list=PLf14a0UX8AU0jktV7GcHf0dV75glC2xeU&index=1&t=18s
