@@ -222,16 +222,19 @@ exportShapefile=function(){
       time<-gsub(":", "", time, fixed = TRUE)
       fileExportName<<-paste0(fileExportName,'_',time)
     }
+
+
     
     tryCatch({
-      if('originalProjection' %in% names(configOptions)){
-        dataToExport<-spTransform(importedDatasetMaster, CRS(configOptions$originalProjection))
-        dataToExport<-dataToExport[,c(configOptions$originalColumns,'problem','mortality','comments')]
-      }else{
-        dataToExport<-importedDatasetMaster
-        dataToExport<-dataToExport[,c(configOptions$originalColumns,'problem','mortality','comments')]
-      }
+      # if('originalProjection' %in% names(configOptions)){
+      #   dataToExport<-spTransform(importedDatasetMaster, CRS(configOptions$originalProjection))
+      #   dataToExport<-dataToExport[,c(configOptions$originalColumns,'problem','mortality','comments')]
+      # }else{
+      #   dataToExport<-importedDatasetMaster
+      #   dataToExport<-dataToExport[,c(configOptions$originalColumns,'problem','mortality','comments')]
+      # }      
       loadingScreenToggle('show',paste0('exporting file to ',fileExportFolder))
+      dataToExport<-st_as_sf(importedDatasetMaster,coords = c("x", "y"), crs = configOptions$masterCrs4326)
       # riteOGR(dataToExport, fileExportFolder, fileExportName, driver = "ESRI Shapefile")
       st_write(dataToExport,paste0(fileExportFolder,'/',fileExportName,'.shp'))
       modalMessager('File Exported',paste0('File exported succesfully.'))
