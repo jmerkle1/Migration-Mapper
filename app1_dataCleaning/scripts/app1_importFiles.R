@@ -76,10 +76,24 @@ importShapefile<-function(fileToImport,lastOne,i){
     # # keep track of position in imports --- to do.. this will probs get goofy if we delete and reimport over and over again
     importIterator<-i
     progressIndicator(paste(fileToImport,' Imported successfully!',sep=""),'stop')
-    loadingScreenToggle('hide','')
+    loadingScreenToggle('hide','')       
+
+    # if there are a bunch of older MM columns from a previous export
+    # those columns need to be dropped 
+    colsToCheck<-c("lon","lat","newUid","elev","comments","rowIds","newMasterDate","burst","month","day","year","jul","id_yr","x","y","nsdYear","displacementYear","nsdOverall","displacementOverall","dist","dt","speed","abs.angle","rel.angle","fixRateHours","problem","mortality","FPT50","FPT150","FPT300","commnts","nwMstrD","nsdOvrl","dsplcmO","id_biYr","dsplcmB","rel_ngl","abs_ngl","dsplcmB","StepFlg","fxRtHrs","mortlty","biYrFll","nsdBio","dsplcmY","bioYear","dateTest","DATETST","dateTst")
+    for(i in 1:length(colsToCheck)){
+      thisCol<-colsToCheck[i]      
+      if(thisCol %in% names(importedDataset)){
+        whichCol<-which(names(importedDataset) == thisCol)
+        # names(importedShapefilesHolder[[fileToImport]])[whichCol]<<-paste0(thisCol,'_')        
+        # importedShapefilesHolder[[fileToImport]]
+        importedDataset<-importedDataset[,-whichCol]
+      }
+    }
 
     # add this shapefile to list holder of imported shapefiles
     importedShapefilesHolder[[fileToImport]]<<-assign(fileToImport,importedDataset)
+
 
     
     # change columns names to UPPERCASE!!
@@ -90,15 +104,6 @@ importShapefile<-function(fileToImport,lastOne,i){
     names(importedShapefilesHolder[[fileToImport]])<<-newNames
     
 
-    colsToCheck<-c("LAT","LON","newUid","elev","comments","rowIds","newMasterDate","burst","month","day","year","jul","id_yr","x","y","nsdYear","displacementYear","nsdOverall","displacementOverall","dist","dt","speed","abs.angle","rel.angle","fixRateHours","problem","mortality")
-    colsToCheck<-toupper(colsToCheck)
-    for(i in 1:length(colsToCheck)){
-      thisCol<-colsToCheck[i]      
-      if(thisCol %in% names(importedShapefilesHolder[[fileToImport]])){
-        whichCol<-which(names(importedShapefilesHolder[[fileToImport]]) == thisCol)
-        names(importedShapefilesHolder[[fileToImport]])[whichCol]<<-paste0(thisCol,'_')
-      }
-    }
 
 
 
