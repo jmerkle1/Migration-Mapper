@@ -234,7 +234,7 @@ exportShapefile=function(){
       #   dataToExport<-dataToExport[,c(configOptions$originalColumns,'problem','mortality','comments')]
       # }      
       loadingScreenToggle('show',paste0('exporting file to ',fileExportFolder))
-      dataToExport<-st_as_sf(importedDatasetMaster,coords = c("x", "y"), crs = configOptions$masterCrs4326)
+      dataToExport<-st_as_sf(importedDatasetMaster,coords = c("x", "y"), crs = configOptions$masterCrs)      
       # riteOGR(dataToExport, fileExportFolder, fileExportName, driver = "ESRI Shapefile")
       st_write(dataToExport,paste0(fileExportFolder,'/',fileExportName,'.shp'))
       modalMessager('File Exported',paste0('File exported succesfully.'))
