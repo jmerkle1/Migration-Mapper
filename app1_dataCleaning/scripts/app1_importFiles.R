@@ -80,7 +80,7 @@ importShapefile<-function(fileToImport,lastOne,i){
 
     # if there are a bunch of older MM columns from a previous export
     # those columns need to be dropped 
-    colsToCheck<-c("lon","lat","newUid","elev","comments","rowIds","newMasterDate","burst","month","day","year","jul","id_yr","x","y","nsdYear","displacementYear","nsdOverall","displacementOverall","dist","dt","speed","abs.angle","rel.angle","fixRateHours","problem","mortality","FPT50","FPT150","FPT300","commnts","nwMstrD","nsdOvrl","dsplcmO","id_biYr","dsplcmB","rel_ngl","abs_ngl","dsplcmB","StepFlg","fxRtHrs","mortlty","biYrFll","nsdBio","dsplcmY","bioYear","dateTest","DATETST","dateTst")
+    colsToCheck<-c("lon","lat","newUid","elev","comments","rowIds","newMasterDate","burst","month","day","year","jul","id_yr","x","y","nsdYear","displacementYear","nsdOverall","displacementOverall","dist","dt","speed","abs.angle","rel.angle","fixRateHours","problem","mortality","FPT50","FPT150","FPT300","commnts","nwMstrD","nsdOvrl","dsplcmO","id_biYr","dsplcmB","rel_ngl","abs_ngl","dsplcmB","StepFlg","fxRtHrs","mortlty","Mortlty","biYrFll","nsdBio","dsplcmY","bioYear","dateTest","DATETST","dateTst")
     for(i in 1:length(colsToCheck)){
       thisCol<-colsToCheck[i]      
       if(thisCol %in% names(importedDataset)){
