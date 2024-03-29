@@ -141,6 +141,7 @@ observeEvent(input$movebankLoginButton,{
 
   shinyDirChoose(input, "chooseDirButton", roots=volumes, filetypes = NULL,allowDirCreate=FALSE)
   observeEvent(input$chooseDirButton, {  
+    volumes<<-getVolumes()()  
     dataFolder<<-getFolderPathFromShinyDirChoose(volumes,input$chooseDirButton)  
     if(is.null(dataFolder)){
       return()
@@ -181,7 +182,7 @@ observeEvent(input$movebankLoginButton,{
     output$fileUploadExecute<-renderUI({
         actionButton('fileUploadExecute','Begin File Import')
     })
-})
+},ignoreInit=TRUE)
 
 
 observeEvent(input$fileUploadExecute, {
