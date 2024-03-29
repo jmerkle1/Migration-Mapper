@@ -373,5 +373,5 @@ loadConfig<-function(){
 }
 
 
-
+shiny::devmode(FALSE)
 shinyApp(ui, server)
