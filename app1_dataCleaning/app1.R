@@ -482,5 +482,5 @@ rebuildOlderProject<-function(newProjectFolder){
 }
 
 
-shiny::devmode(TRUE)
+shiny::devmode(FALSE)
 shinyApp(ui, server)

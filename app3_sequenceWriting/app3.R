@@ -198,5 +198,5 @@ server <- function(input, output, session) {
  })
 }
 
-shiny::devmode(TRUE)
+shiny::devmode(FALSE)
 shinyApp(ui, server)
