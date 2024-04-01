@@ -91,6 +91,9 @@ importShapefile<-function(fileToImport,lastOne,i){
       }
     }
 
+    # for remaining columns.. need to add a _ to deal with others that
+    # could cause errors.. e.g. month
+
     # add this shapefile to list holder of imported shapefiles
     importedShapefilesHolder[[fileToImport]]<<-assign(fileToImport,importedDataset)
 
@@ -98,8 +101,8 @@ importShapefile<-function(fileToImport,lastOne,i){
     
     # change columns names to UPPERCASE!!
     # names(importedShapefilesHolder[[fileToImport]]@data)<<-toupper(names(importedShapefilesHolder[[fileToImport]]@data))
-    newNames<-toupper(names(importedShapefilesHolder[[fileToImport]]))
-    whichIsGeom<-which(newNames=='GEOMETRY')
+    newNames<-paste0(toupper(names(importedShapefilesHolder[[fileToImport]])),'_')
+    whichIsGeom<-which(newNames=='GEOMETRY_')
     newNames[whichIsGeom]<-'geometry'
     names(importedShapefilesHolder[[fileToImport]])<<-newNames
     
