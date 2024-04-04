@@ -16,7 +16,7 @@ movementParamsProcessing<-function(){
     progressIndicator('calculating burst','start')
     #REORDER DATA AS PER BURST REQUIREMENTS
     importedDatasetMaster<<-importedDatasetMaster[order(importedDatasetMaster$newUid, importedDatasetMaster$newMasterDate),]    
-    importedDatasetMaster$burst<<-CalcBurst(importedDatasetMaster,T,'newUid','newMasterDate',10800)
+    importedDatasetMaster$burst<<-CalcBurst(importedDatasetMaster,T,'newUid','newMasterDate',176400)
     progressIndicator('checking for burst','stop')
 
 

@@ -120,6 +120,10 @@ observeEvent(input$movebankLoginButton,{
       saveConfig()
   },ignoreInit=TRUE)
 
+  
+
+  
+
   observeEvent(input$calcMoveParamsButton,{
       findProblemPoints()
   },ignoreInit=TRUE)

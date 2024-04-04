@@ -70,8 +70,7 @@ ui <- fluidPage(
             numericInput("maxSpeedSelector", "Max Speed (km/hr)", 10.8, step=0.1,),
             h4('Mortality Options',style="background-color:#3b3b3b; color:#d9d9d9; padding:5px;"),
             numericInput("mortDistance", "Minimum Distance (meters)", 50),
-            numericInput("mortTime", "Time unit (hours)", 48),
-            # strong('the button below will rebuild your migtime table used in app2. Note if you have already selected dates, these will all be lost.'),
+            numericInput("mortTime", "Time unit (hours)", 48),                        
             hidden(
             fluidRow(id='recalcInstructions',
             p('Press the button below to recalculate movement parameters. Note that any flags already added to your data will be lost.')

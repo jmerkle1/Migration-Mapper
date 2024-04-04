@@ -15,7 +15,7 @@
 #'
 #' @export
 
-CalcBurst <- function(data = data, id = TRUE, id_name="id", date_name="date", Tmax = 10800){
+CalcBurst <- function(data = data, id = TRUE, id_name="id", date_name="date", Tmax = 176400){
 
   require(sf)
   if(inherits(data, "data.frame") != TRUE)
