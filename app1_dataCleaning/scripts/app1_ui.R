@@ -240,6 +240,7 @@ exportShapefile=function(){
       # }      
       loadingScreenToggle('show',paste0('exporting file to ',fileExportFolder))
       dataToExport<-st_as_sf(importedDatasetMaster,coords = c("x", "y"), crs = configOptions$masterCrs)      
+      dataToExport$newMasterDate<-as.character(dataToExport$newMasterDate)
       # riteOGR(dataToExport, fileExportFolder, fileExportName, driver = "ESRI Shapefile")
       st_write(dataToExport,paste0(fileExportFolder,'/',fileExportName,'.shp'))
       modalMessager('File Exported',paste0('File exported succesfully.'))
