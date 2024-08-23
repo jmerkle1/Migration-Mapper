@@ -58,11 +58,7 @@ mapProjectFiles<-function(){
 
     for(i in 1:length(theseFiles)){
       thisFileName<-theseFiles[i]
-      thisSequence<-strsplit(thisFileName,'_')[[1]][1]
-      # thisIdYrMig<-filesHolder$sequences[thisFileName][[thisFileName]]$id_yrb_[1]
-      # thisIdYrMig<-filesHolder$sequences[thisFileName][[thisFileName]]$mig[1]
-      # thisSequence<-strsplit(thisIdYrMig,'_')
-      # thisSequence<-thisSequence[[1]][length(thisSequence[[1]])]
+      thisSequence<-strsplit(thisFileName,'_')[[1]][1]      
       if(!thisSequence%in%names(colorLookup)){
         if(length(names(colorLookup))==0){
           colorLookup[[thisSequence]]<<-mapColors[1]

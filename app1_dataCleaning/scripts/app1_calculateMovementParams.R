@@ -22,10 +22,7 @@ movementParamsProcessing<-function(){
 
 
 
-    progressIndicator('calculating date parameters','start')
-    # importedDatasetMaster@data$month <<- as.numeric(strftime(importedDatasetMaster@data$newMasterDate, format = "%m", tz = selectedTimezone))
-    # importedDatasetMaster@data$day <<- as.numeric(strftime(importedDatasetMaster@data$newMasterDate, format = "%d", tz = selectedTimezone))
-    # importedDatasetMaster@data$year <<- as.numeric(strftime(importedDatasetMaster@data$newMasterDate, format = "%Y", tz = selectedTimezone))
+    progressIndicator('calculating date parameters','start')    
     importedDatasetMaster$month <<- as.numeric(strftime(importedDatasetMaster$newMasterDate, format = "%m", tz = selectedTimezone))
     importedDatasetMaster$day <<- as.numeric(strftime(importedDatasetMaster$newMasterDate, format = "%d", tz = selectedTimezone))
     importedDatasetMaster$year <<- as.numeric(strftime(importedDatasetMaster$newMasterDate, format = "%Y", tz = selectedTimezone))    

@@ -14,27 +14,19 @@ mergeShapfilesHandler<-function(){
 
     # if nan is chosen then the uid will just be the filename
     if(selectedUid=='NaN'){
-      for(i in 1:length(importedShapefilesHolder)){
-        # importedShapefilesHolder[[i]]@data['newUid']<<-NULL
+      for(i in 1:length(importedShapefilesHolder)){        
         importedShapefilesHolder[[i]]$newUid<<-NULL
         thisNewUid<-names(importedShapefilesHolder[i])
         # remove these line because of user needs for underscores to persist
         # also cannot have underscores.. could cause errors later
-        thisNewUid<-gsub("_", "-", thisNewUid)
-        # importedShapefilesHolder[[i]]@data['newUid']<<-thisNewUid
+        thisNewUid<-gsub("_", "-", thisNewUid)        
         importedShapefilesHolder[[i]]$newUid<<-thisNewUid
       }
     } else{ #otherwise the UID is the field that was selected for the UID
-      for(i in 1:length(importedShapefilesHolder)){
-        # importedShapefilesHolder[[i]]@data['newUid']<<-NULL
+      for(i in 1:length(importedShapefilesHolder)){        
         importedShapefilesHolder[[i]]$newUid<<-NULL
-        # also cannot have underscores.. could cause errors later
-        # thisNewUid<-gsub("_","-",importedShapefilesHolder[[i]]@data[,selectedUid])
-        thisNewUid<-gsub("_","-",importedShapefilesHolder[[i]][[selectedUid]])
-        # thisNewUid<-importedShapefilesHolder[[i]]@data[,selectedUid]
-        # importedShapefilesHolder[[i]]@data['newUid']<<-thisNewUid
-        print(i)
-        print(thisNewUid)
+        # also cannot have underscores.. could cause errors later        
+        thisNewUid<-gsub("_","-",importedShapefilesHolder[[i]][[selectedUid]])                
         importedShapefilesHolder[[i]]$newUid<<-thisNewUid
       }
     }
@@ -100,8 +92,6 @@ projectShapefilesHandler<-function(){
 
 
   # add lat/lon for leaflet maps
-  # importedDatasetMaster@data[["lon"]]<<-importedDatasetMaster$coords.x1
-  # importedDatasetMaster@data[["lat"]]<<-importedDatasetMaster$coords.x2
   importedDatasetMaster[["lon"]]<<-coords[,1]
   importedDatasetMaster[["lat"]]<<-coords[,2]
 
@@ -109,18 +99,13 @@ projectShapefilesHandler<-function(){
   # importedDatasetMaster@data[['elev']]<<-raster::extract(elevation,importedDatasetMaster)
   importedDatasetMaster$elev<<-extract(elevation,importedDatasetMaster)[,2]
   progressIndicator('Extracting Elevation Data','stop')
-
-  # importedDatasetMaster@data['comments']<<-''
+  
   importedDatasetMaster$comments<<-''
 
-
-  # midLatLong <- c(importedDatasetMaster@data[1,'lat'],importedDatasetMaster@data[1,'lon'])
-  # midLatLong <- c(importedDatasetMaster[1,'lat'],importedDatasetMaster[1,'lon'])
   midLatLong <- c(importedDatasetMaster[1,]$lat,importedDatasetMaster[1,]$lon)
   zone <- find_UTM_zone(midLatLong[2], midLatLong[1])
   UTMcrs <- paste0("+proj=utm +zone=", zone, " +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0")  
   configOptions$masterCrs<<-UTMcrs
-  # importedDatasetMaster <<- spTransform(importedDatasetMaster, CRS(UTMcrs))
   importedDatasetMaster <<- st_transform(importedDatasetMaster, crs = UTMcrs)
 
   progressIndicator('adding x y columns','start')
