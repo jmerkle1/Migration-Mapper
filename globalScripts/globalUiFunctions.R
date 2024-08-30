@@ -270,17 +270,6 @@ find_UTM_zone <- function(longitude, latitude) {
   }
 }
 
-# points to lines!
-# pointsToLines<-function(d){
-#   ## list of Lines per id, each with one Line in a list
-#   x <- lapply(split(d, d$newUid), function(x) Lines(list(Line(coordinates(x))), x$newUid[1L]))
-#   # the corrected part goes here:
-#   lines <- SpatialLines(x)
-#   data <- data.frame(newUid = unique(d$newUid))
-#   rownames(data) <- data$newUid
-#   l <- SpatialLinesDataFrame(lines, data)
-#   return(l)
-# }
 #' Transform points into lines
 #'
 #' Can either create a line string for each id, or a line for each connected point in the database. Written and updated by Jerod Merkle. Last updated January 2022.
