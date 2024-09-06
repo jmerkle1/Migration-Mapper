@@ -58,16 +58,16 @@ calculateDefinedSequences<-function(){
         names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat','x','y')
         theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
         theseSequencePointsForExport$season<-thisSequenceName
-        # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-        theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
+        theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+        # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
         if(exportShapes!='No, do not export shapefiles'){
           theseSequencePointsForExport$method<-'sliderSelected'
           exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
         }
         theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat','x','y')]
         names(theseSequencePoints)<-c('id','date','mig','lon','lat','x','y')        
-        # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-        theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
+        theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+        # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
         thisFolder<-paste0(sequencesFolder,'\\',thisSequenceName)
         saveRDS(theseSequencePoints,paste0(thisFolder,'\\',thisSequenceName,'.rds'))
 
@@ -261,16 +261,16 @@ calculateInBetweenSequences<-function(){
     names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat','x','y')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
-    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
+    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
     if(exportShapes!='No, do not export shapefiles'){
       exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
     }
 
     theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat','x','y')]
     names(theseSequencePoints)<-c('id','date','mig','lon','lat','x','y')    
-    # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
+    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
     sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
     if(dir.exists(sequencesFolder)==FALSE){
       dir.create(sequencesFolder)
@@ -474,16 +474,16 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
     names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat','x','y')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
-    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
+    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
     if(exportShapes!='No, do not export shapefiles'){
       exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
     }
     
     theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat','x','y')]
     names(theseSequencePoints)<-c('id','date','mig','lon','lat','x','y')
-    # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
+    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
     sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
     if(dir.exists(sequencesFolder)==FALSE){
       dir.create(sequencesFolder)
@@ -620,16 +620,16 @@ calculateCustomSequences<-function(){
     names(theseSequencePointsForExport)<-c('id','bioYearFull','date','id_yrbio_season','lon','lat','x','y')
     theseSequencePointsForExport$date<-as.character(theseSequencePointsForExport$date)
     theseSequencePointsForExport$season<-thisSequenceName
-    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
+    theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    # theseSequencePointsForExport<-st_as_sf(theseSequencePointsForExport,coords = c("x", "y"), crs = configOptions$masterCrs)
     if(exportShapes!='No, do not export shapefiles'){
       theseSequencePointsForExport$method<-'custom'
       exportShapeFiles(theseSequencePointsForExport,thisSequenceName)
     }    
     theseSequencePoints<-theseSequencePoints[,c('newUid','newMasterDate','mig','lon','lat','x','y')]
     names(theseSequencePoints)<-c('id','date','mig','lon','lat','x','y')
-    # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
-    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
+    theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("lon", "lat"), crs = configOptions$masterCrs4326)
+    # theseSequencePoints<-st_as_sf(theseSequencePoints,coords = c("x", "y"), crs = configOptions$masterCrs)
     sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
     if(dir.exists(sequencesFolder)==FALSE){
       dir.create(sequencesFolder)
