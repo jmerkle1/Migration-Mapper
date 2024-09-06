@@ -54,7 +54,9 @@ updateSummaryStats<-function(){
       HTML('<span>No MCP info! Too few points for this individual</span>')
     })    
     }else{
-      thesePointsForMcp<-as_Spatial(st_as_sf(pointsForMap,coords = c("x", "y"), crs = configOptions$masterCrs))
+      thesePointsForMcp<-st_transform(pointsForMap,configOptions$masterCrs)
+      thesePointsForMcp<-as_Spatial(thesePointsForMcp)
+      # thesePointsForMcp<-as_Spatial(st_as_sf(pointsForMap,coords = c("x", "y"), crs = configOptions$masterCrs))
       mcp100<-mcp(thesePointsForMcp,percent=100,unout='km2')$area
       mcp99<-mcp(thesePointsForMcp,percent=99,unout='km2')$area
       mcp95<-mcp(thesePointsForMcp,percent=95,unout='km2')$area
