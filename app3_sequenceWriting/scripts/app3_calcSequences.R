@@ -678,7 +678,8 @@ exportShapeFiles<-function(theseSequencePoints,thisSequenceName){
 
     st_write(theseSequencePoints, sequenceShapesDirectory, paste0(thisSequenceName,'_points'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)  
 
-    linesData<-Points2Lines(theseSequencePoints,'date','id')
+    linesData<-Points2Lines(theseSequencePoints,'date','id_yrbio_season')
+    # linesData<-Points2Lines(theseSequencePoints)
     st_write(linesData, sequenceShapesDirectory, paste0(thisSequenceName,'_lines'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)
 
 }
