@@ -574,7 +574,8 @@ addPointsToMap<-function(){
 
 
       mapboxer_proxy("importedDataMapBox") %>%        
-        add_source(as_mapbox_source(pointsForMap[0,],lat="lat",lng="lon"),'hoverSource')%>%
+        # add_source(as_mapbox_source(pointsForMap[0,],lat="lat",lng="lon"),'hoverSource')%>%
+        add_source(as_mapbox_source(dummyPoint,lat="lat",lng="lon"),'hoverSource')%>%
         add_circle_layer(
           source = 'hoverSource',
           circle_color = '#000000',
@@ -737,8 +738,9 @@ plotData=function(){
       plotClickEvent(clickedPlotPoint)
     }
   },ignoreInit=TRUE)
-  plotHoverObserver<<-observeEvent(input$plot_hover, {
-    hoveredPoint<<-nearPoints(pointsForMap, input$plot_hover, threshold = 5, maxpoints = 1, addDist = TRUE)
+  plotHoverObserver<<-observeEvent(input$plot_hover, {    
+    hoveredPoint<<-nearPoints(pointsForMap, input$plot_hover, threshold = 5, maxpoints = 1, addDist = TRUE)    
+    hoveredPoint<<-st_as_sf(hoveredPoint)
     if(nrow(hoveredPoint)>0){
       showHoverPoint(hoveredPoint)
     } else{
@@ -765,7 +767,7 @@ plotClickEvent=function(clickedPlotPoint){
 showHoverPoint=function(hoveredPoint){
   mapboxer_proxy("importedDataMapBox") %>%    
     set_data(hoveredPoint,lat="lat",lng='lon','hoverSource')%>%
-    update_mapboxer()
+    update_mapboxer()    
 }
 
 clearHoverPoint=function(){
