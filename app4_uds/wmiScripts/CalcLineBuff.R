@@ -72,13 +72,8 @@ CalcLineBuff <- function(
   ln <- sf::st_as_sfc(ln, crs = sf::st_crs(seq.sf))
   
   ln <- try(sf::st_buffer(ln, dist=buff), silent=TRUE) # add buffer
-
-  print('-------------')
-  print('-------------')
-  print('-------------')
-  print('-------------')
-  print(ln)
-  dawg<<-ln
+  
+  print(ln)  
   
   if("try-error" %in% class(ln)){   # if buffering failed
     #gather summary info

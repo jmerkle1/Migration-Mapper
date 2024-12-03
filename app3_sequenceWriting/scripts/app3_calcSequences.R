@@ -1,5 +1,4 @@
 calculateDefinedSequences<-function(){
-
   loadingScreenToggle('show','calculating sequences')
 
   sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
@@ -103,7 +102,7 @@ calculateDefinedSequences<-function(){
   loadingScreenToggle('hide','calculating sequences')
 }
 
-calculateInBetweenSequences<-function(){
+calculateInBetweenSequences<-function(){  
   # this is to keep track of those row ids that span a bio year
   rowIdsThatSpanABioYear<-c()
   thisSequenceName<-input$definedSeasonTextInput
@@ -293,7 +292,6 @@ calculateInBetweenSequences<-function(){
 }
 
 calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
-
   tempDForSpan<-importedDatasetMaster[0,]
 
 
@@ -392,6 +390,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         thisMigStart<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)       
       }
 
+
+
       # -------------------------------------
       # -------------------------------------
       # ---------- now deal with migend...
@@ -415,8 +415,23 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         if(thisSequenceAverageEndDate==999){
           stop()
         }
+
+        # ----------------------
+        # if the migration end date (JULIAN) is greater than the start
+        # then don't need to add a year
+        thisStartJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageStartDate)))
+        thisEndJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageEndDate)))
+        if(thisEndJulian>thisStartJulian){
+          yearToAdd<-0
+        }else{
+          yearToAdd<-1
+        }
+
+
+
+
         # this should fix issue with overspanning data when averaging across bio years etc
-        thisMigEnd<-paste0(as.numeric(thisFullYear)+1,'-',thisSequenceAverageEndDate)
+        thisMigEnd<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',thisSequenceAverageEndDate)
         thisDateSelectionType='averaged'      
       }else{
         thisDateSelectionType='sliderSelected'
@@ -512,7 +527,6 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
 
 calculateCustomSequences<-function(){
-
   loadingScreenToggle('show','calculating sequences')
 
   rowIdsThatSpanABioYear<-c()
@@ -536,8 +550,8 @@ calculateCustomSequences<-function(){
 
   toggleModal(session,'customSeasonModal',toggle='close')
 
-  seasonStartDate<<-input$startDateSelector
-  seasonEndDate<<-input$endDateSelector
+  seasonStartDate<-input$startDateSelector
+  seasonEndDate<-input$endDateSelector
 
   seasonStartDateJ<-yday(seasonStartDate)
   seasonEndDateJ<-yday(seasonEndDate)
