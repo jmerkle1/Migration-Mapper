@@ -559,17 +559,30 @@ calculateCustomSequences<-function(){
 
 
 
-  doesSequenceSpanBioYears<-FALSE
+  # doesSequenceSpanBioYears<-FALSE
 
-  if(seasonEndDateJ<seasonStartDateJ){
-    doesSequenceSpanBioYears<-TRUE
-    tempDForSpan<-importedDatasetMaster[0,]
-  }
+  if(seasonEndDateJ>seasonStartDateJ){
+          yearToAdd<-0
+        }else{
+          yearToAdd<-1
+          tempDForSpan<-importedDatasetMaster[0,]
+        }
 
-  if(seasonStartDateJ<bioYearStartDateJulian & seasonEndDateJ>=bioYearStartDateJulian){
-    doesSequenceSpanBioYears<-TRUE
-    tempDForSpan<-importedDatasetMaster[0,]
-  }
+  # if the julian end date comes before the start date then add a year
+  # if(seasonEndDateJ<seasonStartDateJ){
+  #   doesSequenceSpanBioYears<-TRUE
+  #   print('spans bio year!!!!!! 566')
+  #   tempDForSpan<-importedDatasetMaster[0,]
+  # }
+
+
+  #  if the julian start date comes before the bioYearStart
+  #  and the end date comes after the bioYear Start
+  # if(seasonStartDateJ<bioYearStartDateJulian & seasonEndDateJ>=bioYearStartDateJulian){
+  #   doesSequenceSpanBioYears<-TRUE
+  #   print('spans bio year!!!!!! 571')
+  #   tempDForSpan<-importedDatasetMaster[0,]
+  # }
 
 
   if(seasonStartDate==seasonEndDate){
@@ -589,36 +602,44 @@ calculateCustomSequences<-function(){
     thisIdYr<-migtime[j,'id_bioYear']
     thisAid<-migtime[j,'newUid']
     thisSequenceStartDate<-paste0(thisFullYear,'-',seasonStartDate)
-    if(doesSequenceSpanBioYears){
-      thisSequenceEndDate<-paste0(as.numeric(thisFullYear)+1,'-',seasonEndDate)      
-      theseRows<-which(
-        importedDatasetMaster$newUid==thisAid &
-        importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
-        importedDatasetMaster$newMasterDate <= thisSequenceEndDate
-      )
-    }else{
-      thisSequenceEndDate<-paste0(thisFullYear,'-',seasonEndDate)      
-      theseRows<-which(
-        importedDatasetMaster$newUid==thisAid &
-        importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
-        importedDatasetMaster$newMasterDate <= thisSequenceEndDate
-      )
-    }
 
-    if(length(theseRows>0) & doesSequenceSpanBioYears){
+    thisSequenceEndDate<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',seasonEndDate)      
+      theseRows<-which(
+        importedDatasetMaster$newUid==thisAid &
+        importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
+        importedDatasetMaster$newMasterDate <= thisSequenceEndDate
+      )
+
+    # if(doesSequenceSpanBioYears){
+    #   thisSequenceEndDate<-paste0(as.numeric(thisFullYear)+1,'-',seasonEndDate)      
+    #   theseRows<-which(
+    #     importedDatasetMaster$newUid==thisAid &
+    #     importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
+    #     importedDatasetMaster$newMasterDate <= thisSequenceEndDate
+    #   )
+    # }else{
+    #   thisSequenceEndDate<-paste0(thisFullYear,'-',seasonEndDate)      
+    #   theseRows<-which(
+    #     importedDatasetMaster$newUid==thisAid &
+    #     importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
+    #     importedDatasetMaster$newMasterDate <= thisSequenceEndDate
+    #   )
+    # }
+
+    # if(length(theseRows>0) & doesSequenceSpanBioYears){
+    if(length(theseRows>0) & yearToAdd>0){      
       tempDToAdd<-importedDatasetMaster[theseRows,]
       # this was where there were 2 years for span years      
       tempDToAdd$bioYear<-thisShortYear
-
       tempDForSpan<-rbind(tempDForSpan,tempDToAdd)
-
     }
 
     thisSequencesRows<-c(thisSequencesRows,theseRows)
   }
 
   if(length(thisSequencesRows)>1){
-    if(doesSequenceSpanBioYears){
+    # if(doesSequenceSpanBioYears){
+    if(yearToAdd>0){
       theseSequencePoints<-tempDForSpan
     }else{
       theseSequencePoints<-importedDatasetMaster[thisSequencesRows,]
