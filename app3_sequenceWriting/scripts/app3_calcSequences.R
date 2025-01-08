@@ -419,6 +419,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         # ----------------------
         # if the migration end date (JULIAN) is greater than the start
         # then don't need to add a year
+        thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
         thisStartJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageStartDate)))
         thisEndJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageEndDate)))
         if(thisEndJulian>thisStartJulian){
@@ -553,20 +554,27 @@ calculateCustomSequences<-function(){
   seasonStartDate<-input$startDateSelector
   seasonEndDate<-input$endDateSelector
 
+  # seasonStartDate<-as.POSIXlt('01-01-2022', format = "%m-%d-%y")
+  # seasonEndDate<-as.POSIXlt('03-15-2022', format = "%m-%d-%y")
   seasonStartDateJ<-yday(seasonStartDate)
   seasonEndDateJ<-yday(seasonEndDate)
   bioYearStartDateJulian<-yday(configOptions$bioYearStartDate)
 
+  doesSequenceSpanBioYears<-FALSE
 
+  if(seasonEndDateJ>bioYearStartDateJulian){
+    doesSequenceSpanBioYears<-TRUE
+  }
 
-  # doesSequenceSpanBioYears<-FALSE
+  # seasonStartDate<-as.POSIXlt('01-01-2022', format = "%m-%d-%y")
+  # seasonEndDate<-as.POSIXlt('03-15-2022', format = "%m-%d-%y")
 
   if(seasonEndDateJ>seasonStartDateJ){
-          yearToAdd<-0
-        }else{
-          yearToAdd<-1
-          tempDForSpan<-importedDatasetMaster[0,]
-        }
+    yearToAdd<-0
+  }else{
+    yearToAdd<-1
+    tempDForSpan<-importedDatasetMaster[0,]
+  }
 
   # if the julian end date comes before the start date then add a year
   # if(seasonEndDateJ<seasonStartDateJ){
@@ -592,23 +600,37 @@ calculateCustomSequences<-function(){
   }
 
 
-
   seasonStartDate<-format(input$startDateSelector, format="%m-%d")
   seasonEndDate<-format(input$endDateSelector, format="%m-%d")
   thisSequencesRows<-0
+  migrationNameArray<-c()
   for(j in 1:nrow(migtime)){
+    print('j')
+    print(j)
     thisFullYear<-migtime[j,'bioYearFull']
     thisShortYear<-migtime[j,'bioYear']
     thisIdYr<-migtime[j,'id_bioYear']
     thisAid<-migtime[j,'newUid']
     thisSequenceStartDate<-paste0(thisFullYear,'-',seasonStartDate)
-
     thisSequenceEndDate<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',seasonEndDate)      
-      theseRows<-which(
-        importedDatasetMaster$newUid==thisAid &
-        importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
-        importedDatasetMaster$newMasterDate <= thisSequenceEndDate
-      )
+    print(thisAid)
+    print(thisSequenceStartDate)
+    print(thisSequenceEndDate)
+
+    theseRows<-which(
+      importedDatasetMaster$newUid==thisAid &
+      importedDatasetMaster$newMasterDate >= thisSequenceStartDate &
+      importedDatasetMaster$newMasterDate <= thisSequenceEndDate
+    )
+
+    if(length(theseRows)>0){
+      thisTempMigNameArray<-vector(mode="character", length=length(theseRows))
+      thisTempMigNameArray[thisTempMigNameArray==""] <- paste0(thisAid,'_',thisShortYear,'_',thisSequenceName)
+      migrationNameArray<-c(migrationNameArray,thisTempMigNameArray)
+    }
+
+
+
 
     # if(doesSequenceSpanBioYears){
     #   thisSequenceEndDate<-paste0(as.numeric(thisFullYear)+1,'-',seasonEndDate)      
@@ -633,7 +655,6 @@ calculateCustomSequences<-function(){
       tempDToAdd$bioYear<-thisShortYear
       tempDForSpan<-rbind(tempDForSpan,tempDToAdd)
     }
-
     thisSequencesRows<-c(thisSequencesRows,theseRows)
   }
 
@@ -645,9 +666,16 @@ calculateCustomSequences<-function(){
       theseSequencePoints<-importedDatasetMaster[thisSequencesRows,]
     }
 
+    # this is causing an error for those that span a bio year
+    # theseSequencePoints$mig<-paste0(theseSequencePoints$newUid,'_',theseSequencePoints$bioYear,'_',thisSequenceName)
+    theseSequencePoints$mig<-migrationNameArray
+
+    # drop problems and mortalities
     theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$problem != 1),]
     theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$mortality != 1),]    
-    theseSequencePoints$mig<-paste0(theseSequencePoints$newUid,'_',theseSequencePoints$bioYear,'_',thisSequenceName)
+    
+    
+    
 
     sequencesSummary(theseSequencePoints)
     theseSequencePointsForExport<-theseSequencePoints
@@ -679,6 +707,8 @@ calculateCustomSequences<-function(){
     }
     saveRDS(theseSequencePoints,paste0(thisFolder,'\\',thisSequenceName,'.rds'))
   }
+  # 
+  # finished
   loadingScreenToggle('hide','calculating sequences')
   totalSequences<-length(unique(theseSequencePoints$mig))
   totalUid<-length(unique(theseSequencePoints$id))

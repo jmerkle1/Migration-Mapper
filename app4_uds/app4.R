@@ -50,7 +50,7 @@ ui <- fluidPage(
     p('DBBMM - Dynamic Brownian Bridge Movement Model (from Move package)'),
     p('Kernel UD - Bivariate normal kernel Utilization Distribution (from adehabitatHR package), including an option to subsample data beforehand.'),
     p('CTMM - Continuous Time Movement Model (from package ctmm) and calculate the occurrence distribution.'),
-    p('Line Buffer - Connect points with strait lines and then buffer lines based on user specified value. Note - this method does not provide an occurrence distribution, only a footprint.'),
+    p('Line Buffer - Connect points with strait lines and then buffer lines based on user specified value. Note - this method does not provide an occurrence distribution, only a footprint. Cell sizes larger than 200m are generally not recommended.'),
   ),
   column(4,
     p("Process all sequences by pressing the button below"),
