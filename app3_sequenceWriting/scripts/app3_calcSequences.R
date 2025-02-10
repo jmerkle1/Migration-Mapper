@@ -352,7 +352,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       }
       nextAid<-migtime[j+1,'newUid']
       # if the next aid is a different animal then stop
-      if(nextAid!=thisAid){
+      if(nextAid!=thisAid){        
         next
       }
       nextBioYear<-as.numeric(migtime[j+1,'bioYearFull'])

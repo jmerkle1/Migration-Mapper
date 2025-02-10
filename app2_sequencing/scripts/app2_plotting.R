@@ -20,7 +20,7 @@ plotInit<-function(){
 
   dataForPlots<<-reactive({
 
-    tempIndex<-input$currentIndividualSelector    
+    tempIndex<<-input$currentIndividualSelector    
     tempDat<-importedDatasetMaster[importedDatasetMaster$id_bioYear == tempIndex,c('newMasterDate','newUid')]
     tempUid<<-tempDat[1,'newUid']
     minDate<<-min(tempDat[,'newMasterDate'])
@@ -39,9 +39,9 @@ plotInit<-function(){
     plotDataSixMonth<-importedDatasetMaster[
       which(importedDatasetMaster$newUid == tempUid & 
       as.Date(importedDatasetMaster$newMasterDate)>=sixMonthMin & 
-      as.Date(importedDatasetMaster$newMasterDate)<=sixMonthMax) &
+      as.Date(importedDatasetMaster$newMasterDate)<=sixMonthMax &
       importedDatasetMaster$problem != 1 &
-      importedDatasetMaster$mortality != 1,
+      importedDatasetMaster$mortality != 1),
       c('newMasterDate','nsdBio','displacementBio','speed','elev','FPT50','FPT150','FPT300')
     ]
 
