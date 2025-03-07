@@ -21,7 +21,7 @@ calculateDefinedSequences<-function(){
   for(i in 1:configOptions$totalSequences){
     thisSequenceName<-configOptions[[paste0('sequence',i)]]
     thisSequenceName<-str_replace_all(thisSequenceName, "[^[:alnum:]]", "")
-    thisSequencesRows<-c()
+    thisSequencesRows<<-c()
     for(j in 1:nrow(migtime)){
       thisFullYear<-migtime[j,'bioYearFull']
       thisIdYr<-migtime[j,'id_bioYear']
@@ -37,7 +37,7 @@ calculateDefinedSequences<-function(){
           importedDatasetMaster$newMasterDate <= thisMigEnd
         )
 
-        thisSequencesRows<-c(thisSequencesRows,theseRows)
+        thisSequencesRows<<-c(thisSequencesRows,theseRows)
 
         theseSequencePoints<-importedDatasetMaster[thisSequencesRows,]
 
@@ -91,7 +91,7 @@ calculateDefinedSequences<-function(){
         #   importedDatasetMaster@data$newMasterDate >= thisSequenceAverageStartDate &
         #   importedDatasetMaster@data$newMasterDate <= thisSequenceAverageEndDate
         # )
-        # thisSequencesRows<-c(thisSequencesRows,theseRows)
+        # thisSequencesRows<<-c(thisSequencesRows,theseRows)
       }
     }
   }
@@ -103,8 +103,7 @@ calculateDefinedSequences<-function(){
 }
 
 calculateInBetweenSequences<-function(){  
-  # this is to keep track of those row ids that span a bio year
-  rowIdsThatSpanABioYear<-c()
+  
   thisSequenceName<-input$definedSeasonTextInput
   if(nchar(thisSequenceName)==0){
     modalMessager('error','you must choose a name for your season')
@@ -154,8 +153,8 @@ calculateInBetweenSequences<-function(){
 
 
   # these are the rows that will be added to this sequence
-  thisSequencesRows<-c()
-  methodsHolder<-c()
+  thisSequencesRows<<-c()
+  methodsHolder<<-c()
   for(j in 1:nrow(migtime)){
     thisFullYear<-migtime[j,'bioYearFull']
     thisIdYr<-migtime[j,'id_bioYear']
@@ -188,10 +187,10 @@ calculateInBetweenSequences<-function(){
         importedDatasetMaster$newMasterDate >= thisMigStart &
         importedDatasetMaster$newMasterDate < thisMigEnd
       )
-      thisSequencesRows<-c(thisSequencesRows,theseRows)
+      thisSequencesRows<<-c(thisSequencesRows,theseRows)
       thisDateSelectionType='sliderSelected'      
       theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
-      methodsHolder<-c(methodsHolder,theseSelectionMethods)
+      methodsHolder<<-c(methodsHolder,theseSelectionMethods)
     }else{
       if(shouldAverage==FALSE){
         next
@@ -229,8 +228,8 @@ calculateInBetweenSequences<-function(){
       )
 
       theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
-      methodsHolder<-c(methodsHolder,theseSelectionMethods)
-      thisSequencesRows<-c(thisSequencesRows,theseRows)
+      methodsHolder<<-c(methodsHolder,theseSelectionMethods)
+      thisSequencesRows<<-c(thisSequencesRows,theseRows)
     }
   }
 
@@ -291,9 +290,138 @@ calculateInBetweenSequences<-function(){
   hideExistingSeasonsInputs()
 }
 
-calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
-  tempDForSpan<-importedDatasetMaster[0,]
+# calculateInBetweenSequencesForSpanYearWithNoNextPartner<-function(thisSequenceName,thisMigtimeRow,startSeason,endSeason,migStartPartner,migEndPartner){  
+#   thisFullYear<-migtime[thisMigtimeRow,'bioYearFull']
+#   thisBioYear<-migtime[thisMigtimeRow,'bioYear']
+#   thisIdYr<-migtime[thisMigtimeRow,'id_bioYear']
+#   thisAid<-migtime[thisMigtimeRow,'newUid']
+#   thisMigStart<-migtime[thisMigtimeRow,startSeason]
 
+#   if( grepl( 'start', startSeason, fixed = TRUE) ){
+#         startSeasonMatch<-gsub("start", "end", startSeason)
+#     }else{
+#         startSeasonMatch<-gsub("end", "start", startSeason)
+#     }
+
+#     if( grepl( 'start', endSeason, fixed = TRUE) ){
+#         endSeasonMatch<-gsub("start", "end", endSeason)
+#     }else{
+#         endSeasonMatch<-gsub("end", "start", endSeason)
+#     }
+
+#     thisMigStartPartner<-migtime[thisMigtimeRow,startSeasonMatch]
+#     thisMigEndPartner<-migtime[thisMigtimeRow,endSeasonMatch]
+
+#     # -------------------------------------
+#     # -------------------------------------
+#     # ---------- first deal with migstart...
+#     # does it have a period defined..
+#     thisMigStartPartner<-migtime[thisMigtimeRow,migStartPartner]
+#     ## if the dates are the same here then we need to use the mean value
+#     #  if the dates are the same here then we need to skip since no periods were defined
+    
+#     if(thisMigStart==thisMigStartPartner){
+#       if(shouldAverage==FALSE){
+#         return()
+#       }
+#       thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
+#       # if there were no start dates for this year, we'll use the average start for all years
+#       if(thisSequenceAverageStartDate==999){
+#         thisSequenceAverageStartDate<-seasonDetails[[startSeason]][[averagingMethodOne]]
+#       }
+#       # ---------------------------------
+#       # ---------------------------------
+#       # ---------if still 999 need to do something else------------
+#       if(thisSequenceAverageStartDate==999){
+#         stop()
+#       }
+#       thisMigStart<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)       
+#       thisDateSelectionType='averaged'      
+#     }else{
+#       thisDateSelectionType='sliderSelected'      
+#     }
+
+#     nextYearBioYearStart<-configOptions$bioYearStartDate
+#     year(nextYearBioYearStart)<-as.numeric(thisFullYear)+1
+#     thisMigEnd<-nextYearBioYearStart-1
+
+#     print('mig start and end')
+#       print(thisMigStart)
+#       print(thisMigEnd)
+
+#     theseRows<-which(
+#         importedDatasetMaster$newUid==thisAid &
+#         importedDatasetMaster$newMasterDate >= thisMigStart &
+#         importedDatasetMaster$newMasterDate < thisMigEnd
+#       )
+#     if(length(theseRows)>0){
+#       tempDToAdd<-importedDatasetMaster[theseRows,]
+#       # when spanning two years.. I used to use a combined bioyear_bioyear+1        
+#       tempDToAdd$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
+#       # changing back to just the first bioyear
+#       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+#       tempDToAdd$method<-thisDateSelectionType
+#       tempDForSpan<<-rbind(tempDForSpan,tempDToAdd)
+#     }    
+#     thisSequencesRows<<-c(thisSequencesRows,theseRows)
+# }
+
+
+calculateInBetweenSequencesForSpanYearWithNoPrevPartner<-function(thisSequenceName,thisMigtimeRow,endSeason,migEndPartner){  
+  thisFullYear<-migtime[thisMigtimeRow,'bioYearFull']
+  thisBioYear<-migtime[thisMigtimeRow,'bioYear']
+  thisIdYr<-migtime[thisMigtimeRow,'id_bioYear']
+  thisAid<-migtime[thisMigtimeRow,'newUid']
+  
+  thisMigEnd<-migtime[thisMigtimeRow,endSeason]
+  thisMigEndPartner<-migtime[thisMigtimeRow,migEndPartner]
+
+  # does it have a period defined..    
+  #  if the dates are the same here then we need to skip since no periods were defined
+  thisDateSelectionType='averaged'    
+  if(thisMigEnd==thisMigEndPartner){
+    if(shouldAverage==FALSE){             
+      return()
+    }
+    thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[endSeason]][[averagingMethodOne]]
+    # if there were no start dates for this year, we'll use the average start for all years
+    if(thisSequenceAverageStartDate==999){
+      thisSequenceAverageStartDate<-seasonDetails[[endSeason]][[averagingMethodOne]]
+    }
+    # ---------------------------------
+    # ---------------------------------
+    # ---------if still 999 need to do something else------------
+    if(thisSequenceAverageStartDate==999){
+      stop()
+    }
+    thisMigEnd<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)   
+    thisDateSelectionType='sliderSelected'    
+  }
+
+  # this mig start will just be the first day of this bio year  
+  thisMigStart<-configOptions$bioYearStartDate
+  year(thisMigStart)<-as.numeric(thisFullYear)  
+
+  theseRows<-which(
+      importedDatasetMaster$newUid==thisAid &
+      importedDatasetMaster$newMasterDate >= thisMigStart &
+      importedDatasetMaster$newMasterDate < thisMigEnd
+    )
+  if(length(theseRows)>0){
+    tempDToAdd<-importedDatasetMaster[theseRows,]
+    # when spanning two years.. I combine bioyear-1_bioyear
+    tempDToAdd$bioYear<-paste0(as.numeric(thisBioYear)-1,'_',thisBioYear)
+    # changing back to just the first bioyear
+    # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+    tempDToAdd$method<-thisDateSelectionType
+    tempDForSpan<<-rbind(tempDForSpan,tempDToAdd)
+  }    
+  thisSequencesRows<<-c(thisSequencesRows,theseRows)
+}
+
+
+calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
+  tempDForSpan<<-importedDatasetMaster[0,]
 
   toggleModal(session,'customSeasonModal',toggle='close')
   loadingScreenToggle('show','calculating sequences')
@@ -301,8 +429,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
   thisSequenceName<-str_replace_all(thisSequenceName, "[^[:alnum:]]", "")
 
 
-  # this is to keep track of those row ids that span a bio year
-  rowIdsThatSpanABioYear<-c()
+  # this is to keep track of those row ids that span a bio year  
   startSeason<-input$startSeasonSelector
   endSeason<-input$endSeasonSelector
 
@@ -331,8 +458,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
 
   # these are the rows that will be added to this sequence
-  thisSequencesRows<-c()
-  methodsHolder<-c()
+  thisSequencesRows<<-c()
+  methodsHolder<<-c()
   for(j in 1:nrow(migtime)){
       thisFullYear<-migtime[j,'bioYearFull']
       thisBioYear<-migtime[j,'bioYear']
@@ -341,29 +468,79 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       thisMigStart<-migtime[j,startSeason]
 
       print(j)
-      print(startSeason)
-      print(thisFullYear)
-      print(endSeason)
+      print(thisIdYr)
+
 
 
       # if we're already on the last row of migtime.. there is no end date avaialble so stop
-      if(j+1>nrow(migtime)){
-        next
+      # if(j+1>nrow(migtime)){
+      #   print('LAST ROWW')
+      #   calculateInBetweenSequencesForSpanYearWithNoPartner(thisSequenceName,j,startSeason,endSeason,migStartPartner,migEndPartner,TRUE)
+      #   next
+      # }
+
+      prevAid<-migtime[j-1,'newUid']
+      nextAid<-migtime[j+1,'newUid']      
+      if(length(prevAid)==0 || is.na(prevAid)){
+        prevAid=-99999999
       }
-      nextAid<-migtime[j+1,'newUid']
-      # if the next aid is a different animal then stop
-      if(nextAid!=thisAid){        
-        next
+      if(length(nextAid)==0 || is.na(nextAid)){
+        nextAid=-99999999
       }
+      
+      
+      # if the next aid and previd is a different animal then special selection
+      # if(nextAid!=thisAid){        
+      #   print('next aid or prev aid is different')
+      #   calculateInBetweenSequencesForSpanYearWithNoNextPartner(thisSequenceName,j,startSeason,endSeason,migStartPartner,migEndPartner)
+      #   next
+      # }
+
+
+      # if(nextAid!=thisAid && prevAid!=thisAid){        
+      #   print('next aid or prev aid is different')
+      #   calculateInBetweenSequencesForSpanYearWithNoPartner(thisSequenceName,j,startSeason,endSeason,migStartPartner,migEndPartner,TRUE)
+      #   next
+      # }
+
+      # # if the next aid is a different animal then stop
+      # if(nextAid!=thisAid){        
+      #   print('next aid is different')
+      #   next
+      # }
+
+      # if the previous bio year for this animal is not this year minus 1
+      # or the next aid is not this aid      
+      # then  need to create a small segment for last winter
+      prevBioYear<-as.numeric(migtime[j-1,'bioYearFull'])
+      if(length(prevBioYear)==0 || is.na(prevBioYear)){
+        prevBioYear=-99999999
+      }
+      if(prevBioYear!=as.numeric(thisFullYear)-1 || nextAid!=thisAid){
+        calculateInBetweenSequencesForSpanYearWithNoPrevPartner(thisSequenceName,j,endSeason,migEndPartner)
+        print('no start match')
+        print('migStartPartner')
+        print(migStartPartner)
+        print('migEndPartner')
+        print(migEndPartner)
+        print('startSeason')
+        print(startSeason)
+        print('endSeason')
+        print(endSeason)
+      }
+
+      
+      # if the next next bio year for this animal is not the next year 
+      # or the next aid is not this aid      
+      # then  need to set last day of this current bio year
       nextBioYear<-as.numeric(migtime[j+1,'bioYearFull'])
-      # if the next next bio year for this animal is not the next year then stop
-      if(nextBioYear!=as.numeric(thisFullYear)+1){
-        next
+      if(nextBioYear!=as.numeric(thisFullYear)+1 || nextAid!=thisAid){
+        nextYearBioYearStart<-configOptions$bioYearStartDate
+        year(nextYearBioYearStart)<-as.numeric(thisFullYear)+1
+        thisMigEnd<-nextYearBioYearStart-1
+      }else{
+        thisMigEnd<-migtime[j+1,endSeason]
       }
-      # if we're still here, then the enddate is in the next row of the migtime table
-      thisMigEnd<-migtime[j+1,endSeason]
-
-
 
       # -------------------------------------
       # -------------------------------------
@@ -373,7 +550,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       ## if the dates are the same here then we need to use the mean value
       #  if the dates are the same here then we need to skip since no periods were defined
       if(thisMigStart==thisMigStartPartner){
-        if(shouldAverage==FALSE){
+        if(shouldAverage==FALSE){             
           next
         }
         thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
@@ -397,10 +574,13 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       # ---------- now deal with migend...
       # does it have a period defined..
       thisMigEndPartner<-migtime[j+1,migEndPartner]
+      if(is.na(thisMigEndPartner)){
+        thisMigEndPartner=-9999999
+      }
       ## if the dates are the same here then we need to use the mean value
       # if the dates are teh same here we need to skip
       if(thisMigEnd==thisMigEndPartner){
-        if(shouldAverage==FALSE){
+        if(shouldAverage==FALSE){            
           next
         }
 
@@ -447,22 +627,13 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
       if(length(theseRows)>0){
         tempDToAdd<-importedDatasetMaster[theseRows,]
-
-    
-
-        # when spanning two years.. I used to use a combined bioyear_bioyear+1        
-        tempDToAdd$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)
-        # changing back to just the first bioyear
-        # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!        
+        # when spanning two years.. bioyear_bioyear+1        
+        tempDToAdd$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)        
         tempDToAdd$method<-thisDateSelectionType
-        tempDForSpan<-rbind(tempDForSpan,tempDToAdd)
-      }
-
-      
-      thisSequencesRows<-c(thisSequencesRows,theseRows)
-    }
-
-    print(thisSequencesRows)  
+        tempDForSpan<<-rbind(tempDForSpan,tempDToAdd)
+      }      
+      thisSequencesRows<<-c(thisSequencesRows,theseRows)
+    }   
 
 
 
@@ -478,10 +649,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
     # -----------------------------
     # DROPPING PROBLEMS AND MORTALITIES BY DEFAULT
     # -----------------------------
-    # -----------------------------
-
-
-    
+    # -----------------------------    
     theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$problem != 1),]
     theseSequencePoints<-theseSequencePoints[which(theseSequencePoints$mortality != 1),]
 
@@ -530,8 +698,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 calculateCustomSequences<-function(){
   loadingScreenToggle('show','calculating sequences')
 
-  rowIdsThatSpanABioYear<-c()
-
+  
   thisSequenceName<-input$customSeasonTextInput
   if(nchar(thisSequenceName)==0){
     modalMessager('error','you must choose a name for your season')
@@ -573,14 +740,16 @@ calculateCustomSequences<-function(){
     yearToAdd<-0
   }else{
     yearToAdd<-1
-    tempDForSpan<-importedDatasetMaster[0,]
+    tempDForSpan<<-importedDatasetMaster[0,]
   }
+
+
 
   # if the julian end date comes before the start date then add a year
   # if(seasonEndDateJ<seasonStartDateJ){
   #   doesSequenceSpanBioYears<-TRUE
   #   print('spans bio year!!!!!! 566')
-  #   tempDForSpan<-importedDatasetMaster[0,]
+  #   tempDForSpan<<-importedDatasetMaster[0,]
   # }
 
 
@@ -589,7 +758,7 @@ calculateCustomSequences<-function(){
   # if(seasonStartDateJ<bioYearStartDateJulian & seasonEndDateJ>=bioYearStartDateJulian){
   #   doesSequenceSpanBioYears<-TRUE
   #   print('spans bio year!!!!!! 571')
-  #   tempDForSpan<-importedDatasetMaster[0,]
+  #   tempDForSpan<<-importedDatasetMaster[0,]
   # }
 
 
@@ -602,13 +771,13 @@ calculateCustomSequences<-function(){
 
   seasonStartDate<-format(input$startDateSelector, format="%m-%d")
   seasonEndDate<-format(input$endDateSelector, format="%m-%d")
-  thisSequencesRows<-0
+  thisSequencesRows<<-0
   migrationNameArray<-c()
   for(j in 1:nrow(migtime)){
     print('j')
-    print(j)
+    print(j)    
     thisFullYear<-migtime[j,'bioYearFull']
-    thisShortYear<-migtime[j,'bioYear']
+    thisBioYear<-migtime[j,'bioYear']
     thisIdYr<-migtime[j,'id_bioYear']
     thisAid<-migtime[j,'newUid']
     thisSequenceStartDate<-paste0(thisFullYear,'-',seasonStartDate)
@@ -616,6 +785,10 @@ calculateCustomSequences<-function(){
     print(thisAid)
     print(thisSequenceStartDate)
     print(thisSequenceEndDate)
+
+
+
+    
 
     theseRows<-which(
       importedDatasetMaster$newUid==thisAid &
@@ -625,9 +798,48 @@ calculateCustomSequences<-function(){
 
     if(length(theseRows)>0){
       thisTempMigNameArray<-vector(mode="character", length=length(theseRows))
-      thisTempMigNameArray[thisTempMigNameArray==""] <- paste0(thisAid,'_',thisShortYear,'_',thisSequenceName)
+      if(yearToAdd==0){
+          thisTempMigNameArray[thisTempMigNameArray==""] <- paste0(thisAid,'_',thisBioYear,'_',thisSequenceName)
+        }else{
+          thisTempMigNameArray[thisTempMigNameArray==""] <- paste0(thisAid,'_',thisBioYear,'_',as.numeric(thisBioYear)+1,'_',thisSequenceName)
+        }
+      
       migrationNameArray<-c(migrationNameArray,thisTempMigNameArray)
     }
+
+    
+    prevAid<-migtime[j-1,'newUid']      
+    if(length(prevAid)==0 || is.na(prevAid)){
+      prevAid=-99999999
+    }
+
+    prevBioYear<-as.numeric(migtime[j-1,'bioYearFull'])
+    if(length(prevBioYear)==0 || is.na(prevBioYear)){
+      prevBioYear=-99999999
+    }
+    
+
+    # if this is spanning a bio year    
+    if(yearToAdd>0){
+      # and the previous animal id is not this one or the previous year in migtime is not this year
+      # then need to get the second part of previous years points
+      if(thisAid!=prevAid || prevBioYear!=as.numeric(thisFullYear)-1){
+        lastSequenceEndDate<-paste0(thisFullYear,'-',seasonEndDate)  
+        theseRowsTemp<-which(
+          importedDatasetMaster$newUid==thisAid &          
+          importedDatasetMaster$newMasterDate <= lastSequenceEndDate
+        )  
+        if(length(theseRowsTemp)>0){          
+          thisTempMigNameArray<-vector(mode="character", length=length(theseRowsTemp))
+          thisTempMigNameArray[thisTempMigNameArray==""] <- paste0(thisAid,'_',as.numeric(thisBioYear)-1,'_',thisBioYear,'_',thisSequenceName)
+          migrationNameArray<-c(migrationNameArray,thisTempMigNameArray)
+          theseRows<-c(theseRows,theseRowsTemp)
+        }
+      }
+    }
+    
+      
+      
 
 
 
@@ -649,13 +861,14 @@ calculateCustomSequences<-function(){
     # }
 
     # if(length(theseRows>0) & doesSequenceSpanBioYears){
-    if(length(theseRows>0) & yearToAdd>0){      
+    if(length(theseRows>0) & yearToAdd>0){  
       tempDToAdd<-importedDatasetMaster[theseRows,]
       # this was where there were 2 years for span years      
-      tempDToAdd$bioYear<-thisShortYear
-      tempDForSpan<-rbind(tempDForSpan,tempDToAdd)
+      # tempDToAdd$bioYear<-thisShortYear
+      tempDToAdd$bioYear<-paste0(thisBioYear,'_',as.numeric(thisBioYear)+1)        
+      tempDForSpan<<-rbind(tempDForSpan,tempDToAdd)
     }
-    thisSequencesRows<-c(thisSequencesRows,theseRows)
+    thisSequencesRows<<-c(thisSequencesRows,theseRows)
   }
 
   if(length(thisSequencesRows)>1){
