@@ -402,6 +402,14 @@ calculateInBetweenSequencesForSpanYearWithNoPrevPartner<-function(thisSequenceNa
   thisMigStart<-configOptions$bioYearStartDate
   year(thisMigStart)<-as.numeric(thisFullYear)  
 
+  print('thisMigStart')
+      print(thisMigStart)
+      print('thisMigEnd')
+      print(thisMigEnd)
+      print('               ')
+       print('               ')
+        print('               ')
+
   theseRows<-which(
       importedDatasetMaster$newUid==thisAid &
       importedDatasetMaster$newMasterDate >= thisMigStart &
@@ -461,15 +469,21 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
   thisSequencesRows<<-c()
   methodsHolder<<-c()
   for(j in 1:nrow(migtime)){
+  # for(j in 1:15){
       thisFullYear<-migtime[j,'bioYearFull']
       thisBioYear<-migtime[j,'bioYear']
       thisIdYr<-migtime[j,'id_bioYear']
       thisAid<-migtime[j,'newUid']
       thisMigStart<-migtime[j,startSeason]
 
-      print(j)
+      print('                  ')
+      print('                  ')
+      print('++++++++++++++++')
+      print('                  ')
+      print('id_bioYear ')
       print(thisIdYr)
 
+     
 
 
       # if we're already on the last row of migtime.. there is no end date avaialble so stop
@@ -516,17 +530,11 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       if(length(prevBioYear)==0 || is.na(prevBioYear)){
         prevBioYear=-99999999
       }
-      if(prevBioYear!=as.numeric(thisFullYear)-1 || nextAid!=thisAid){
+      
+      # if(prevBioYear!=as.numeric(thisFullYear)-1 || nextAid!=thisAid){
+      if(prevBioYear!=as.numeric(thisFullYear)-1){
         calculateInBetweenSequencesForSpanYearWithNoPrevPartner(thisSequenceName,j,endSeason,migEndPartner)
-        print('no start match')
-        print('migStartPartner')
-        print(migStartPartner)
-        print('migEndPartner')
-        print(migEndPartner)
-        print('startSeason')
-        print(startSeason)
-        print('endSeason')
-        print(endSeason)
+        print('!!!!!!!! no prev partner')        
       }
 
       
@@ -535,6 +543,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       # then  need to set last day of this current bio year
       nextBioYear<-as.numeric(migtime[j+1,'bioYearFull'])
       if(nextBioYear!=as.numeric(thisFullYear)+1 || nextAid!=thisAid){
+        print('****************** no nextx partner')   
         nextYearBioYearStart<-configOptions$bioYearStartDate
         year(nextYearBioYearStart)<-as.numeric(thisFullYear)+1
         thisMigEnd<-nextYearBioYearStart-1
@@ -553,6 +562,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         if(shouldAverage==FALSE){             
           next
         }
+        print('going to average migstart...!!')
         thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
         # if there were no start dates for this year, we'll use the average start for all years
         if(thisSequenceAverageStartDate==999){
@@ -577,14 +587,26 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       if(is.na(thisMigEndPartner)){
         thisMigEndPartner=-9999999
       }
-      ## if the dates are the same here then we need to use the mean value
-      # if the dates are teh same here we need to skip
+      # if the dates are the same here then we need to use the mean value
+      
       if(thisMigEnd==thisMigEndPartner){
         if(shouldAverage==FALSE){            
           next
         }
+        print('going to average migend...!!')
+        print('thisFullYear')
+        print(thisFullYear)
+
+        print('endSeason')
+        print(endSeason)
+        
+        print('averagingMethodOne')
+        print(averagingMethodOne)
 
         thisSequenceAverageEndDate<-seasonDetails[[toString(as.numeric(thisFullYear)+1)]][[endSeason]][[averagingMethodOne]]    
+
+        print('thisSequenceAverageEndDate')
+        print(thisSequenceAverageEndDate)
         # if there were no start dates for this year, we'll use the average start for all years
         if(thisSequenceAverageEndDate==999){
           thisSequenceAverageEndDate<-seasonDetails[[endSeason]][[averagingMethodTwo]]
@@ -599,9 +621,15 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         # ----------------------
         # if the migration end date (JULIAN) is greater than the start
         # then don't need to add a year
-        thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
-        thisStartJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageStartDate)))
+        # thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
+        # thisStartJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageStartDate)))
+        thisStartJulian<-yday(as.Date(thisMigStart))
         thisEndJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageEndDate)))
+        print('thisStartJulian')
+        print(thisStartJulian)
+        print('thisEndJulian')
+        print(thisEndJulian)
+
         if(thisEndJulian>thisStartJulian){
           yearToAdd<-0
         }else{
@@ -618,6 +646,13 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         thisDateSelectionType='sliderSelected'
       }
 
+      print('thisMigStart')
+      print(thisMigStart)
+      print('thisMigEnd')
+      print(thisMigEnd)
+      print('               ')
+       print('               ')
+        print('               ')
 
       theseRows<-which(
         importedDatasetMaster$newUid==thisAid &
@@ -774,17 +809,14 @@ calculateCustomSequences<-function(){
   thisSequencesRows<<-0
   migrationNameArray<-c()
   for(j in 1:nrow(migtime)){
-    print('j')
-    print(j)    
+   
     thisFullYear<-migtime[j,'bioYearFull']
     thisBioYear<-migtime[j,'bioYear']
     thisIdYr<-migtime[j,'id_bioYear']
     thisAid<-migtime[j,'newUid']
     thisSequenceStartDate<-paste0(thisFullYear,'-',seasonStartDate)
     thisSequenceEndDate<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',seasonEndDate)      
-    print(thisAid)
-    print(thisSequenceStartDate)
-    print(thisSequenceEndDate)
+   
 
 
 
@@ -932,16 +964,7 @@ calculateCustomSequences<-function(){
 
 sequencesSummary<-function(thisData){
   thisData<<-thisData
-  print('--total rows in sequence')
-  print(dim(thisData))
-  print('--total aids in data')
-  print(unique(thisData$newUid))
-  print('--min date')
-  print(min(thisData$newMasterDate))
-  print('--max date')
-  print(max(thisData$newMasterDate))
-  print('-- total migs')
-  print(unique(thisData$mig))
+  
 }
 
 exportShapeFiles<-function(theseSequencePoints,thisSequenceName){
