@@ -552,6 +552,17 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
       if(is.na(thisFullYear)){
         thisFullYear=-99999999999
       }
+
+      
+
+      # if(!thisAid%in%c('UintaMD-015','UintaMD-003','Uinta-024')){
+      #   next
+      # }
+
+      print('  ****  ')
+      print(thisAid)
+      print(thisFullYear)
+      print('    ')
       
       
       # if the previous bio year for this animal is not this year minus 1
@@ -636,6 +647,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         # if there were no start dates for this year, we'll use the average start for all years
         if(thisSequenceAverageEndDate==999){
           thisSequenceAverageEndDate<-seasonDetails[[endSeason]][[averagingMethodTwo]]
+          print('averaging end date')
+
         }
         # ---------------------------------
         # ---------------------------------
@@ -659,16 +672,16 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
             thisMigStart<-thisMigStart+365
           }
           # thisMigStart<-thisMigStart+365
+          thisMigEnd<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',thisSequenceAverageEndDate)
         }else{
           yearToAdd<-1
           # this should fix issue with overspanning data when averaging across bio years etc
           thisMigEnd<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',thisSequenceAverageEndDate)
         }
-
-
-
-
-        
+        print('avg end date')
+        print(thisSequenceAverageEndDate)
+        print('this mig end')
+        print(thisMigEnd)        
         thisDateSelectionType='averaged'      
       }else{
         thisDateSelectionType='sliderSelected'
