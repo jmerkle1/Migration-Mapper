@@ -555,7 +555,20 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
       
 
-      # if(!thisAid%in%c('UintaMD-015','UintaMD-003','Uinta-024')){
+      # if(!thisAid%in%c('UintaMD-003','UintaMD-003','UintaMD-015','UintaMD-019','UintaMD-024',
+      #   'UintaMD-004','UintaMD-005','UintaMD-006','UintaMD-007','UintaMD-008')){
+      #   next
+      # }
+
+      # if(!thisAid%in%c('UintaMD-001','UintaMD-002','UintaMD-004','UintaMD-005','UintaMD-006','UintaMD-007','UintaMD-008')){
+      #   next
+      # }
+
+      # if(!thisAid%in%c('UintaMD-001','UintaMD-002','UintaMD-003','UintaMD-015')){
+      #   next
+      # }
+
+      # if(!thisAid%in%c('UintaMD-001','UintaMD-002','UintaMD-003','UintaMD-004','UintaMD-005','UintaMD-006','UintaMD-007','UintaMD-008','UintaMD-015','UintaMD-024','UintaMD-032','UintaMD-041','UintaMD-050')){
       #   next
       # }
 
@@ -665,14 +678,13 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
         thisStartJulian<-yday(as.Date(thisMigStart))
         thisEndJulian<-yday(as.Date(paste0(thisFullYear,'-',thisSequenceAverageEndDate)))        
 
-        if(thisEndJulian>thisStartJulian){
-          yearToAdd<-0
+        if(thisEndJulian>thisStartJulian){          
           thisMigStart<-as.Date(thisMigStart)          
           if(wasStartAveraged==TRUE){
             thisMigStart<-thisMigStart+365
           }
           # thisMigStart<-thisMigStart+365
-          thisMigEnd<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',thisSequenceAverageEndDate)
+          thisMigEnd<-paste0(as.numeric(thisFullYear)+1,'-',thisSequenceAverageEndDate)
         }else{
           yearToAdd<-1
           # this should fix issue with overspanning data when averaging across bio years etc
