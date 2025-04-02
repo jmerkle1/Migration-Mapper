@@ -383,10 +383,10 @@ calculateInBetweenSequencesForSpanYearWithNoPrevPartner<-function(thisSequenceNa
     if(shouldAverage==FALSE){             
       return()
     }
-    thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[endSeason]][[averagingMethodOne]]
+    thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[endSeason]][[averagingMethodTwo]]
     # if there were no start dates for this year, we'll use the average start for all years
     if(thisSequenceAverageStartDate==999){
-      thisSequenceAverageStartDate<-seasonDetails[[endSeason]][[averagingMethodOne]]
+      thisSequenceAverageStartDate<-seasonDetails[[endSeason]][[averagingMethodTwo]]
     }
     # ---------------------------------
     # ---------------------------------
@@ -655,7 +655,7 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
           next
         }        
 
-        thisSequenceAverageEndDate<-seasonDetails[[toString(as.numeric(thisFullYear)+1)]][[endSeason]][[averagingMethodOne]]    
+        thisSequenceAverageEndDate<-seasonDetails[[toString(as.numeric(thisFullYear)+1)]][[endSeason]][[averagingMethodTwo]]    
 
         # if there were no start dates for this year, we'll use the average start for all years
         if(thisSequenceAverageEndDate==999){
@@ -1035,3 +1035,23 @@ exportShapeFiles<-function(theseSequencePoints,thisSequenceName){
     st_write(linesData, sequenceShapesDirectory, paste0(thisSequenceName,'_lines'), driver="ESRI Shapefile", quiet=TRUE, append=FALSE, delete_layer = TRUE)
 
 }
+
+
+
+# seasonDetails$`2021`$mig1start
+# seasonDetails$`2021`$mig1end
+# seasonDetails$`2021`$mig2start
+# seasonDetails$`2021`$mig2end
+# seasonDetails$`2022`$mig1start
+# seasonDetails$`2022`$mig1end
+# seasonDetails$`2022`$mig2start
+# seasonDetails$`2022`$mig2end
+# seasonDetails$`2023`$mig1start
+# seasonDetails$`2023`$mig1end
+# seasonDetails$`2023`$mig2start
+# seasonDetails$`2023`$mig2end
+# seasonDetails$`2024`$mig1start
+# seasonDetails$`2024`$mig1end
+# seasonDetails$`2024`$mig2start
+# seasonDetails$`2024`$mig2end
+
