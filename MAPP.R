@@ -2,7 +2,7 @@ objs <- ls(pos = ".GlobalEnv")
 rm(list = objs, pos = ".GlobalEnv")
 
 dependenciesAll<-c("shiny", "sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR","RSQLite","move","shinycssloaders","adehabitatLT","BBMM","R.utils",
-  "lubridate","stringr","parallel","R.utils","dplyr","ctmm","fields","smoothr","rgeos","suncalc","terra","tcltk")
+  "lubridate","stringr","parallel","R.utils","dplyr","ctmm","fields","smoothr","rgeos","suncalc","terra","tcltk",'shinyBS','bslib')
 
 for(i in 1:length(dependenciesAll)){
   if(dependenciesAll[i] %in% installed.packages()==FALSE){

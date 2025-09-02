@@ -20,7 +20,9 @@ source("wmiScripts/FindProblemPts.R",local=TRUE)
 source("wmiScripts/CalcMovParams.R",local=TRUE)
 source("wmiScripts/Check4Morts.R",local=TRUE)
 
+# dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk','shinyFiles','shinyBS','bslib')
 dependencies<-c("shiny","sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR",'RSQLite','move','shinycssloaders','terra','tcltk','shinyFiles')
+
 loadDependencies(dependencies)
 
 # lubridate can cause issues when loaded in app2 if the R session is not terminated before reloading app1
@@ -31,6 +33,8 @@ if("lubridate" %in% (.packages())){
 Sys.setenv(MAPBOX_API_TOKEN = "pk.eyJ1Ijoid21pLW1lcmtsZSIsImEiOiJja3RrYmluMnMxazRlMm9xbnN3bXluYjQzIn0.wOmx_vSC944YRdF8LSjZRQ")
 
 ui <- fluidPage(
+  # theme = bs_theme(version = 3),   # <-- force Bootstrap 3  
+  # theme = shinythemes::shinytheme("default"),  # uses BS3
   tags$head(tags$style("body{ overflow-x:hidden}")),  
   uiOutput("loading"),  
   HTML("<div id='loadingScreen' style='width:100%; display:none; height:200%; background-color:rgba(0, 0, 0,0.5); color:white; position:absolute; top:0px; left:0px; z-index:5000;'>
@@ -290,11 +294,17 @@ hidden(
         ),
         column(6,
         selectInput('isProblemSelector', 'Is this point classified as a problem point?',c('yes','no')),
+        ),        
+        column(12,
+          textInput('commentInput', 'Comments for this point'),
         ),
         column(12,
-        textInput('commentInput', 'Comments for this point'),
-        ),
-        uiOutput("pointClickData")
+          p("Point data"),
+          div(id = "pointClickData")   # <— plain div, NOT textOutput
+        )
+
+
+        
   ),
   bsModal("manyPointsSelectedModal", "Points Selected", NULL, size = "large",
         column(12,

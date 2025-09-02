@@ -60,7 +60,7 @@ mapInit<-function(){
     importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),'mortality']<<-newValue
     pointsForMap[which(pointsForMap$rowIds==clickedId),'mortality']<<-newValue
     updateTable('importedDatasetMaster','mortality',paste0('where rowIds = ',clickedId),newValue)
-    updatePopupTable(clickedId)
+    updatePopupTable(clickedId)    
     updateProblemAndMortPoints()    
     mapboxer_proxy("importedDataMapBox") %>%
       set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%
@@ -71,7 +71,7 @@ mapInit<-function(){
     pointToChange<-clickedMapPoint$props$rowIds    
     importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),'comments']<<-input$commentInput
     updateTable('importedDatasetMaster','comments',paste0('where rowIds = ',clickedId),paste0('"',input$commentInput,'"'))
-    updatePopupTable(clickedId)
+    updatePopupTable(clickedId)    
     pointsForMap[which(pointsForMap$rowIds==clickedId),'comments']<<-input$commentInput
 
     mapboxer_proxy("importedDataMapBox") %>%      
@@ -90,7 +90,7 @@ mapInit<-function(){
     pointsForMap[which(pointsForMap$rowIds==clickedId),'problem']<<-newValue    
     updateProblemAndMortPoints()
     updateTable('importedDatasetMaster','problem',paste0('where rowIds = ',clickedId),newValue)
-    updatePopupTable(clickedId)
+    updatePopupTable(clickedId)    
     mapboxer_proxy("importedDataMapBox") %>%      
       set_data(pointsForMap,lat="lat",lng='lon','pointsSource')%>%
       update_mapboxer()
@@ -809,6 +809,8 @@ forwardBackHandler=function(which){
 
 pointClickEvent=function(clickedId,fromButton){
 
+
+
   if(is.null(clickedId)){
     return()
   }
@@ -844,18 +846,21 @@ pointClickEvent=function(clickedId,fromButton){
     updateTextInput(session, 'commentInput', value=rowToMap$comments)
   }else{
     updateTextInput(session, 'commentInput', value='')
-  }
-
-
-  updatePopupTable(clickedId)
+  }  
 
   if(!fromButton){
-    toggleModal(session,'pointClickModal',toggle='open')
+    toggleModal(session,'pointClickModal',toggle='open')  
   }
 
+  updatePopupTable(clickedId)
+  
 }
 
+
+
 updatePopupTable<-function(clickedId){  
+  print(clickedId)  
+
   rowToMap<-importedDatasetMaster[which(importedDatasetMaster$rowIds==clickedId),]
   allFields<-names(rowToMap)
   htmlToRender<-''
@@ -868,7 +873,7 @@ updatePopupTable<-function(clickedId){
   allFields<-c(allFields,'mortality')
   allFields<-c(allFields,'problem')
   allFields<-c(allFields,'comments')
-  for(i in 1:length(allFields)){
+  for(i in 1:length(allFields)){    
     thisColumn<-allFields[i]
     thisValue<-rowToMap[1,thisColumn]
     if(is.numeric(thisValue)){
@@ -882,10 +887,12 @@ updatePopupTable<-function(clickedId){
       thisValue='  -  '
     }
     thisHtml<-paste0('<div style="display:inline-block !important; padding:10px; text-align:center !important;"><span style="font-weight:bold !important; font-size:14px !important;">',thisColumn,'</span><br><span style="">',thisValue,'</span></div>')
+    # thisHtml<-paste0('<div style="font-size:14px !important;">',thisColumn,'</span><br><span style="">',thisValue,'</span></div>')
     htmlToRender<-paste0(htmlToRender,thisHtml)
   }
 
-  output$pointClickData <- renderUI({
-    HTML(htmlToRender)
-  })
+  shinyjs::html(
+      id   = "pointClickData",
+      html = htmlToRender
+    )
 }
