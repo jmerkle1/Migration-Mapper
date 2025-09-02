@@ -32,7 +32,7 @@ ui <- fluidPage(
   column(12,
   HTML("<div style='width:110% !important; margin-left:-3rem !important; height:10rem !important; padding:4rem !important; background-color:black; color:white; text-align:center !important;'>
     <span style='text-align: center !important; font-size:3rem; width:100% !important; position:absolute !important; top:0px !important; left:0px !important; color:white;>Migration Mapper - Module 2</span>'>
-    Migration Mapper 3.1 - App 2
+    Migration Mapper 3.2 - App 2
     </div>"),
   actionButton("changeAppsButton", style = "width:15%; font-weight:bolder; position:absolute !important; top:5.5rem !important; left:42.5% !important; border:0px;", "Jump to another Module"),
   actionButton("parametersButton", style = "font-weight:bolder; position:absolute !important; top:5px !important; left:-5px !important;", "Configuration Parameters"),  

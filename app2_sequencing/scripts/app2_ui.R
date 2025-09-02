@@ -401,7 +401,11 @@ replaceMigtimeDbTable<-function(){
 }
 
 forwardBackward<-function(fOrB){
+  print('current individ')
+  print(currentIndividual)
   thisYrIdIndex<-which(migtime$id_bioYear==currentIndividual)
+  print('thisYrIdIndex')
+  print(thisYrIdIndex)
   if(fOrB=='forward'){
     if(thisYrIdIndex==nrow(migtime)){
       return()

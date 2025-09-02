@@ -1,4 +1,5 @@
 calculateDefinedSequences<-function(){
+  print('calculateDefinedSequences')
   loadingScreenToggle('show','calculating sequences')
 
   sequencesFolder<-paste0(masterWorkingDirectory,'\\sequences')
@@ -103,6 +104,8 @@ calculateDefinedSequences<-function(){
 }
 
 calculateInBetweenSequences<-function(){  
+
+  print('calculateInBetweenSequences')
   
   thisSequenceName<-input$definedSeasonTextInput
   if(nchar(thisSequenceName)==0){
@@ -195,6 +198,7 @@ calculateInBetweenSequences<-function(){
       if(shouldAverage==FALSE){
         next
       }
+      print('going to average')
       thisDateSelectionType='averaged'      
       # if there are no dates selected in the migtime table then we'll use averages for this year start end
       thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
@@ -220,12 +224,30 @@ calculateInBetweenSequences<-function(){
       # paste on the current year for the start & end dates
       thisSequenceAverageStartDate<-paste0(thisFullYear,'-',thisSequenceAverageStartDate)
       thisSequenceAverageEndDate<-paste0(thisFullYear,'-',thisSequenceAverageEndDate)
-      
+
+      # print('thisSequenceAverageStartDate')
+      # print(thisSequenceAverageStartDate)
+      # print('thisSequenceAverageEndDate')
+      # print(thisSequenceAverageEndDate)
+      # print('thisIdYr')
+      # print(thisIdYr)
+      # print('nrow(theseRows)')
+      # print(nrow(theseRows))
+
+      # thisAid      
+      # theseRows<-which(
+      #   importedDatasetMaster$id_bioYear==thisIdYr &
+      #   importedDatasetMaster$newMasterDate >= thisSequenceAverageStartDate &
+      #   importedDatasetMaster$newMasterDate <= thisSequenceAverageEndDate
+      # )
+
       theseRows<-which(
-        importedDatasetMaster$id_bioYear==thisIdYr &
+        importedDatasetMaster$newUid==thisAid &
         importedDatasetMaster$newMasterDate >= thisSequenceAverageStartDate &
         importedDatasetMaster$newMasterDate <= thisSequenceAverageEndDate
       )
+
+      
 
       theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
       methodsHolder<<-c(methodsHolder,theseSelectionMethods)
@@ -368,6 +390,7 @@ calculateInBetweenSequences<-function(){
 
 
 calculateInBetweenSequencesForSpanYearWithNoPrevPartner<-function(thisSequenceName,thisMigtimeRow,endSeason,migEndPartner){  
+  print('calculateInBetweenSequencesForSpanYearWithNoPrevPartner')
   thisFullYear<-migtime[thisMigtimeRow,'bioYearFull']
   thisBioYear<-migtime[thisMigtimeRow,'bioYear']
   thisIdYr<-migtime[thisMigtimeRow,'id_bioYear']
@@ -417,6 +440,7 @@ calculateInBetweenSequencesForSpanYearWithNoPrevPartner<-function(thisSequenceNa
 }
 
 calculateInBetweenSequencesForSpanYearWithNoNextPartner<-function(thisSequenceName,thisMigtimeRow,thisMigStart,migStartPartner,startSeason){  
+  print('calculateInBetweenSequencesForSpanYearWithNoNextPartner')
   thisFullYear<-migtime[thisMigtimeRow,'bioYearFull']
   thisBioYear<-migtime[thisMigtimeRow,'bioYear']
   thisIdYr<-migtime[thisMigtimeRow,'id_bioYear']
@@ -467,13 +491,13 @@ calculateInBetweenSequencesForSpanYearWithNoNextPartner<-function(thisSequenceNa
     year(thisMigEnd)<-as.numeric(thisFullYear)+1
   }
 
-  print('thisMigStart no next partner 485')
-  print(thisMigStart)
-  print('thisMigEnd')
-  print(thisMigEnd)
-  print('               ')
-  print('               ')
-  print('               ')
+  # print('thisMigStart no next partner 485')
+  # print(thisMigStart)
+  # print('thisMigEnd')
+  # print(thisMigEnd)
+  # print('               ')
+  # print('               ')
+  # print('               ')
 
 
   theseRows<-which(
@@ -493,6 +517,7 @@ calculateInBetweenSequencesForSpanYearWithNoNextPartner<-function(thisSequenceNa
 
 
 calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
+  print('calculateInBetweenSequencesForSpanYear')
   tempDForSpan<<-importedDatasetMaster[0,]
 
   toggleModal(session,'customSeasonModal',toggle='close')
@@ -690,21 +715,22 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
           # this should fix issue with overspanning data when averaging across bio years etc
           thisMigEnd<-paste0(as.numeric(thisFullYear)+yearToAdd,'-',thisSequenceAverageEndDate)
         }
-        print('avg end date')
-        print(thisSequenceAverageEndDate)
-        print('this mig end')
-        print(thisMigEnd)        
+        # print('avg end date')
+        # print(thisSequenceAverageEndDate)
+        # print('this mig end')
+        # print(thisMigEnd)        
+        
         thisDateSelectionType='averaged'      
       }else{
         thisDateSelectionType='sliderSelected'
       }
 
-      print('thisMigStart 740')
-      print(thisMigStart)
-      print('thisMigEnd')
-      print(thisMigEnd)      
-      print('               ')
-      print('               ')
+      # print('thisMigStart 740')
+      # print(thisMigStart)
+      # print('thisMigEnd')
+      # print(thisMigEnd)      
+      # print('               ')
+      # print('               ')
 
       theseRows<-which(
         importedDatasetMaster$newUid==thisAid &
@@ -782,6 +808,8 @@ calculateInBetweenSequencesForSpanYear<-function(thisSequenceName){
 
 
 calculateCustomSequences<-function(){
+  print('calculateCustomSequences')
+
   loadingScreenToggle('show','calculating sequences')
 
   
@@ -811,10 +839,9 @@ calculateCustomSequences<-function(){
   # seasonEndDate<-as.POSIXlt('03-15-2022', format = "%m-%d-%y")
   seasonStartDateJ<-yday(seasonStartDate)
   seasonEndDateJ<-yday(seasonEndDate)
+  
   bioYearStartDateJulian<-yday(configOptions$bioYearStartDate)
-
   doesSequenceSpanBioYears<-FALSE
-
   if(seasonEndDateJ>bioYearStartDateJulian){
     doesSequenceSpanBioYears<-TRUE
   }

@@ -40,6 +40,9 @@ calcBioYearParams<-function(){
   uniqueYears<-unique(format(as.Date(importedDatasetMaster[,"newMasterDate"]),"%y"))
   uniqueYearsFull<-unique(format(as.Date(importedDatasetMaster[,"newMasterDate"]),"%Y"))
 
+  uniqueYears<-sort(uniqueYears)
+  uniqueYearsFull<-sort(uniqueYearsFull)
+
   for(i in 1:length(uniqueYearsFull)){
     thisYear<-uniqueYearsFull[i]
     nextYear<-as.numeric(thisYear)+1
@@ -68,12 +71,22 @@ calcBioYearParams<-function(){
     thisYearEndDay<-endDay
     thisYearEndMonth<-endMonth
 
+    lastYearStartDate<-as.Date(paste(lastYear,startMonth,startDay,sep="-"),"%Y-%m-%d")
     lastYearEndDate<-as.Date(paste(thisYear,lastYearEndMonth,lastYearEndDay,sep="-"),"%Y-%m-%d")
-    thisYearStartDate<-as.Date(paste(thisYear,startMonth,startDay,sep="-"),"%Y-%m-%d")
-    thisYearEndDate<-as.Date(paste(nextYear,thisYearEndMonth,thisYearEndDay,sep="-"),"%Y-%m-%d")
 
+    importedDatasetMaster[
+      as.Date(importedDatasetMaster$newMasterDate)>=lastYearStartDate &
+      as.Date(importedDatasetMaster$newMasterDate)<=lastYearEndDate,"bioYear"
+    ]<<-lastYearShort
+
+    importedDatasetMaster[
+      as.Date(importedDatasetMaster$newMasterDate)>=lastYearStartDate &
+      as.Date(importedDatasetMaster$newMasterDate)<=lastYearEndDate,"bioYearFull"
+    ]<<-lastYear
 
     
+    thisYearStartDate<-as.Date(paste(thisYear,startMonth,startDay,sep="-"),"%Y-%m-%d")
+    thisYearEndDate<-as.Date(paste(nextYear,thisYearEndMonth,thisYearEndDay,sep="-"),"%Y-%m-%d")
 
     importedDatasetMaster[
       as.Date(importedDatasetMaster$newMasterDate)>=thisYearStartDate &
@@ -87,8 +100,7 @@ calcBioYearParams<-function(){
 
   }
 
-  # FOR THOSE SEQUENCES AT THE START OF AN ANIMAL BEFORE BIO START DATE.... WHAT TO DO? DROPPING FOR NOW
-  
+  # FOR THOSE SEQUENCES AT THE START OF AN ANIMAL BEFORE BIO START DATE.... WHAT TO DO? DROPPING FOR NOW  
   importedDatasetMaster$id_bioYear <<- paste(importedDatasetMaster$newUid, importedDatasetMaster$bioYear, sep="_")
   progressIndicator('Calculating Bio Year Params','stop')
   loadingScreenToggle('hide','Calculating Bio Year Params')
