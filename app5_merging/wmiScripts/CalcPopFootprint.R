@@ -217,6 +217,9 @@ CalcPopFootprint <- function(
   # reproject to the projection of interest
   classifiedPoly <- st_transform(classifiedPoly, crs=out.proj)
 
+  # make valid in case any irregular geometries 
+  classifiedPoly <- st_make_valid(classifiedPoly)
+
   # write to a shapefile
   st_write(classifiedPoly, out.fldr, "Footprint_contours", driver="ESRI Shapefile", quiet=TRUE, append=FALSE)
 

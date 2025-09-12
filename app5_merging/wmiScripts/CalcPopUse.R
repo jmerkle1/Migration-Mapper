@@ -196,7 +196,7 @@ CalcPopUse <- function(
     }
     # i=1
     for(i in 1:length(opts.order[[1]])){
-      print(i)
+      print(i)      
       sub1.fls <- fls[get(names(opts.order)[1]) %in% opts.order[[1]][i]]
       sub1.nms <- nms[get(names(opts.order)[1]) %in% opts.order[[1]][i]]
 
@@ -277,56 +277,75 @@ CalcPopUse <- function(
   # Final Contours ####
   # ------------------#
 
+  
   popUDVol <- terra::rast(paste0(out.fldr, "/Pop_UD.tif"))
   
   # make it like the old getvolumeUD (where high values are lowest and low values are highest UD)
   vals <- terra::values(popUDVol)
+  
   rnk <- (1:length(vals))[rank(vals)]
+  
   terra::values(popUDVol) <- 
   popUDVol[] <- 1 - cumsum(sort(vals))[rnk]  
   
+  
   #identify the contour
   contour.levels2 <- c(0, contour.levels)  # add the 0 to make the cuts correct
+  
 
   # This denotes whether we want contours based on area or volume
   if(contour.type == "Area"){
+    
     breakValues <- terra::quantile(popUDVol[popUDVol != 1], probs = contour.levels2/100)
+    
     # compute the contours
     rcl <- matrix(c(breakValues[1:(length(breakValues)-1)],
                     breakValues[2:length(breakValues)],
                     contour.levels), ncol=3, byrow=FALSE)
     
     classifiedRaster = terra::classify(popUDVol, rcl, others=NA)
+    
   }else{  # if contour.type == "Volume"
     # compute the contours
+    
     rcl <- matrix(c(contour.levels2[1:(length(contour.levels2)-1)]/100,
                     contour.levels2[2:length(contour.levels2)]/100,
                     contour.levels), ncol=3, byrow=FALSE)
+    
     classifiedRaster = terra::classify(popUDVol, rcl, others=NA)
+    
   }
 
   # extract the contours as polygons
   classifiedPoly <- terra::as.polygons(classifiedRaster,dissolve=T)
+  
   classifiedPoly <- sf::st_as_sf(classifiedPoly)
+  
 
   # rename the column
   classifiedPoly$contour <- classifiedPoly$lyr.1  
+  
   classifiedPoly$lyr.1 <- NULL
+  
 
   # aggregate the different corridor levels
   # make it so the top level includes the ones below it!
   codes <- sort(unique(classifiedPoly$contour))
+  
   classifiedPoly <- do.call(rbind, lapply(codes, function(i){
-
+  
     tmp <- sf::st_union(classifiedPoly[classifiedPoly$contour <= i,])
-
+  
     # this removes polygon segments smaller than a specific threshold
     tmp <- drop_crumbs(tmp, threshold = min_area_drop)
+  
 
     # this fills holes smaller than a specific threshold
     tmp <- fill_holes(tmp, threshold = min_area_fill)
+  
 
     tmp <- st_cast(tmp, "POLYGON")
+  
 
     return(st_as_sf(data.frame(contour = i),
                     geometry=tmp))
@@ -334,32 +353,41 @@ CalcPopUse <- function(
 
   # reorder for plotting
   classifiedPoly <- classifiedPoly[order(classifiedPoly$contour, decreasing=TRUE),]
+  
 
   if(simplify == TRUE){
+    
     # do something here so if it fails, it doesn't kill the whole thing!
-    classifiedPoly2 <- try(smooth(classifiedPoly, method="ksmooth", smoothness=ksmooth_smoothness), silent=TRUE)
+    classifiedPoly2 <- try(smooth(classifiedPoly, method="ksmooth", smoothness=ksmooth_smoothness), silent=TRUE)    
     # mapview(classifiedPoly2, zcol="contour")
 
     if("try-error" %in% class(classifiedPoly2)){
       print("Your k smoothing didn't work! Try changing the ksmooth_smoothness parameter and read about the smooth() function!")
     }else{
       classifiedPoly <- classifiedPoly2
-      rm(classifiedPoly2)
+      rm(classifiedPoly2)  
     }
   } # end of if simplify equals TRUE
 
-  # reproject to the projection of interest
+  # reproject to the projection of interest  
   classifiedPoly <- st_transform(classifiedPoly, crs=out.proj)
+
+  # make valid in case any irregular geometries 
+  classifiedPoly <- st_make_valid(classifiedPoly)
+  
 
   # write to a shapefile
   st_write(classifiedPoly, out.fldr, "Pop_use_contours", driver="ESRI Shapefile", quiet=TRUE, append=FALSE)
 
   # calculate some areas
+
   codes <- sort(unique(classifiedPoly$contour))
+  
   areas <- do.call(rbind, lapply(codes, function(i){
     data.frame(contour=i,
                area_SqKm=as.numeric(st_area(st_union(classifiedPoly[classifiedPoly$contour == i,], is_coverage = TRUE)))/1000000)
   }))
+  
 
   write.csv(areas, paste0(out.fldr, "/PopUse_contour_areas.csv"), row.names = FALSE)
   write.csv(meta, paste0(out.fldr, "/PopUse_metadata.csv"), row.names = FALSE)
