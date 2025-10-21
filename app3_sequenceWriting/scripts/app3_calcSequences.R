@@ -159,38 +159,46 @@ calculateInBetweenSequences<-function(){
   thisSequencesRows<<-c()
   methodsHolder<<-c()
   for(j in 1:nrow(migtime)){
-    thisFullYear<-migtime[j,'bioYearFull']
-    thisIdYr<-migtime[j,'id_bioYear']
-    thisAid<-migtime[j,'newUid']
-    thisMigStart<-migtime[j,startSeason]
-    thisMigEnd<-migtime[j,endSeason]
+
+    # if(migtime[j,'id_bioYear']!='D001_21'){
+    #   next
+    # }
+
+    thisFullYear<<-migtime[j,'bioYearFull']
+    thisIdYr<<-migtime[j,'id_bioYear']
+    thisAid<<-migtime[j,'newUid']
+    thisMigStart<<-migtime[j,startSeason]
+    thisMigEnd<<-migtime[j,endSeason]
+
+    
 
     if( grepl( 'start', startSeason, fixed = TRUE) ){
-        startSeasonMatch<-gsub("start", "end", startSeason)
+        startSeasonMatch<<-gsub("start", "end", startSeason)
     }else{
-        startSeasonMatch<-gsub("end", "start", startSeason)
+        startSeasonMatch<<-gsub("end", "start", startSeason)
     }
 
     if( grepl( 'start', endSeason, fixed = TRUE) ){
-        endSeasonMatch<-gsub("start", "end", endSeason)
+        endSeasonMatch<<-gsub("start", "end", endSeason)
     }else{
-        endSeasonMatch<-gsub("end", "start", endSeason)
+        endSeasonMatch<<-gsub("end", "start", endSeason)
     }
 
-    thisMigStartPartner<-migtime[j,startSeasonMatch]
-    thisMigEndPartner<-migtime[j,endSeasonMatch]
-
-
+    thisMigStartPartner<<-migtime[j,startSeasonMatch]
+    thisMigEndPartner<<-migtime[j,endSeasonMatch]
 
 
     # if there is an actual sequence defined in the migtime table and we're not crossing over bio year
     if(thisMigStart!=thisMigStartPartner && thisMigEnd!=thisMigEndPartner){      
+      # print('not averagng')
+      # print(thisIdYr)
+
       theseRows<-which(
         importedDatasetMaster$id_bioYear==thisIdYr &
         importedDatasetMaster$newMasterDate >= thisMigStart &
         importedDatasetMaster$newMasterDate < thisMigEnd
-      )
-      thisSequencesRows<<-c(thisSequencesRows,theseRows)
+      )      
+      thisSequencesRows<<-c(thisSequencesRows,theseRows)      
       thisDateSelectionType='sliderSelected'      
       theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
       methodsHolder<<-c(methodsHolder,theseSelectionMethods)
@@ -198,7 +206,10 @@ calculateInBetweenSequences<-function(){
       if(shouldAverage==FALSE){
         next
       }
-      print('going to average')
+
+      
+      # print('going to average')
+      # print(thisIdYr)
       thisDateSelectionType='averaged'      
       # if there are no dates selected in the migtime table then we'll use averages for this year start end
       thisSequenceAverageStartDate<-seasonDetails[[thisFullYear]][[startSeason]][[averagingMethodOne]]
@@ -246,7 +257,6 @@ calculateInBetweenSequences<-function(){
         importedDatasetMaster$newMasterDate >= thisSequenceAverageStartDate &
         importedDatasetMaster$newMasterDate <= thisSequenceAverageEndDate
       )
-
       
 
       theseSelectionMethods<-rep(thisDateSelectionType,length(theseRows))
