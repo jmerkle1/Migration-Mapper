@@ -6,11 +6,15 @@ dependenciesAll<-c("shiny", "sf","circular","shinyjs","shinyBS","ggplot2","mapbo
 
 for(i in 1:length(dependenciesAll)){
   if(dependenciesAll[i] %in% installed.packages()==FALSE){
-    if(dependenciesAll[i]=='BBMM'){
-        install.packages("https://cran.r-project.org/src/contrib/Archive/BBMM/BBMM_3.0.tar.gz", repos=NULL)
-      }else{
-        install.packages(dependenciesAll[i])
-      }
+    if(dependenciesAll[i] %in% c('BBMM','mapboxer')){
+      archivedPkgFiles <- c(BBMM='BBMM_3.0.tar.gz', mapboxer='mapboxer_0.4.0.tar.gz')
+      localArchive <- file.path('archivedPackages', archivedPkgFiles[dependenciesAll[i]])
+      if(file.exists(localArchive)==FALSE)
+        stop(paste0('Missing archived package file: ', localArchive))
+      install.packages(localArchive, repos=NULL)
+    }else{
+      install.packages(dependenciesAll[i])
+    }
   }
 }
 dependencies<-c("shiny","shinyjs")

@@ -218,9 +218,24 @@ checkForSession<<-function(fromApp){
 }
 
 loadDependencies<-function(dependencies){
+  archivedPkgFiles <- c(BBMM='BBMM_3.0.tar.gz', mapboxer='mapboxer_0.4.0.tar.gz')
+
   for(i in 1:length(dependencies)){
     if(dependencies[i] %in% installed.packages()==FALSE){
-      install.packages(dependencies[i])
+      if(dependencies[i] %in% names(archivedPkgFiles)){
+        archiveCandidates <- c(
+          file.path('archivedPackages', archivedPkgFiles[dependencies[i]]),
+          file.path('..', 'archivedPackages', archivedPkgFiles[dependencies[i]])
+        )
+        archivePath <- archiveCandidates[file.exists(archiveCandidates)][1]
+
+        if(length(archivePath)==0 || is.na(archivePath))
+          stop(paste0('Missing archived package file for ', dependencies[i], ': ', archivedPkgFiles[dependencies[i]]))
+
+        install.packages(archivePath, repos=NULL)
+      } else{
+        install.packages(dependencies[i])
+      }
       require(dependencies[i],character.only=TRUE)
     } else{
       require(dependencies[i],character.only=TRUE)
