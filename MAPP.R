@@ -1,14 +1,28 @@
 objs <- ls(pos = ".GlobalEnv")
 rm(list = objs, pos = ".GlobalEnv")
 
-dependenciesAll<-c("shiny", "sf","circular","shinyjs","shinyBS","ggplot2","mapboxer","adehabitatHR","RSQLite","move","shinycssloaders","adehabitatLT","BBMM","R.utils",
+dependenciesAll<-c("shiny", "sf","circular","shinyjs","shinyBS","ggplot2",'htmlwidgets', 'yaml', 'purrr', 'geojsonsf',"mapboxer","adehabitatHR","RSQLite","move","shinycssloaders","adehabitatLT","BBMM","R.utils",
   "lubridate","stringr","parallel","R.utils","dplyr","ctmm","fields","smoothr","rgeos","suncalc","terra","tcltk",'shinyBS','bslib')
+
+getScriptDir <- function() {
+  cmdArgs <- commandArgs(trailingOnly = FALSE)
+  fileArg <- grep("^--file=", cmdArgs, value = TRUE)
+  if (length(fileArg) > 0) {
+    return(dirname(normalizePath(sub("^--file=", "", fileArg[1]))))
+  }
+  if (!is.null(sys.frames()[[1]]$ofile)) {
+    return(dirname(normalizePath(sys.frames()[[1]]$ofile)))
+  }
+  normalizePath(getwd())
+}
+
+appRootDir <- getScriptDir()
 
 for(i in 1:length(dependenciesAll)){
   if(dependenciesAll[i] %in% installed.packages()==FALSE){
     if(dependenciesAll[i] %in% c('BBMM','mapboxer')){
       archivedPkgFiles <- c(BBMM='BBMM_3.0.tar.gz', mapboxer='mapboxer_0.4.0.tar.gz')
-      localArchive <- file.path('archivedPackages', archivedPkgFiles[dependenciesAll[i]])
+      localArchive <- file.path(appRootDir, 'archivedPackages', archivedPkgFiles[dependenciesAll[i]])
       if(file.exists(localArchive)==FALSE)
         stop(paste0('Missing archived package file: ', localArchive))
       install.packages(localArchive, repos=NULL)

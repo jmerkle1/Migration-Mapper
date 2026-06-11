@@ -220,10 +220,25 @@ checkForSession<<-function(fromApp){
 loadDependencies<-function(dependencies){
   archivedPkgFiles <- c(BBMM='BBMM_3.0.tar.gz', mapboxer='mapboxer_0.4.0.tar.gz')
 
+  getScriptDir <- function() {
+    cmdArgs <- commandArgs(trailingOnly = FALSE)
+    fileArg <- grep("^--file=", cmdArgs, value = TRUE)
+    if (length(fileArg) > 0) {
+      return(dirname(normalizePath(sub("^--file=", "", fileArg[1]))))
+    }
+    if (!is.null(sys.frames()[[1]]$ofile)) {
+      return(dirname(normalizePath(sys.frames()[[1]]$ofile)))
+    }
+    normalizePath(getwd())
+  }
+
+  appRootDir <- dirname(getScriptDir())
+
   for(i in 1:length(dependencies)){
     if(dependencies[i] %in% installed.packages()==FALSE){
       if(dependencies[i] %in% names(archivedPkgFiles)){
         archiveCandidates <- c(
+          file.path(appRootDir, 'archivedPackages', archivedPkgFiles[dependencies[i]]),
           file.path('archivedPackages', archivedPkgFiles[dependencies[i]]),
           file.path('..', 'archivedPackages', archivedPkgFiles[dependencies[i]])
         )
