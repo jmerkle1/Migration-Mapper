@@ -1,3 +1,25 @@
+validateAnimalIds<-function(animalIds){
+  invalidCharacters<-c("<", ">", ":", '"', "/", "\\", "|", "?", "*")
+  animalIds<-as.character(animalIds)
+  foundInvalidCharacters<-invalidCharacters[vapply(invalidCharacters, function(character){
+    any(grepl(character, animalIds, fixed=TRUE), na.rm=TRUE)
+  }, logical(1))]
+
+  if(length(foundInvalidCharacters)>0){
+    modalMessager(
+      "INVALID CHARACTER ERROR",
+      paste0(
+        "Animal IDs cannot contain invalid characters. The following invalid character(s) were found in your animal IDs: ",
+        paste(foundInvalidCharacters, collapse=" "),
+        ". Please update your animal IDs and try again. You will need to use a clean project folder when you retry."
+      )
+    )
+    return(FALSE)
+  }
+
+  TRUE
+}
+
 mergeShapfilesHandler<-function(){   
 
     selectedUid<<-input$uniqueIdSelector
@@ -29,6 +51,14 @@ mergeShapfilesHandler<-function(){
         thisNewUid<-gsub("_","-",importedShapefilesHolder[[i]][[selectedUid]])                
         importedShapefilesHolder[[i]]$newUid<<-thisNewUid
       }
+    }
+
+    allAnimalIds<-unlist(lapply(importedShapefilesHolder, function(shapefile){
+      shapefile$newUid
+    }), use.names=FALSE)
+    if(!validateAnimalIds(allAnimalIds)){
+      progressIndicator('Processing.... Please wait...','stop')
+      return()
     }
 
 

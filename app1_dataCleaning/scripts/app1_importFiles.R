@@ -290,8 +290,12 @@ importShapefile<-function(fileToImport,lastOne,i){
       if(!exists('importedDatasetMaster')){
         mergeShapfilesHandler()
       }else{
-        newUid<-input$uniqueIdSelectorGo        
-        importedDatasetMaster$newUid<<-importedDatasetMaster[,newUid]
+        newUid<-input$uniqueIdSelector
+        selectedAnimalIds<-gsub("_", "-", importedDatasetMaster[[newUid]])
+        if(!validateAnimalIds(selectedAnimalIds)){
+          return()
+        }
+        importedDatasetMaster$newUid<<-selectedAnimalIds
         showDateTimeSelectionPanel()
       }
 
